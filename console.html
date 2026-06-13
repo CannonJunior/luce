@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferrari Luce — Center Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Barlow+Condensed:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 30px 0 80px;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.toolbar-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 1px;
+}
+.toolbar-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.65);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.toolbar-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.toolbar-btn.active {
+  background: rgba(255,242,0,0.12);
+  border-color: rgba(255,242,0,0.45);
+  color: #FFF200;
+}
+.toolbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08); }
+#currentLayoutLabel {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.5px;
+}
+
+/* ── CONSOLE SHELL ── */
+.console {
+  width: 650px;
+  background: #111114;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.055),
+    0 24px 70px rgba(0,0,0,0.92),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Image overlay */
+.ref-overlay {
+  position: absolute;
+  top: -12px;
+  left: -25px;
+  width: 700px;
+  height: 700px;
+  pointer-events: none;
+  z-index: 500;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.ref-overlay.hidden { opacity: 0; }
+
+/* Night-mode dim */
+.console.night-mode::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  pointer-events: none;
+  z-index: 50;
+  border-radius: 30px;
+}
+
+/* Status dot */
+.status-dot {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FF2800;
+  box-shadow: 0 0 6px #FF2800;
+  z-index: 2;
+}
+
+/* ── SCREEN ROW ── */
+.screen-row {
+  position: relative;
+  padding: 52px 24px 0;
+}
+
+/* horse + enzo */
+.horse-enzo {
+  position: absolute;
+  top: 16px;
+  left: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  z-index: 2;
+}
+.horse-svg { width: 28px; height: 32px; }
+.enzo-badge {
+  background: #FF2800;
+  color: #fff;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  cursor: default;
+}
+
+/* ── SCREEN AREA ── */
+.screen-area {
+  background: #0b0b0e;
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  border: 1px solid rgba(255,255,255,0.055);
+  position: relative;
+}
+.screen-area.hud-on {
+  border-color: rgba(0,255,100,0.3);
+  box-shadow: inset 0 0 20px rgba(0,255,80,0.06);
+}
+
+/* ── METRICS ── */
+.metrics-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.metric-block { display: flex; flex-direction: column; gap: 3px; }
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  width: fit-content;
+  transition: opacity 0.2s, border-color 0.3s, color 0.3s;
+  background: transparent;
+}
+.mode-badge:hover { opacity: 0.8; }
+.mode-badge:active { opacity: 0.6; }
+.metric-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 42px;
+  font-weight: 700;
+  color: #e8e8e0;
+  line-height: 1;
+  letter-spacing: -1.5px;
+}
+.metric-value .unit {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(232,232,224,0.45);
+  margin-left: 3px;
+  letter-spacing: 0.5px;
+}
+.waveform-wrap { position: relative; height: 44px; margin-top: 2px; }
+.waveform-wrap canvas { width: 100%; height: 100%; display: block; }
+.waveform-label {
+  position: absolute; right: 0; bottom: 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px; color: rgba(255,255,255,0.25);
+  line-height: 1.4; text-align: right; pointer-events: none;
+}
+.screen-divider { height: 1px; background: rgba(255,255,255,0.055); margin: 3px 0; }
+
+/* ── INFO COL ── */
+.info-col {
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 4px; padding: 0 10px;
+  border-left: 1px solid rgba(255,255,255,0.065);
+  border-right: 1px solid rgba(255,255,255,0.065);
+  min-width: 82px;
+}
+.info-time { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 600; color: #e8e8e0; letter-spacing: 0.5px; line-height: 1; }
+.info-date { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500; color: rgba(232,232,224,0.6); letter-spacing: 1px; }
+.info-temp { font-family: 'Orbitron', sans-serif; font-size: 17px; font-weight: 400; color: #e8e8e0; margin-top: 5px; }
+.info-aqi, .info-heading { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: rgba(232,232,224,0.5); letter-spacing: 0.5px; }
+
+/* ── MULTIGRAPH ── */
+.multigraph-col { display: flex; align-items: center; justify-content: center; }
+.multigraph-bezel {
+  width: 115px; height: 115px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #28282e 0%, #141416 55%, #0e0e12 100%);
+  border: 2px solid rgba(255,255,255,0.13);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.6);
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 0.3s;
+  overflow: hidden;
+}
+.multigraph-bezel:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.18), inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.7); }
+.multigraph-bezel canvas { position: absolute; top:0; left:0; width:100%; height:100%; }
+
+/* ── WATERMARK ZONE ── */
+.watermark-zone {
+  flex: 1;
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.ferrari-watermark {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 72px;
+  font-weight: 600;
+  font-style: italic;
+  color: rgba(255,255,255,0.038);
+  letter-spacing: -2px;
+  white-space: nowrap;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── LOWER SECTION ── */
+.lower { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── CLIMATE STRIP ── */
+.climate-strip { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
+.climate-group { display: flex; align-items: center; gap: 10px; }
+.seat-icon { cursor: pointer; opacity: 0.4; transition: opacity 0.2s; position: relative; }
+.seat-icon:hover { opacity: 0.75; }
+.seat-icon.heating-low  { opacity: 0.65; }
+.seat-icon.heating-med  { opacity: 0.85; }
+.seat-icon.heating-high { opacity: 1; filter: drop-shadow(0 0 4px rgba(255,120,0,0.7)); }
+.seat-icon svg { width: 22px; height: 24px; }
+.fan-icon { cursor: pointer; opacity: 0.4; transition: opacity 0.2s, filter 0.2s; }
+.fan-icon:hover { opacity: 0.7; }
+.fan-icon.active { opacity: 0.9; filter: drop-shadow(0 0 5px rgba(150,200,255,0.7)); }
+.fan-icon svg { width: 22px; height: 22px; }
+.temp-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: rgba(255,255,255,0.025);
+}
+.temp-ring:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.055); }
+.temp-ring:active { transform: scale(0.94); }
+.temp-ring-val { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.72); line-height: 1; }
+
+/* ── BUTTON ROW ── */
+.button-row { display: flex; align-items: center; justify-content: center; gap: 9px; }
+.dome-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dome-btn {
+  width: 38px; height: 22px;
+  border-radius: 50% / 65%;
+  background: linear-gradient(180deg, #2c2c30 0%, #1c1c1e 55%, #131315 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07);
+  transition: box-shadow 0.15s, transform 0.1s;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.dome-btn::after { content: ''; position: absolute; top: 3px; left: 6px; right: 6px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.055); }
+.dome-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12); }
+.dome-btn:active { transform: scaleY(0.86); }
+.dome-btn.active-green { box-shadow: 0 0 8px rgba(0,220,80,0.5), 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1); border-color: rgba(0,220,80,0.35); }
+.dome-btn.active-amber { box-shadow: 0 0 8px rgba(255,180,0,0.5), 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1); border-color: rgba(255,180,0,0.35); }
+.dome-btn.active-red   { box-shadow: 0 0 8px rgba(255,40,0,0.5), 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1); border-color: rgba(255,40,0,0.35); }
+.dome-btn.active-blue  { box-shadow: 0 0 8px rgba(80,120,255,0.5), 0 2px 5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1); border-color: rgba(80,120,255,0.35); }
+.dome-led { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.08); transition: background 0.3s, box-shadow 0.3s; }
+.dome-led.on-green { background: #00dc50; box-shadow: 0 0 5px #00dc50; }
+.dome-led.on-amber { background: #ffb400; box-shadow: 0 0 5px #ffb400; }
+.dome-led.on-red   { background: #FF2800; box-shadow: 0 0 5px #FF2800; }
+.dome-led.on-blue  { background: #4a78ff; box-shadow: 0 0 5px #4a78ff; }
+.icon-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.025);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.icon-btn svg { width: 16px; height: 16px; }
+.icon-btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.22); }
+.icon-btn.active-moon { background: rgba(30,60,200,0.28); border-color: #5577ff; box-shadow: 0 0 10px rgba(60,100,255,0.4); }
+.icon-btn.active-hex  { background: rgba(255,242,0,0.1); border-color: #FFF200; box-shadow: 0 0 10px rgba(255,242,0,0.35); animation: hazard-pulse 0.6s ease-in-out infinite alternate; }
+@keyframes hazard-pulse { from { box-shadow: 0 0 6px rgba(255,242,0,0.25); } to { box-shadow: 0 0 14px rgba(255,242,0,0.55); } }
+.icon-btn.active-rect { background: rgba(0,220,80,0.1); border-color: rgba(0,220,80,0.6); box-shadow: 0 0 8px rgba(0,220,80,0.3); }
+.btn-separator { width: 1px; height: 26px; background: rgba(255,255,255,0.07); margin: 0 1px; }
+.volume-knob {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #3a3a3e 0%, #222226 50%, #181819 100%);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 3px 9px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+  cursor: ns-resize; position: relative; transition: box-shadow 0.2s;
+}
+.volume-knob::before { content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%); width: 2px; height: 9px; background: rgba(255,255,255,0.38); border-radius: 1px; }
+.volume-knob:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.14); }
+
+/* ── HANDLE ── */
+.handle { display: flex; justify-content: center; padding: 8px 0 16px; }
+.handle-bar {
+  width: 210px; height: 24px;
+  background: linear-gradient(180deg, #686870 0%, #8c8c92 18%, #a0a0a5 40%, #8c8c92 68%, #585860 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 7px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.32), inset 0 -1px 0 rgba(0,0,0,0.28);
+  position: relative;
+}
+.handle-bar::before { content: ''; position: absolute; top: 5px; left: 18px; right: 18px; height: 5px; background: rgba(255,255,255,0.14); border-radius: 3px; }
+
+/* ── STATUS BAR ── */
+.status-bar { display: flex; gap: 10px; padding: 0 4px; align-items: center; flex-wrap: wrap; min-height: 18px; }
+.status-pill {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  padding: 1px 7px; border-radius: 10px;
+  color: rgba(200,200,196,0.5);
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+.status-pill.active-pill { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
+/* ── CUSTOM TOOLTIP ── */
+#tip {
+  position: fixed;
+  background: rgba(10,10,12,0.96);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 8px;
+  padding: 8px 12px;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  max-width: 230px;
+}
+#tip-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: #e0e0dc; letter-spacing: 0.8px; margin-bottom: 3px; }
+#tip-fn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 400; color: rgba(200,200,196,0.62); line-height: 1.4; }
+
+/* ══════════════════════════════════════════════════════
+   POSITIONING SYSTEM
+   ══════════════════════════════════════════════════════ */
+
+/* Ctrl-held cursor hint */
+body.ctrl-held [data-pos-id] { cursor: crosshair !important; }
+body.ctrl-held [data-pos-id]:hover {
+  outline: 1px dashed rgba(255,242,0,0.38) !important;
+  outline-offset: 4px;
+}
+
+/* Selected element */
+[data-pos-id].pos-selected {
+  outline: 2px solid #FFF200 !important;
+  outline-offset: 3px;
+  z-index: 20 !important;
+  position: relative !important;
+}
+[data-pos-id].pos-selected::before {
+  content: attr(data-pos-label);
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-family: 'Barlow Condensed', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #FFF200;
+  background: rgba(0,0,0,0.85);
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Pos hint bar (bottom of viewport) */
+#posHint {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(6,6,8,0.96);
+  border-top: 1px solid rgba(255,242,0,0.2);
+  padding: 8px 20px;
+  display: none;
+  align-items: center;
+  gap: 16px;
+  z-index: 8000;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+#posHint .hint-selected {
+  font-size: 12px;
+  font-weight: 600;
+  color: #FFF200;
+  letter-spacing: 0.5px;
+}
+#posHint .hint-keys {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.3px;
+}
+#posHint .hint-key {
+  display: inline-block;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 3px;
+  padding: 0px 5px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  margin: 0 2px;
+}
+#posHint .hint-clear {
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  transition: color 0.2s, border-color 0.2s;
+}
+#posHint .hint-clear:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+
+/* ── SAVE MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: #13131a;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 28px;
+  width: 380px;
+  max-width: 95vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+}
+.modal-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #e0e0dc;
+  margin-bottom: 6px;
+}
+.modal-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  color: rgba(200,200,196,0.45);
+  margin-bottom: 18px;
+  letter-spacing: 0.3px;
+  line-height: 1.5;
+}
+.modal-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  color: #e0e0dc;
+  letter-spacing: 0.5px;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 6px;
+}
+.modal-input:focus { border-color: rgba(255,242,0,0.4); }
+.modal-input::placeholder { color: rgba(255,255,255,0.2); }
+.modal-error {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: #FF2800;
+  min-height: 16px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.modal-saves {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+.save-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.15s;
+}
+.save-item:last-child { border-bottom: none; }
+.save-item:hover { background: rgba(255,255,255,0.03); }
+.save-item.current-layout { background: rgba(255,242,0,0.04); }
+.save-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  color: rgba(220,220,216,0.8);
+  letter-spacing: 0.5px;
+  flex: 1;
+}
+.save-item.current-layout .save-name { color: #FFF200; }
+.save-actions { display: flex; align-items: center; gap: 6px; }
+.save-item-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(220,220,216,0.65);
+}
+.save-item-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.save-item-btn.delete-btn { color: rgba(255,80,60,0.55); border-color: rgba(255,80,60,0.15); }
+.save-item-btn.delete-btn:hover { background: rgba(255,40,0,0.12); color: #FF2800; border-color: rgba(255,40,0,0.35); }
+.save-item-locked { font-size: 12px; opacity: 0.3; padding: 0 4px; }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.modal-btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 7px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.05);
+  color: rgba(220,220,216,0.7);
+}
+.modal-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.modal-btn.primary {
+  background: rgba(255,242,0,0.12);
+  border-color: rgba(255,242,0,0.4);
+  color: #FFF200;
+}
+.modal-btn.primary:hover { background: rgba(255,242,0,0.2); }
+.modal-reset {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  cursor: pointer;
+  margin-right: auto;
+  padding: 7px 0;
+  transition: color 0.2s;
+  letter-spacing: 0.5px;
+}
+.modal-reset:hover { color: rgba(255,255,255,0.6); }
+</style>
+</head>
+<body>
+
+<!-- ── TOOLBAR ── -->
+<div class="toolbar">
+  <button class="toolbar-btn active" id="overlayToggle" onclick="toggleOverlay()">OVERLAY: ON</button>
+  <button class="toolbar-btn" id="saveBtn" onclick="openSaveModal()">SAVE LAYOUT</button>
+  <div class="toolbar-divider"></div>
+  <span class="toolbar-label">LAYOUT:</span>
+  <span id="currentLayoutLabel">Default</span>
+  <div class="toolbar-divider"></div>
+  <span class="toolbar-label">Ferrari Luce · Center Console</span>
+</div>
+
+<!-- ── CONSOLE ── -->
+<div class="console" id="console">
+
+  <!-- Reference image overlay -->
+  <img src="ferrari_console.jpeg" class="ref-overlay" id="refOverlay" alt="">
+
+  <!-- Status dot -->
+  <div class="status-dot"
+    data-pos-id="status-dot"
+    data-pos-label="Status Indicator"
+    data-tip="System Status Indicator"
+    data-tip-fn="Red LED confirms ignition-on and all vehicle systems are awake. Dims to 10% brightness in rest state."></div>
+
+  <!-- Screen row -->
+  <div class="screen-row">
+
+    <!-- Horse + ENZO -->
+    <div class="horse-enzo"
+      data-pos-id="horse-enzo"
+      data-pos-label="Horse & ENZO Badge">
+      <svg class="horse-svg" viewBox="0 0 80 100" fill="none">
+        <path d="M40 4C36 4 30 7 27 13C24 19 26 25 22 30C18 35 12 35 9 40C6 45 7 51 10 55C13 59 18 61 20 66C22 71 19 76 21 81C24 86 30 88 35 90C38 91 40 93 40 97C40 97 42 91 44 90C49 88 55 86 58 81C60 76 57 71 59 66C61 61 66 59 69 55C72 51 73 45 70 40C67 35 61 35 57 30C53 25 55 19 52 13C49 7 44 4 40 4Z" fill="white"/>
+      </svg>
+      <div class="enzo-badge"
+        data-tip="ENZO Driver Profile"
+        data-tip-fn="Driver identity badge — indicates the active driver profile. ENZO personalizes seat position, mirror angles, and driving preference presets.">
+        ENZO
+      </div>
+    </div>
+
+    <!-- Screen area -->
+    <div class="screen-area" id="screenArea"
+      data-pos-id="screen-area"
+      data-pos-label="Screen Panel">
+
+      <!-- Metrics col -->
+      <div class="metrics-col"
+        data-pos-id="metrics-col"
+        data-pos-label="Metrics Column">
+        <div class="metric-block">
+          <div class="mode-badge" id="modeBadge"
+            data-tip="Manettino — Chassis Mode"
+            data-tip-fn="Click to cycle: ICE → WET → DRY → SPORT → PERFORMANCE. Controls traction, ESC sensitivity, damper stiffness, and steering weight.">
+            MODE: DRY
+          </div>
+          <div class="metric-value" id="speedVal">210 <span class="unit">km/h</span></div>
+          <div class="waveform-wrap">
+            <canvas id="speedWave" width="200" height="44"></canvas>
+            <div class="waveform-label">km/h<br>0–280</div>
+          </div>
+        </div>
+        <div class="screen-divider"></div>
+        <div class="metric-block">
+          <div class="mode-badge" id="powerBadge"
+            data-tip="e-Manettino — Power Mode"
+            data-tip-fn="Click to cycle: RANGE → TOUR → PERFO. Controls powertrain energy delivery, regenerative braking intensity, and throttle mapping.">
+            POWER: TOUR
+          </div>
+          <div class="metric-value" id="powerVal">464 <span class="unit">kW</span></div>
+          <div class="waveform-wrap">
+            <canvas id="powerWave" width="200" height="44"></canvas>
+            <div class="waveform-label">kW<br>0–600</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info col -->
+      <div class="info-col"
+        data-pos-id="info-col"
+        data-pos-label="Info Column">
+        <div class="info-time" id="infoTime">10:10</div>
+        <div class="info-date" id="infoDate">MON 25</div>
+        <div class="info-temp">27°</div>
+        <div class="info-aqi" id="infoAqi">AOI: 36</div>
+        <div class="info-heading" id="infoHeading">330° NW</div>
+      </div>
+
+      <!-- Multigraph -->
+      <div class="multigraph-col">
+        <div class="multigraph-bezel" id="multigraphBezel"
+          data-pos-id="multigraph"
+          data-pos-label="Multigraph Clock"
+          data-tip="Multigraph Instrument"
+          data-tip-fn="Click to toggle: Analog Clock ↔ Compass. Clock mode: real-time hands, red second hand. Compass mode: rotating dial with live bearing readout.">
+          <canvas id="clockFace" width="115" height="115"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watermark zone -->
+  <div class="watermark-zone"
+    data-pos-id="watermark"
+    data-pos-label="Ferrari Watermark">
+    <div class="ferrari-watermark">Ferrari</div>
+  </div>
+
+  <!-- Lower section -->
+  <div class="lower">
+
+    <!-- Status bar -->
+    <div class="status-bar" id="statusBar"
+      data-pos-id="status-bar"
+      data-pos-label="Status Bar">
+      <div class="status-pill" id="pill-tc">TC: ON</div>
+      <div class="status-pill" id="pill-esc">ESC: FULL</div>
+      <div class="status-pill" id="pill-susp">SUSP: COMFORT</div>
+      <div class="status-pill" id="pill-regen">REGEN: MED</div>
+      <div class="status-pill" id="pill-adas">ADAS: ON</div>
+      <div class="status-pill" id="pill-vol">VOL: 60%</div>
+    </div>
+
+    <!-- Climate strip -->
+    <div class="climate-strip"
+      data-pos-id="climate"
+      data-pos-label="Climate Controls">
+      <div class="climate-group">
+        <div class="seat-icon" id="seatLeft"
+          data-tip="Left Seat Heating"
+          data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH. Controls left seat heating element intensity.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
+            <path d="M8 5 C8 5 7 9 8 13 C8.5 15 10 16 11 17 L11 21"/>
+            <path d="M7 21 L15 21"/>
+            <path d="M15 15 L18 15 C19 15 20 16 20 17 L20 21"/>
+            <circle cx="10" cy="3.5" r="1.5"/>
+          </svg>
+        </div>
+        <div class="temp-ring" id="tempLeft"
+          data-tip="Left Climate Zone"
+          data-tip-fn="Click upper half to raise (+1°) or lower half to reduce (−1°) left zone temperature. Range: 16°–30°.">
+          <div class="temp-ring-val" id="tempLeftVal">22°</div>
+        </div>
+        <div class="fan-icon" id="fanIcon"
+          data-tip="Climate Fan / A/C"
+          data-tip-fn="Click to cycle fan speed: OFF → LOW → MED → HIGH. Controls cabin airflow for both climate zones.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
+            <circle cx="12" cy="12" r="2"/>
+            <path d="M12 10 C11.5 8 11.5 5 13 4 C14.5 3 16 4.5 14.5 6.5 C13.5 7.8 12 10 12 10Z" fill="rgba(255,255,255,0.25)"/>
+            <path d="M14 12 C16 11.5 19 11.5 20 13 C21 14.5 19.5 16 17.5 14.5 C16.2 13.5 14 12 14 12Z" fill="rgba(255,255,255,0.25)"/>
+            <path d="M12 14 C12.5 16 12.5 19 11 20 C9.5 21 8 19.5 9.5 17.5 C10.5 16.2 12 14 12 14Z" fill="rgba(255,255,255,0.25)"/>
+            <path d="M10 12 C8 12.5 5 12.5 4 11 C3 9.5 4.5 8 6.5 9.5 C7.8 10.5 10 12 10 12Z" fill="rgba(255,255,255,0.25)"/>
+          </svg>
+        </div>
+      </div>
+
+      <div style="flex:1"></div>
+
+      <div class="climate-group">
+        <div class="temp-ring" id="tempRight"
+          data-tip="Right Climate Zone"
+          data-tip-fn="Click upper half to raise (+1°) or lower half to reduce (−1°) right zone temperature. Range: 16°–30°.">
+          <div class="temp-ring-val" id="tempRightVal">18°</div>
+        </div>
+        <div class="seat-icon" id="seatRight"
+          data-tip="Right Seat Heating"
+          data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH. Controls right seat heating element intensity.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
+            <path d="M16 5 C16 5 17 9 16 13 C15.5 15 14 16 13 17 L13 21"/>
+            <path d="M9 21 L17 21"/>
+            <path d="M9 15 L6 15 C5 15 4 16 4 17 L4 21"/>
+            <circle cx="14" cy="3.5" r="1.5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Button row -->
+    <div class="button-row"
+      data-pos-id="buttons"
+      data-pos-label="Button Row">
+      <div class="dome-group">
+        <div class="dome-btn" id="domeTC"
+          data-tip="Traction Control"
+          data-tip-fn="Toggle traction control on/off. OFF allows controlled wheel spin for performance launches. System re-enables automatically above 80 km/h."></div>
+        <div class="dome-led" id="ledTC"></div>
+      </div>
+      <div class="dome-group">
+        <div class="dome-btn" id="domeESC"
+          data-tip="Electronic Stability Control"
+          data-tip-fn="Cycle ESC mode: FULL → SPORT → OFF. SPORT allows more lateral slip for dynamic cornering. OFF only available in SPORT/PERFORMANCE Manettino."></div>
+        <div class="dome-led" id="ledESC"></div>
+      </div>
+      <div class="dome-group">
+        <div class="dome-btn" id="domeSUSP"
+          data-tip="Adaptive Suspension"
+          data-tip-fn="Cycle damper mode: COMFORT → SPORT → RACE. RACE mode reduces ride height by 10mm and increases damper stiffness by 40%."></div>
+        <div class="dome-led" id="ledSUSP"></div>
+      </div>
+
+      <div class="btn-separator"></div>
+
+      <div class="icon-btn" id="btnMoon"
+        data-tip="Night Mode"
+        data-tip-fn="Dim all display panels for night driving. Reduces screen brightness to 15% and enables red-tinted instrument lighting.">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(100,140,255,0.8)" stroke-width="2" stroke-linecap="round">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>
+        </svg>
+      </div>
+
+      <div class="icon-btn" id="btnHex"
+        data-tip="Hazard Warning Lights"
+        data-tip-fn="Toggle hazard flashers. All four turn signals blink simultaneously at 1.5 Hz. Overrides all other turn signal states.">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,242,0,0.75)" stroke-width="1.8">
+          <polygon points="12,2 20.5,7.5 20.5,16.5 12,22 3.5,16.5 3.5,7.5"/>
+          <line x1="12" y1="8" x2="12" y2="13" stroke="rgba(255,242,0,0.75)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="15.5" r="0.8" fill="rgba(255,242,0,0.75)"/>
+        </svg>
+      </div>
+
+      <div class="icon-btn" id="btnHUD"
+        data-tip="Head-Up Display"
+        data-tip-fn="Toggle windscreen HUD projection. Displays speed, navigation turn arrows, and speed limit sign recognition at eye level.">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(180,180,180,0.7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="7" width="18" height="10" rx="1.5"/>
+          <line x1="8" y1="17" x2="6" y2="21" stroke-width="1.5"/>
+          <line x1="16" y1="17" x2="18" y2="21" stroke-width="1.5"/>
+        </svg>
+      </div>
+
+      <div class="btn-separator"></div>
+
+      <div class="volume-knob" id="volumeKnob"
+        data-tip="Audio Volume"
+        data-tip-fn="Drag up to increase / down to decrease volume (0–100%). Current level shown in status bar."></div>
+
+      <div class="btn-separator"></div>
+
+      <div class="dome-group">
+        <div class="dome-btn" id="domeREGEN"
+          data-tip="Regenerative Braking"
+          data-tip-fn="Cycle regen level: LOW → MED → HIGH → MAX. MAX enables one-pedal driving. Affects energy recuperation during deceleration."></div>
+        <div class="dome-led" id="ledREGEN"></div>
+      </div>
+      <div class="dome-group">
+        <div class="dome-btn" id="domeADAS"
+          data-tip="Driver Assistance Systems"
+          data-tip-fn="Toggle ADAS suite: lane keep, adaptive cruise, emergency brake assist, and blind-spot monitoring. Disabled automatically in PERFORMANCE mode."></div>
+        <div class="dome-led" id="ledADAS"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Handle -->
+  <div class="handle"
+    data-pos-id="handle"
+    data-pos-label="Handle">
+    <div class="handle-bar"
+      data-tip="Aluminum Handle"
+      data-tip-fn="Ergonomic console grab handle machined from 6061-T6 aluminium. Assists passenger entry/exit and serves as a structural console mount point."></div>
+  </div>
+</div>
+
+<!-- ── TOOLTIP ── -->
+<div id="tip">
+  <div id="tip-title"></div>
+  <div id="tip-fn"></div>
+</div>
+
+<!-- ── POSITION HINT BAR ── -->
+<div id="posHint">
+  <span class="hint-selected">Selected: <span id="posHintNames"></span></span>
+  <span class="hint-keys">
+    <span class="hint-key">W</span><span class="hint-key">A</span><span class="hint-key">S</span><span class="hint-key">D</span> to move
+    &nbsp;·&nbsp;
+    <span class="hint-key">⇧</span>+WASD = ×5
+    &nbsp;·&nbsp;
+    <span class="hint-key">Ctrl</span>+Click to toggle select
+    &nbsp;·&nbsp;
+    <span class="hint-key">⇧</span>+Click to add
+  </span>
+  <span class="hint-clear" onclick="clearSelection()">CLEAR SELECTION</span>
+</div>
+
+<!-- ── SAVE MODAL ── -->
+<div class="modal-overlay" id="saveModal">
+  <div class="modal-box">
+    <div class="modal-title">SAVE LAYOUT</div>
+    <div class="modal-sub">Name this set of element positions. Load any saved layout to restore it. The Default layout cannot be overwritten.</div>
+    <input type="text" class="modal-input" id="saveNameInput" placeholder="Layout name…" maxlength="40"
+      onkeydown="if(event.key==='Enter') confirmSave()">
+    <div class="modal-error" id="saveError"></div>
+    <div class="modal-saves" id="savedList"></div>
+    <div class="modal-actions">
+      <span class="modal-reset" onclick="resetToDefault()">↺ Reset to Default</span>
+      <button class="modal-btn" onclick="closeSaveModal()">CANCEL</button>
+      <button class="modal-btn primary" onclick="confirmSave()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════════════════
+const MANETTINO    = ['ICE','WET','DRY','SPORT','PERFORMANCE'];
+const E_MANET      = ['RANGE','TOUR','PERFO'];
+const MODE_COLOR   = { ICE:'#A8C4D4', WET:'#B8D0E0', DRY:'#4caf50', SPORT:'#E87722', PERFORMANCE:'#FF2800' };
+const EMODE_COLOR  = { RANGE:'#A8C4D4', TOUR:'#FFF200', PERFO:'#FF2800' };
+const TC_STATES    = ['ON','OFF'];
+const ESC_STATES   = ['FULL','SPORT','OFF'];
+const SUSP_STATES  = ['COMFORT','SPORT','RACE'];
+const REGEN_STATES = ['LOW','MED','HIGH','MAX'];
+
+// Positionable element registry: id → human label
+const POS_ELEMENTS = {
+  'status-dot':  'Status Indicator',
+  'horse-enzo':  'Horse & ENZO Badge',
+  'screen-area': 'Screen Panel',
+  'metrics-col': 'Metrics Column',
+  'info-col':    'Info Column',
+  'multigraph':  'Multigraph Clock',
+  'watermark':   'Ferrari Watermark',
+  'status-bar':  'Status Bar',
+  'climate':     'Climate Controls',
+  'buttons':     'Button Row',
+  'handle':      'Handle',
+};
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+const s = {
+  mIdx:2, eIdx:1,
+  multigraph:'CLOCK',
+  tempLeft:22, tempRight:18,
+  tcIdx:0, escIdx:0, suspIdx:0, regenIdx:1, adasOn:true,
+  fanIdx:0,
+  nightMode:false, hazard:false, hudOn:false,
+  volume:60, knobAngle:0,
+  waveSpeedColor: '#4caf50',
+};
+
+// Waveform buffers
+const WAVE = 60;
+const speedBuf = new Float32Array(WAVE);
+const powerBuf = new Float32Array(WAVE);
+let wPtr = 0;
+for (let i=0;i<WAVE;i++){
+  speedBuf[i] = 175 + 45*Math.sin(i*0.28) + (Math.random()-0.5)*18;
+  powerBuf[i] = 410 + 90*Math.sin(i*0.22+1) + (Math.random()-0.5)*55;
+}
+
+// ══════════════════════════════════════════════════════
+// DOM REFS
+// ══════════════════════════════════════════════════════
+const dom = {
+  modeBadge:   document.getElementById('modeBadge'),
+  powerBadge:  document.getElementById('powerBadge'),
+  speedVal:    document.getElementById('speedVal'),
+  powerVal:    document.getElementById('powerVal'),
+  speedWave:   document.getElementById('speedWave'),
+  powerWave:   document.getElementById('powerWave'),
+  clockFace:   document.getElementById('clockFace'),
+  multigraph:  document.getElementById('multigraphBezel'),
+  infoTime:    document.getElementById('infoTime'),
+  infoDate:    document.getElementById('infoDate'),
+  infoHeading: document.getElementById('infoHeading'),
+  tempLeftEl:  document.getElementById('tempLeftVal'),
+  tempRightEl: document.getElementById('tempRightVal'),
+  screenArea:  document.getElementById('screenArea'),
+  console:     document.getElementById('console'),
+  domeTC:   document.getElementById('domeTC'),
+  domeESC:  document.getElementById('domeESC'),
+  domeSUSP: document.getElementById('domeSUSP'),
+  domeREGEN:document.getElementById('domeREGEN'),
+  domeADAS: document.getElementById('domeADAS'),
+  ledTC:    document.getElementById('ledTC'),
+  ledESC:   document.getElementById('ledESC'),
+  ledSUSP:  document.getElementById('ledSUSP'),
+  ledREGEN: document.getElementById('ledREGEN'),
+  ledADAS:  document.getElementById('ledADAS'),
+  btnMoon:  document.getElementById('btnMoon'),
+  btnHex:   document.getElementById('btnHex'),
+  btnHUD:   document.getElementById('btnHUD'),
+  volKnob:  document.getElementById('volumeKnob'),
+  seatLeft:  document.getElementById('seatLeft'),
+  seatRight: document.getElementById('seatRight'),
+  fanIcon:   document.getElementById('fanIcon'),
+  pillTC:    document.getElementById('pill-tc'),
+  pillESC:   document.getElementById('pill-esc'),
+  pillSUSP:  document.getElementById('pill-susp'),
+  pillRegen: document.getElementById('pill-regen'),
+  pillAdas:  document.getElementById('pill-adas'),
+  pillVol:   document.getElementById('pill-vol'),
+};
+
+const ctxSpeed = dom.speedWave.getContext('2d');
+const ctxPower = dom.powerWave.getContext('2d');
+const ctxClock = dom.clockFace.getContext('2d');
+
+// ══════════════════════════════════════════════════════
+// BADGES
+// ══════════════════════════════════════════════════════
+function applyBadgesClean(){
+  const m=MANETTINO[s.mIdx], e=E_MANET[s.eIdx];
+  const mc=MODE_COLOR[m], ec=EMODE_COLOR[e];
+  dom.modeBadge.textContent  = 'MODE: '+m;
+  dom.modeBadge.style.border = `1px solid ${mc}`;
+  dom.modeBadge.style.color  = mc;
+  dom.powerBadge.textContent = 'POWER: '+e;
+  dom.powerBadge.style.border= `1px solid ${ec}`;
+  dom.powerBadge.style.color = ec;
+  s.waveSpeedColor = mc;
+}
+
+// ══════════════════════════════════════════════════════
+// WAVEFORMS
+// ══════════════════════════════════════════════════════
+function resizeCanvas(c){
+  const r=c.getBoundingClientRect();
+  c.width  = r.width  || 200;
+  c.height = r.height || 44;
+}
+function hexToRgba(hex,a){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function drawWave(ctx, buf, color, minV, maxV){
+  const w=ctx.canvas.width, h=ctx.canvas.height, range=maxV-minV;
+  ctx.clearRect(0,0,w,h);
+  ctx.beginPath();
+  for(let i=0;i<WAVE;i++){
+    const x=(i/(WAVE-1))*w, idx=(wPtr+i)%WAVE;
+    const y=h-((buf[idx]-minV)/range)*(h-4)-2;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
+  ctx.fillStyle=hexToRgba(color,0.1); ctx.fill();
+  ctx.beginPath();
+  for(let i=0;i<WAVE;i++){
+    const x=(i/(WAVE-1))*w, idx=(wPtr+i)%WAVE;
+    const y=h-((buf[idx]-minV)/range)*(h-4)-2;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.stroke();
+}
+
+// ══════════════════════════════════════════════════════
+// CLOCK
+// ══════════════════════════════════════════════════════
+function drawClock(){
+  const W=dom.clockFace.width, H=dom.clockFace.height, cx=W/2, cy=H/2, r=W/2-2;
+  ctxClock.clearRect(0,0,W,H);
+  const now=new Date();
+  const sec=now.getSeconds()+now.getMilliseconds()/1000;
+  const min=now.getMinutes()+sec/60;
+  const hr=(now.getHours()%12)+min/60;
+  const g=ctxClock.createRadialGradient(cx-r*.22,cy-r*.22,0,cx,cy,r);
+  g.addColorStop(0,'#26262c'); g.addColorStop(1,'#0e0e12');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-1,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2-Math.PI/2, maj=i%5===0, ro=r-2, ri=ro-(maj?9:4);
+    ctxClock.beginPath();
+    ctxClock.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a));
+    ctxClock.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    ctxClock.strokeStyle=maj?'rgba(255,255,255,0.72)':'rgba(255,255,255,0.18)';
+    ctxClock.lineWidth=maj?1.5:0.8; ctxClock.stroke();
+  }
+  ctxClock.font=`600 ${Math.round(r*.17)}px Barlow Condensed,sans-serif`;
+  ctxClock.fillStyle='rgba(255,255,255,0.72)';
+  ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  const nr=r-16;
+  [[12,0],[3,90],[6,180],[9,270]].forEach(([n,d])=>{
+    const a=(d-90)*Math.PI/180;
+    ctxClock.fillText(n,cx+nr*Math.cos(a),cy+nr*Math.sin(a));
+  });
+  hand(cx,cy,(hr/12)*Math.PI*2-Math.PI/2,r*.5,3,'rgba(255,255,255,0.88)');
+  hand(cx,cy,(min/60)*Math.PI*2-Math.PI/2,r*.73,2,'rgba(255,255,255,0.82)');
+  hand(cx,cy,(sec/60)*Math.PI*2-Math.PI/2,r*.82,1,'#FF2800');
+  hand(cx,cy,(sec/60)*Math.PI*2-Math.PI/2+Math.PI,r*.2,1.5,'#FF2800');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,3.5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+}
+function hand(cx,cy,angle,len,w,color){
+  ctxClock.save(); ctxClock.translate(cx,cy); ctxClock.rotate(angle);
+  ctxClock.beginPath(); ctxClock.moveTo(0,0); ctxClock.lineTo(len,0);
+  ctxClock.strokeStyle=color; ctxClock.lineWidth=w; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.restore();
+}
+
+// ══════════════════════════════════════════════════════
+// COMPASS
+// ══════════════════════════════════════════════════════
+let cBearing=330, cTarget=330, cVel=0;
+function drawCompass(){
+  const W=dom.clockFace.width, H=dom.clockFace.height, cx=W/2, cy=H/2, r=W/2-2;
+  ctxClock.clearRect(0,0,W,H);
+  if(Math.random()<0.008) cTarget+=(Math.random()-0.5)*25;
+  cVel=cVel*0.92+(cTarget-cBearing)*0.04;
+  cBearing+=cVel;
+  s.bearing=((cBearing%360)+360)%360;
+  updateHeading();
+  const g=ctxClock.createRadialGradient(cx,cy,0,cx,cy,r);
+  g.addColorStop(0,'#18181e'); g.addColorStop(1,'#0e0e12');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-1,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
+  const ang=-(s.bearing*Math.PI/180);
+  for(let i=0;i<36;i++){
+    const ba=(i/36)*Math.PI*2+ang-Math.PI/2, maj=i%9===0, ro=r-2, ri=ro-(maj?10:5);
+    ctxClock.beginPath();
+    ctxClock.moveTo(cx+ro*Math.cos(ba),cy+ro*Math.sin(ba));
+    ctxClock.lineTo(cx+ri*Math.cos(ba),cy+ri*Math.sin(ba));
+    ctxClock.strokeStyle=maj?'rgba(255,255,255,0.78)':'rgba(255,255,255,0.22)';
+    ctxClock.lineWidth=maj?1.5:0.8; ctxClock.stroke();
+  }
+  ctxClock.font=`700 ${Math.round(r*.19)}px Barlow Condensed,sans-serif`;
+  ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  const lr=r-16;
+  [['N',0],['E',90],['S',180],['W',270]].forEach(([l,d])=>{
+    const a=(d*Math.PI/180)+ang-Math.PI/2;
+    ctxClock.fillStyle=l==='N'?'#FF2800':'rgba(255,255,255,0.72)';
+    ctxClock.fillText(l,cx+lr*Math.cos(a),cy+lr*Math.sin(a));
+  });
+  const nl=r*.54;
+  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy-nl);
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy+nl*.65);
+  ctxClock.strokeStyle='rgba(255,255,255,0.55)'; ctxClock.lineWidth=1.5; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,4,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.font=`600 ${Math.round(r*.15)}px Share Tech Mono,monospace`;
+  ctxClock.fillStyle='rgba(255,255,255,0.55)'; ctxClock.textBaseline='bottom';
+  ctxClock.fillText(String(Math.round(s.bearing)).padStart(3,'0')+'°',cx,H-5);
+}
+
+// ══════════════════════════════════════════════════════
+// TIME / HEADING
+// ══════════════════════════════════════════════════════
+function updateTime(){
+  const now=new Date();
+  dom.infoTime.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  dom.infoDate.textContent=days[now.getDay()]+' '+now.getDate();
+}
+function updateHeading(){
+  const brg=((s.bearing%360)+360)%360;
+  const dirs=[[22.5,'N'],[45,'NNE'],[67.5,'NE'],[90,'ENE'],[112.5,'E'],[135,'ESE'],[157.5,'SE'],[180,'SSE'],[202.5,'S'],[225,'SSW'],[247.5,'SW'],[270,'WSW'],[292.5,'W'],[315,'WNW'],[337.5,'NW'],[360,'NNW']];
+  let label='N';
+  for(const [limit,l] of dirs){ if(brg<limit){label=l;break;} }
+  dom.infoHeading.textContent=Math.round(brg)+'° '+label;
+}
+
+// ══════════════════════════════════════════════════════
+// STATUS PILLS
+// ══════════════════════════════════════════════════════
+function updatePills(){
+  const set=(el,text,active)=>{ el.textContent=text; el.classList.toggle('active-pill',active); };
+  set(dom.pillTC,   'TC: '+TC_STATES[s.tcIdx],       s.tcIdx===0);
+  set(dom.pillESC,  'ESC: '+ESC_STATES[s.escIdx],     s.escIdx!==2);
+  set(dom.pillSUSP, 'SUSP: '+SUSP_STATES[s.suspIdx],  true);
+  set(dom.pillRegen,'REGEN: '+REGEN_STATES[s.regenIdx],true);
+  set(dom.pillAdas, 'ADAS: '+(s.adasOn?'ON':'OFF'),   s.adasOn);
+  set(dom.pillVol,  'VOL: '+Math.round(s.volume)+'%', true);
+}
+
+// ══════════════════════════════════════════════════════
+// LED HELPERS
+// ══════════════════════════════════════════════════════
+function setLed(led,btn,color){
+  led.className='dome-led on-'+color;
+  btn.classList.remove('active-green','active-amber','active-red','active-blue');
+  btn.classList.add('active-'+color);
+}
+function offLed(led,btn){
+  led.className='dome-led';
+  btn.classList.remove('active-green','active-amber','active-red','active-blue');
+}
+function applyDomeStates(){
+  if(s.tcIdx===0) setLed(dom.ledTC,dom.domeTC,'green'); else offLed(dom.ledTC,dom.domeTC);
+  if(s.escIdx===0) setLed(dom.ledESC,dom.domeESC,'green');
+  else if(s.escIdx===1) setLed(dom.ledESC,dom.domeESC,'amber');
+  else offLed(dom.ledESC,dom.domeESC);
+  if(s.suspIdx===0) setLed(dom.ledSUSP,dom.domeSUSP,'blue');
+  else if(s.suspIdx===1) setLed(dom.ledSUSP,dom.domeSUSP,'amber');
+  else setLed(dom.ledSUSP,dom.domeSUSP,'red');
+  setLed(dom.ledREGEN,dom.domeREGEN,['blue','green','amber','red'][s.regenIdx]);
+  if(s.adasOn) setLed(dom.ledADAS,dom.domeADAS,'green'); else offLed(dom.ledADAS,dom.domeADAS);
+}
+
+// ══════════════════════════════════════════════════════
+// SIMULATION
+// ══════════════════════════════════════════════════════
+let simT=0;
+function updateSim(){
+  simT+=0.022;
+  s.speed = Math.max(0, 180+35*Math.sin(simT*.65)+18*Math.sin(simT*2.1)+(Math.random()-.5)*5);
+  s.power = Math.max(0, 420+85*Math.sin(simT*.85)+45*Math.sin(simT*3.0)+(Math.random()-.5)*18);
+  speedBuf[wPtr%WAVE]=s.speed;
+  powerBuf[wPtr%WAVE]=s.power;
+  wPtr=(wPtr+1)%WAVE;
+  dom.speedVal.innerHTML=Math.round(s.speed)+' <span class="unit">km/h</span>';
+  dom.powerVal.innerHTML=Math.round(s.power)+' <span class="unit">kW</span>';
+}
+
+// ══════════════════════════════════════════════════════
+// MAIN LOOP
+// ══════════════════════════════════════════════════════
+function loop(){
+  updateSim(); updateTime();
+  resizeCanvas(dom.speedWave); resizeCanvas(dom.powerWave);
+  drawWave(ctxSpeed, speedBuf, s.waveSpeedColor, 0, 280);
+  drawWave(ctxPower, powerBuf, '#FFF200', 0, 600);
+  if(s.multigraph==='CLOCK') drawClock(); else drawCompass();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ══════════════════════════════════════════════════════
+// NORMAL INTERACTIONS
+// ══════════════════════════════════════════════════════
+dom.modeBadge.addEventListener('click',()=>{ s.mIdx=(s.mIdx+1)%MANETTINO.length; applyBadgesClean(); });
+dom.powerBadge.addEventListener('click',()=>{ s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean(); });
+
+dom.multigraph.addEventListener('click',()=>{
+  s.multigraph=s.multigraph==='CLOCK'?'COMPASS':'CLOCK';
+  dom.multigraph.style.boxShadow='0 0 22px rgba(255,255,255,0.25)';
+  setTimeout(()=>dom.multigraph.style.boxShadow='',320);
+});
+
+function attachTemp(el,valEl,side){
+  el.addEventListener('click',(e)=>{
+    const r=el.getBoundingClientRect();
+    const delta=(e.clientY-r.top)<r.height/2?1:-1;
+    if(side==='left'){ s.tempLeft=Math.min(30,Math.max(16,s.tempLeft+delta)); valEl.textContent=s.tempLeft+'°'; }
+    else             { s.tempRight=Math.min(30,Math.max(16,s.tempRight+delta)); valEl.textContent=s.tempRight+'°'; }
+  });
+}
+attachTemp(document.getElementById('tempLeft'),  dom.tempLeftEl,  'left');
+attachTemp(document.getElementById('tempRight'), dom.tempRightEl, 'right');
+
+let fanIdx=0;
+dom.fanIcon.addEventListener('click',()=>{
+  fanIdx=(fanIdx+1)%4;
+  dom.fanIcon.classList.toggle('active',fanIdx>0);
+});
+
+function attachSeat(el){
+  let idx=0;
+  el.addEventListener('click',()=>{
+    idx=(idx+1)%4;
+    el.className='seat-icon '+['','heating-low','heating-med','heating-high'][idx];
+  });
+}
+attachSeat(document.getElementById('seatLeft'));
+attachSeat(document.getElementById('seatRight'));
+
+dom.domeTC.addEventListener('click',()=>{ s.tcIdx=(s.tcIdx+1)%2; applyDomeStates(); updatePills(); });
+dom.domeESC.addEventListener('click',()=>{ s.escIdx=(s.escIdx+1)%3; applyDomeStates(); updatePills(); });
+dom.domeSUSP.addEventListener('click',()=>{ s.suspIdx=(s.suspIdx+1)%3; applyDomeStates(); updatePills(); });
+dom.domeREGEN.addEventListener('click',()=>{ s.regenIdx=(s.regenIdx+1)%4; applyDomeStates(); updatePills(); });
+dom.domeADAS.addEventListener('click',()=>{ s.adasOn=!s.adasOn; applyDomeStates(); updatePills(); });
+
+dom.btnMoon.addEventListener('click',()=>{
+  s.nightMode=!s.nightMode;
+  dom.btnMoon.classList.toggle('active-moon',s.nightMode);
+  dom.console.classList.toggle('night-mode',s.nightMode);
+});
+dom.btnHex.addEventListener('click',()=>{ s.hazard=!s.hazard; dom.btnHex.classList.toggle('active-hex',s.hazard); });
+dom.btnHUD.addEventListener('click',()=>{ s.hudOn=!s.hudOn; dom.btnHUD.classList.toggle('active-rect',s.hudOn); dom.screenArea.classList.toggle('hud-on',s.hudOn); });
+
+let knobY=null;
+dom.volKnob.addEventListener('mousedown',(e)=>{ knobY=e.clientY; e.preventDefault(); });
+window.addEventListener('mousemove',(e)=>{
+  if(knobY===null) return;
+  const d=knobY-e.clientY; knobY=e.clientY;
+  s.volume=Math.min(100,Math.max(0,s.volume+d*.6));
+  s.knobAngle+=d*3;
+  dom.volKnob.style.transform=`rotate(${s.knobAngle}deg)`;
+  updatePills();
+});
+window.addEventListener('mouseup',()=>{ knobY=null; });
+
+document.querySelectorAll('.dome-btn').forEach(b=>{
+  b.addEventListener('mousedown',()=>{
+    b.style.boxShadow='0 0 14px rgba(255,255,255,0.22), inset 0 1px 0 rgba(255,255,255,0.15)';
+    setTimeout(()=>b.style.boxShadow='',220);
+  });
+});
+
+// ══════════════════════════════════════════════════════
+// TOOLTIP
+// ══════════════════════════════════════════════════════
+const tipEl=document.getElementById('tip');
+const tipTitle=document.getElementById('tip-title');
+const tipFn=document.getElementById('tip-fn');
+let tipTimer=null;
+
+document.addEventListener('mouseover',(e)=>{
+  const el=e.target.closest('[data-tip]');
+  if(!el){ hideTip(); return; }
+  clearTimeout(tipTimer);
+  tipTimer=setTimeout(()=>{
+    tipTitle.textContent=el.getAttribute('data-tip');
+    tipFn.textContent=el.getAttribute('data-tip-fn');
+    tipEl.style.display='block';
+    posTip(e);
+  },120);
+});
+document.addEventListener('mousemove',(e)=>{ if(tipEl.style.display==='block') posTip(e); });
+document.addEventListener('mouseout',(e)=>{ if(!e.target.closest('[data-tip]')){ clearTimeout(tipTimer); hideTip(); } });
+function hideTip(){ tipEl.style.display='none'; }
+function posTip(e){
+  tipEl.style.left=Math.min(e.clientX+14,window.innerWidth-245)+'px';
+  tipEl.style.top=Math.max(e.clientY-54,8)+'px';
+}
+
+// ══════════════════════════════════════════════════════
+// OVERLAY TOGGLE
+// ══════════════════════════════════════════════════════
+function toggleOverlay(){
+  const img=document.getElementById('refOverlay');
+  const btn=document.getElementById('overlayToggle');
+  img.classList.toggle('hidden');
+  const on=!img.classList.contains('hidden');
+  btn.textContent='OVERLAY: '+(on?'ON':'OFF');
+  btn.classList.toggle('active',on);
+}
+
+// ══════════════════════════════════════════════════════
+// ██████████ POSITIONING SYSTEM ██████████
+// ══════════════════════════════════════════════════════
+
+// Current offsets for every positionable element
+const positions = {};
+Object.keys(POS_ELEMENTS).forEach(id => { positions[id]={x:0,y:0}; });
+
+// Currently selected set
+const selectedIds = new Set();
+
+function getPosEl(id){
+  return document.querySelector(`[data-pos-id="${id}"]`);
+}
+
+function applyPosition(id){
+  const el=getPosEl(id);
+  if(!el) return;
+  const {x,y}=positions[id];
+  // volume knob has its own rotation transform — compose on the knob itself, not the button-row
+  el.style.transform=`translate(${x}px,${y}px)`;
+}
+
+function selectPosEl(id){
+  const el=getPosEl(id);
+  if(!el) return;
+  selectedIds.add(id);
+  el.classList.add('pos-selected');
+  updatePosHint();
+}
+
+function deselectPosEl(id){
+  const el=getPosEl(id);
+  if(el) el.classList.remove('pos-selected');
+  selectedIds.delete(id);
+  updatePosHint();
+}
+
+function clearSelection(){
+  selectedIds.forEach(id=>{
+    const el=getPosEl(id);
+    if(el) el.classList.remove('pos-selected');
+  });
+  selectedIds.clear();
+  updatePosHint();
+}
+
+function updatePosHint(){
+  const hint=document.getElementById('posHint');
+  const namesEl=document.getElementById('posHintNames');
+  if(selectedIds.size===0){ hint.style.display='none'; return; }
+  hint.style.display='flex';
+  namesEl.textContent=[...selectedIds].map(id=>POS_ELEMENTS[id]).join(', ');
+}
+
+// ── Click capture: Ctrl/Shift intercepted before element handlers ──
+document.addEventListener('click',(e)=>{
+  const isCtrl=e.ctrlKey||e.metaKey;
+  const isShift=e.shiftKey;
+  if(!isCtrl&&!isShift) return; // let normal clicks pass through
+
+  // Don't intercept modal or toolbar clicks
+  if(e.target.closest('.modal-overlay')||e.target.closest('.toolbar')) return;
+
+  const posEl=e.target.closest('[data-pos-id]');
+  if(!posEl) return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  const id=posEl.getAttribute('data-pos-id');
+
+  if(isCtrl&&!isShift){
+    // Toggle: Ctrl+click selects or deselects
+    if(selectedIds.has(id)) deselectPosEl(id);
+    else selectPosEl(id);
+  } else {
+    // Shift+click always adds to selection
+    selectPosEl(id);
+  }
+},true); // capture phase — runs before bubble-phase element handlers
+
+// ── WASD movement ──
+document.addEventListener('keydown',(e)=>{
+  // Don't capture when typing in modal input
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  // Don't capture when no elements selected
+  if(selectedIds.size===0) return;
+
+  const key=e.key.toLowerCase();
+  if(!['w','a','s','d'].includes(key)) return;
+
+  e.preventDefault();
+  const step=e.shiftKey?5:1;
+  const dx=key==='a'?-step:key==='d'?step:0;
+  const dy=key==='w'?-step:key==='s'?step:0;
+
+  selectedIds.forEach(id=>{
+    positions[id].x+=dx;
+    positions[id].y+=dy;
+    applyPosition(id);
+  });
+});
+
+// ── Ctrl key body class for hover crosshair feedback ──
+document.addEventListener('keydown',(e)=>{ if(e.ctrlKey||e.metaKey) document.body.classList.add('ctrl-held'); });
+document.addEventListener('keyup',  (e)=>{ if(!e.ctrlKey&&!e.metaKey) document.body.classList.remove('ctrl-held'); });
+window.addEventListener('blur',()=>document.body.classList.remove('ctrl-held'));
+
+// ── Escape clears selection ──
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    if(selectedIds.size>0){ clearSelection(); e.preventDefault(); }
+    else closeSaveModal();
+  }
+});
+
+// ══════════════════════════════════════════════════════
+// ██████████ SAVE / LOAD SYSTEM ██████████
+// ══════════════════════════════════════════════════════
+const LS_KEY='ferrari-console-layouts';
+let currentLayoutName='Default';
+
+function getLayouts(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }
+  catch{ return {}; }
+}
+function putLayouts(obj){ localStorage.setItem(LS_KEY,JSON.stringify(obj)); }
+
+function snapshot(){
+  const snap={};
+  Object.keys(POS_ELEMENTS).forEach(id=>{ snap[id]={...positions[id]}; });
+  return snap;
+}
+
+function applySnapshot(snap){
+  Object.keys(POS_ELEMENTS).forEach(id=>{
+    if(snap&&snap[id]){
+      positions[id]={...snap[id]};
+      applyPosition(id);
+    }
+  });
+}
+
+function resetToDefault(){
+  Object.keys(POS_ELEMENTS).forEach(id=>{ positions[id]={x:0,y:0}; applyPosition(id); });
+  currentLayoutName='Default';
+  document.getElementById('currentLayoutLabel').textContent='Default';
+  closeSaveModal();
+}
+
+// Modal open / close
+function openSaveModal(){
+  const modal=document.getElementById('saveModal');
+  modal.classList.add('open');
+  const input=document.getElementById('saveNameInput');
+  input.value=currentLayoutName==='Default'?'':currentLayoutName;
+  document.getElementById('saveError').textContent='';
+  renderSavedList();
+  setTimeout(()=>input.focus(),50);
+}
+function closeSaveModal(){
+  document.getElementById('saveModal').classList.remove('open');
+}
+
+function renderSavedList(){
+  const layouts=getLayouts();
+  const userNames=Object.keys(layouts);
+  const allNames=['Default',...userNames];
+  const list=document.getElementById('savedList');
+
+  list.innerHTML=allNames.map(name=>{
+    const isDefault=name==='Default';
+    const isCurrent=name===currentLayoutName;
+    return `<div class="save-item${isCurrent?' current-layout':''}">
+      <span class="save-name">${name}${isCurrent?' ●':''}</span>
+      <div class="save-actions">
+        <button class="save-item-btn" onclick="loadLayout('${escHTML(name)}')">LOAD</button>
+        ${isDefault
+          ? '<span class="save-item-locked" title="Default layout is protected">🔒</span>'
+          : `<button class="save-item-btn delete-btn" onclick="deleteLayout('${escHTML(name)}')">✕</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHTML(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function confirmSave(){
+  const name=document.getElementById('saveNameInput').value.trim();
+  const errEl=document.getElementById('saveError');
+  errEl.textContent='';
+
+  if(!name){ errEl.textContent='Please enter a layout name.'; return; }
+  if(name.toLowerCase()==='default'){ errEl.textContent='Cannot save over the Default layout. Choose a different name.'; return; }
+
+  const layouts=getLayouts();
+  layouts[name]=snapshot();
+  putLayouts(layouts);
+  currentLayoutName=name;
+  document.getElementById('currentLayoutLabel').textContent=name;
+  closeSaveModal();
+}
+
+function loadLayout(name){
+  if(name==='Default'){
+    resetToDefault();
+    return;
+  }
+  const layouts=getLayouts();
+  if(layouts[name]){
+    applySnapshot(layouts[name]);
+    currentLayoutName=name;
+    document.getElementById('currentLayoutLabel').textContent=name;
+  }
+  closeSaveModal();
+}
+
+function deleteLayout(name){
+  if(name==='Default') return;
+  if(!confirm(`Delete layout "${name}"?`)) return;
+  const layouts=getLayouts();
+  delete layouts[name];
+  putLayouts(layouts);
+  if(currentLayoutName===name){
+    currentLayoutName='Default';
+    document.getElementById('currentLayoutLabel').textContent='Default';
+  }
+  renderSavedList();
+}
+
+// Close modal on overlay click
+document.getElementById('saveModal').addEventListener('click',(e)=>{
+  if(e.target===document.getElementById('saveModal')) closeSaveModal();
+});
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+applyBadgesClean();
+applyDomeStates();
+updatePills();
+updateTime();
+updateHeading();
+dom.tempLeftEl.textContent  = s.tempLeft+'°';
+dom.tempRightEl.textContent = s.tempRight+'°';
+document.getElementById('overlayToggle').classList.add('active');
+</script>
+</body>
+</html>

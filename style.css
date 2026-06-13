@@ -1,0 +1,1220 @@
+/* ============================================================
+   FERRARI LUCE COCKPIT — DESIGN SPECIFICATION STYLESHEET
+   Color System, Typography, Layout, Animations
+   ============================================================ */
+
+/* ── DESIGN TOKEN LAYER ─────────────────────────────────── */
+:root {
+  /* Core palette — OLED depth layers */
+  --black-oled:       #000000;   /* true void — depth planes only */
+  --black-deep:       #010101;
+  --black-dial:       #020202;
+  --black-surface:    #080808;
+  --black-raised:     #0d0d0d;
+  --border-hairline:  #141414;
+  --border-subtle:    #1e1e1e;
+  --border-visible:   #2a2a2a;
+  --metal-dark:       #1a1a1a;
+  --metal-mid:        #2e2e2e;
+  --metal-light:      #444444;
+  --text-primary:     #F5F3ED;   /* warm cream */
+  --text-secondary:   #8A8880;
+  --text-tertiary:    #4A4845;
+  --text-dim:         #252525;
+
+  /* Ferrari Yellow — signal, not surface. 4 permitted appearances total. */
+  --yellow:           #FFF200;
+  --yellow-warm:      #FFF200;
+  --yellow-glow:      rgba(255, 242, 0, 0.15);
+  --yellow-faint:     rgba(255, 242, 0, 0.06);
+
+  /* Manettino 5-position mode palette */
+  --mode-ice-primary:   #A8C4D4;              /* cool silver-blue */
+  --mode-ice-bg:        rgba(168, 196, 212, 0.04);
+  --mode-wet-primary:   #B8C8D8;              /* blue-grey */
+  --mode-wet-bg:        rgba(184, 200, 216, 0.04);
+  --mode-dry-primary:   #FFFFFF;              /* neutral white */
+  --mode-dry-bg:        rgba(255, 255, 255, 0.03);
+  --mode-tour-primary:  #F0EEE8;              /* warm white */
+  --mode-tour-bg:       rgba(240, 238, 232, 0.04);
+  --mode-range-primary: #A8C4D4;              /* alias for e-Manettino Range */
+  --mode-range-bg:      rgba(168, 196, 212, 0.04);
+  --mode-sport-primary: #E87722;              /* amber */
+  --mode-sport-bg:      rgba(232, 119, 34, 0.06);
+  --mode-perf-primary:  #FF2800;              /* Ferrari red — exact */
+  --mode-perf-bg:       rgba(255, 40, 0, 0.08);
+
+  /* Active mode defaults (sport) */
+  --mode-primary:     var(--mode-sport-primary);
+  --mode-bg:          var(--mode-sport-bg);
+  --mode-arc:         var(--mode-sport-primary);
+
+  /* Battery + regen arcs — always cool blue, immune to mode changes */
+  --battery-arc:      #A8C4D4;
+  --regen-arc:        #A8C4D4;
+
+  /* Functional colors */
+  --red-warn:         #8a1a1a;
+  --red-bright:       #FF2800;   /* Ferrari red — exact, never substitute */
+  --blue-regen:       #A8C4D4;
+
+  /* Typography */
+  --font-instrument:  'Orbitron', 'Rajdhani', sans-serif;
+  --font-label:       'Barlow Condensed', sans-serif;
+  --font-mono:        'Share Tech Mono', monospace;
+  --font-body:        'Barlow', sans-serif;
+
+  /* Spacing / geometry */
+  --dial-gap:         18px;
+  --binnacle-height:  340px;
+  --bezel-radius:     50%;
+  --bezel-border:     2px solid #111;
+
+  /* Easing library */
+  --ease-needle:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-mode:        cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-startup:     cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-key:         cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout */
+  --vp-max-width:     1440px;
+  --overhead-h:       72px;
+  --binnacle-zone-h:  420px;
+  --console-h:        200px;
+}
+
+/* ── RESET & BASE ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--black-oled);
+  overflow: hidden;
+  font-family: var(--font-label);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+/* ── REST STATE OVERLAY ──────────────────────────────────── */
+#rest-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--black-oled);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  z-index: 100;
+  transition: opacity 600ms var(--ease-key), visibility 600ms;
+}
+#rest-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Rest state: near-total darkness. Words invisible. Only the key glows. */
+.rest-wordmark {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 14px;
+  color: #0f0f0f;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.rest-model {
+  font-family: var(--font-instrument);
+  font-size: 72px;
+  font-weight: 300;
+  letter-spacing: -2px;
+  color: #080808;
+  line-height: 1;
+  margin-bottom: 48px;
+}
+.rest-cta {
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 6px;
+  color: transparent;
+  margin-bottom: 40px;
+  opacity: 0;
+}
+/* Tooltip — appears after 3s, fades after 4s */
+#restTooltip {
+  position: absolute;
+  bottom: -28px;
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 5px;
+  color: rgba(200, 200, 200, 0.35);
+  opacity: 0;
+  transition: opacity 600ms ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Glass Key (rest state) */
+.glass-key-rest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform 200ms ease;
+}
+.glass-key-rest:hover { transform: translateY(-3px); }
+.glass-key-rest:hover .gk-eink { box-shadow: 0 0 24px var(--yellow-glow), 0 0 48px var(--yellow-faint); }
+
+.gk-body {
+  position: relative;
+  width: 48px;
+  height: 88px;
+  background: linear-gradient(160deg, #1a1a1a 0%, #0a0a0a 50%, #111 100%);
+  border-radius: 24px 24px 8px 8px;
+  border: 1px solid #1e1e1e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+}
+.gk-eink {
+  width: 34px;
+  height: 44px;
+  background: var(--yellow);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 800ms ease, box-shadow 800ms ease;
+  box-shadow: 0 0 16px var(--yellow-glow);
+}
+.gk-e {
+  font-family: var(--font-instrument);
+  font-size: 22px;
+  font-weight: 600;
+  color: #000;
+  font-style: italic;
+}
+.gk-grip {
+  position: absolute;
+  bottom: 8px;
+  width: 28px;
+  height: 6px;
+  background: #222;
+  border-radius: 3px;
+}
+.gk-label {
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: var(--text-tertiary);
+}
+
+/* ── STARTUP FLASH ───────────────────────────────────────── */
+#startup-flash {
+  position: fixed;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99;
+}
+#startup-flash.flash {
+  animation: flash-seq 1200ms var(--ease-startup) forwards;
+}
+@keyframes flash-seq {
+  0%   { opacity: 0; }
+  8%   { opacity: 0.08; }
+  12%  { opacity: 0; }
+  20%  { opacity: 0.04; }
+  25%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* ── COCKPIT SHELL ───────────────────────────────────────── */
+.cockpit {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--overhead-h) 1fr auto auto;
+  grid-template-columns: 1fr;
+  background: var(--black-oled);
+  max-width: var(--vp-max-width);
+  margin: 0 auto;
+}
+.hidden { opacity: 0; pointer-events: none; }
+.cockpit.visible {
+  opacity: 1;
+  pointer-events: all;
+  animation: cockpit-reveal 1200ms 200ms var(--ease-startup) both;
+}
+@keyframes cockpit-reveal {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── OVERHEAD CONSOLE ────────────────────────────────────── */
+.overhead-console {
+  grid-row: 1;
+  border-bottom: 1px solid var(--border-hairline);
+  background: linear-gradient(180deg, #060606 0%, #020202 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+}
+.overhead-rail {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1000px;
+}
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Aircraft toggle switches */
+.toggle-switch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: background 150ms ease;
+}
+.toggle-switch:hover { background: rgba(255,255,255,0.03); }
+.toggle-lever {
+  width: 10px;
+  height: 22px;
+  background: var(--metal-dark);
+  border-radius: 5px;
+  border: 1px solid var(--border-visible);
+  position: relative;
+  transition: transform 150ms ease, background 150ms ease;
+  box-shadow: inset 0 2px 3px rgba(0,0,0,0.6);
+}
+.toggle-lever::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  height: 8px;
+  background: #222;
+  border-radius: 3px;
+  transition: top 150ms ease;
+}
+.toggle-switch.active .toggle-lever { background: #1a1a1a; border-color: #444; }
+.toggle-switch.active .toggle-lever::after { top: 12px; background: var(--text-secondary); }
+.toggle-label {
+  font-family: var(--font-label);
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+  transition: color 150ms ease;
+}
+.toggle-switch.active .toggle-label { color: var(--text-secondary); }
+
+/* Launch Handle */
+.launch-handle-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.launch-handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  cursor: pointer;
+  position: relative;
+}
+.lh-rail {
+  width: 3px;
+  height: 18px;
+  background: var(--metal-dark);
+  border-radius: 2px;
+  margin-top: -2px;
+}
+.lh-grip {
+  width: 38px;
+  height: 32px;
+  background: linear-gradient(180deg, #d84800 0%, #a83800 60%, #8a2c00 100%);
+  border-radius: 6px 6px 3px 3px;
+  border: 1px solid #ff6020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 12px rgba(255, 80, 0, 0.2), inset 0 1px 0 rgba(255,150,50,0.3);
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+}
+.lh-grip:active { transform: translateY(3px); }
+.lh-label {
+  font-family: var(--font-label);
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(255,200,150,0.8);
+}
+
+/* ── BINNACLE WRAPPER ────────────────────────────────────── */
+.binnacle-wrapper {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 24px 24px 0;
+  gap: 16px;
+  position: relative;
+}
+
+/* ── STEERING WHEEL ──────────────────────────────────────── */
+.steering-wheel-zone {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  pointer-events: none;
+}
+.steering-wheel {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  pointer-events: all;
+}
+.sw-svg {
+  width: 200px;
+  height: 200px;
+  transition: transform 200ms var(--ease-needle);
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.8));
+}
+.sw-hub {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px; height: 36px;
+  background: radial-gradient(circle at 40% 35%, #333, #0a0a0a);
+  border-radius: 50%;
+  border: 1px solid #2a2a2a;
+  z-index: 2;
+}
+.pod {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #1c1c1c 0%, #111 60%, #0a0a0a 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px 10px;
+  width: 80px;
+  cursor: pointer;
+}
+.pod-left  { right: calc(100% + 4px); }
+.pod-right { left:  calc(100% + 4px); }
+.pod-label {
+  font-family: var(--font-label);
+  font-size: 6px;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.pod-rotary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.rotary-ring {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2a2a2a, #0d0d0d);
+  border: 1px solid var(--border-visible);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.rotary-ring.red { border-color: #3a1010; }
+.rotary-knob {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #333, #111);
+  border: 1px solid #333;
+  position: relative;
+  transition: transform 300ms var(--ease-needle);
+  cursor: grab;
+}
+.rotary-knob.red { border-color: #4a1818; }
+.rotary-indicator {
+  position: absolute;
+  top: 3px; left: 50%;
+  transform: translateX(-50%);
+  width: 2px; height: 7px;
+  background: var(--text-secondary);
+  border-radius: 1px;
+}
+.rotary-knob.red .rotary-indicator { background: #cc3333; }
+.rotary-positions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.rp {
+  font-family: var(--font-label);
+  font-size: 6px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  transition: color 200ms ease;
+}
+.rp.active { color: var(--text-secondary); }
+.rotary-positions.red .rp.active { color: #cc3333; }
+
+.paddle-label {
+  position: absolute;
+  font-family: var(--font-label);
+  font-size: 6px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  top: calc(50% + 8px);
+  transform: translateY(-50%);
+}
+.paddle-left  { right: calc(100% - 28px); }
+.paddle-right { left:  calc(100% - 28px); }
+
+/* Turn signal — secret until lit. Yellow is functional here, not decorative. */
+#signalLeft.blink  { animation: signal-blink 500ms 0.25s step-end infinite; }
+#signalRight.blink { animation: signal-blink 500ms step-end infinite; }
+@keyframes signal-blink {
+  0%, 100% { fill: #0a0a0a; filter: none; opacity: 0; }
+  50% { fill: #FFF200; filter: drop-shadow(0 0 5px rgba(255, 242, 0, 0.9)); opacity: 1; }
+}
+
+/* Paddle flash feedback */
+#paddleLeft.flash-regen   { animation: paddle-flash-blue 180ms ease; }
+#paddleRight.flash-torque { animation: paddle-flash-white 180ms ease; }
+@keyframes paddle-flash-blue {
+  0%  { fill: #1a1a1a; }
+  40% { fill: #A8C4D4; filter: drop-shadow(0 0 6px rgba(168, 196, 212, 0.8)); }
+  100%{ fill: #1a1a1a; filter: none; }
+}
+@keyframes paddle-flash-white {
+  0%  { fill: #1a1a1a; }
+  40% { fill: #e0e0e0; filter: drop-shadow(0 0 6px rgba(220, 220, 220, 0.7)); }
+  100%{ fill: #1a1a1a; filter: none; }
+}
+
+/* ── BINNACLE DIAL LAYOUT ────────────────────────────────── */
+.binnacle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dial-gap);
+  width: 100%;
+  max-width: 900px;
+}
+
+/* Dial containers */
+.dial-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.dial-left, .dial-right {
+  width: 220px;
+  height: 220px;
+  margin-top: 24px;  /* offset below center */
+}
+.dial-center {
+  width: 300px;
+  height: 300px;
+}
+
+/* Dial bezel — CNC anodized aluminum aesthetic */
+.dial-bezel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%,
+    #2a2a2a 0%, #111 40%, #080808 70%, #0d0d0d 100%);
+  border: 1px solid #1a1a1a;
+  box-shadow:
+    0 0 0 1px #0d0d0d,
+    0 0 0 3px #080808,
+    0 4px 32px rgba(0,0,0,0.9),
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.5);
+  padding: 3px;
+  position: relative;
+}
+.center-bezel {
+  background: radial-gradient(circle at 32% 22%,
+    #2e2e2e 0%, #141414 35%, #070707 65%, #0e0e0e 100%);
+  box-shadow:
+    0 0 0 1px #141414,
+    0 0 0 4px #080808,
+    0 6px 48px rgba(0,0,0,0.95),
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 -1px 0 rgba(0,0,0,0.6);
+}
+
+/* Convex glass lens (parallax depth illusion) */
+.dial-lens {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 28%,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.01) 40%,
+    rgba(0,0,0,0) 70%);
+  overflow: hidden;
+  position: relative;
+  /* Convex glass distortion hint */
+  box-shadow:
+    inset 0 0 40px rgba(0,0,0,0.6),
+    inset 0 2px 4px rgba(255,255,255,0.06);
+}
+.center-lens {
+  background: radial-gradient(circle at 36% 26%,
+    rgba(255,255,255,0.05) 0%,
+    rgba(255,255,255,0.015) 35%,
+    rgba(0,0,0,0) 65%);
+}
+
+/* CSS 3D parallax depth on hover */
+.dial-container:hover .dial-bezel {
+  transform: perspective(400px) rotateX(2deg);
+  transition: transform 300ms ease;
+}
+.dial-container .dial-bezel {
+  transition: transform 300ms ease;
+}
+
+/* Dial SVG */
+.dial-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Dial bottom label */
+.dial-label-bottom {
+  position: absolute;
+  bottom: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-label);
+  font-size: 8px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+/* Right dial mode button */
+.dial-mode-btn {
+  position: absolute;
+  bottom: -44px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px; height: 22px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  background: var(--black-surface);
+  transition: color 150ms ease, border-color 150ms ease;
+}
+.dial-mode-btn:hover {
+  color: var(--text-secondary);
+  border-color: var(--border-visible);
+}
+
+/* ── NEEDLE ANIMATION ────────────────────────────────────── */
+/* Needles animated via JS with CSS transition */
+#leftNeedle, #rightNeedle {
+  transition: transform 400ms var(--ease-needle);
+  transform-origin: 110px 110px;
+}
+#centerNeedle {
+  transition: transform 350ms var(--ease-needle);
+  transform-origin: 150px 150px;
+}
+
+/* ── DRIVE SELECTOR ZONE ─────────────────────────────────── */
+.drive-selector-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 8px 0 20px;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* Drive Selector */
+.drive-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.ds-gate {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--black-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 4px 8px;
+}
+.ds-position {
+  font-family: var(--font-instrument);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-dim);
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: color 200ms ease, background 200ms ease;
+  letter-spacing: 1px;
+}
+.ds-position.active {
+  color: var(--yellow);
+  background: var(--yellow-faint);
+  text-shadow: 0 0 12px var(--yellow-glow);
+}
+.ds-divider {
+  width: 1px; height: 16px;
+  background: var(--border-hairline);
+  margin: 0 2px;
+}
+.ds-glass-body {
+  width: 12px; height: 40px;
+  background: linear-gradient(160deg, rgba(245,197,24,0.3), rgba(245,197,24,0.05));
+  border-radius: 6px;
+  border: 1px solid rgba(245,197,24,0.2);
+  position: relative;
+  box-shadow: 0 0 8px var(--yellow-faint);
+}
+.ds-selector-knob {
+  width: 8px; height: 8px;
+  background: var(--yellow);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 4px; left: 2px;
+  transition: transform 250ms var(--ease-needle);
+  box-shadow: 0 0 6px var(--yellow-glow);
+}
+
+/* Multigraph */
+.multigraph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+.mg-bezel {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%,
+    #252525 0%, #0e0e0e 50%, #060606 100%);
+  border: 1px solid #141414;
+  box-shadow:
+    0 0 0 2px #080808,
+    0 3px 20px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  padding: 3px;
+}
+.mg-face {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+.mg-svg { width: 100%; height: 100%; }
+.mg-mode-label {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-label);
+  font-size: 7px;
+  letter-spacing: 3px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.mg-mode-btn {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 150ms ease;
+}
+.mg-mode-btn:hover { color: var(--text-secondary); }
+
+/* Multigraph hands */
+#mgHourHand, #mgMinHand, #mgSecHand {
+  transition: transform 600ms var(--ease-needle);
+  transform-origin: 70px 70px;
+}
+
+/* Glass Key Slot */
+.glass-key-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.gks-body {
+  width: 36px; height: 60px;
+  background: linear-gradient(160deg, #1a1a1a, #0a0a0a);
+  border-radius: 18px 18px 6px 6px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 6px;
+}
+.gks-eink {
+  width: 26px; height: 34px;
+  background: var(--black-deep);
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 800ms ease, box-shadow 800ms ease;
+}
+.gks-eink.yellow-state {
+  background: var(--yellow);
+  box-shadow: 0 0 16px var(--yellow-glow);
+}
+.gks-e {
+  font-family: var(--font-instrument);
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  font-style: italic;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+.gks-eink.yellow-state .gks-e { opacity: 1; }
+.gks-label {
+  font-family: var(--font-label);
+  font-size: 7px;
+  letter-spacing: 3px;
+  color: var(--text-tertiary);
+}
+
+/* ── CENTER TOUCHSCREEN ──────────────────────────────────── */
+.center-screen-zone {
+  grid-row: 3;
+  display: flex;
+  justify-content: center;
+  padding: 0 24px 16px;
+  border-top: 1px solid var(--border-hairline);
+  background: linear-gradient(0deg, #030303 0%, #010101 100%);
+}
+.center-screen {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 16px;
+}
+.cs-bezel {
+  background: #050505;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  padding: 3px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+.cs-display {
+  background: #040404;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 16/10;
+  display: flex;
+  flex-direction: column;
+}
+.cs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 4px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+.cs-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+}
+.cs-temp {
+  font-family: var(--font-label);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.cs-signal {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.sig-bar {
+  width: 2px;
+  background: var(--text-secondary);
+  border-radius: 1px;
+}
+.sig-bar:nth-child(1) { height: 4px; }
+.sig-bar:nth-child(2) { height: 6px; }
+.sig-bar:nth-child(3) { height: 8px; }
+.sig-bar:nth-child(4) { height: 10px; }
+
+.cs-nav-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.cs-map-bg {
+  position: absolute;
+  inset: 0;
+  background: #060810;
+  overflow: hidden;
+}
+.cs-map-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.cs-route-line {
+  position: absolute;
+  top: 30%; left: 20%;
+  width: 60%; height: 2px;
+  background: linear-gradient(90deg, transparent, #A8C4D4, var(--mode-arc));
+  opacity: 0.6;
+  clip-path: polygon(0 50%, 30% 0, 60% 80%, 100% 50%);
+  transform-origin: 0 50%;
+  border-radius: 1px;
+}
+.cs-car-marker {
+  position: absolute;
+  top: 40%; left: 35%;
+  transform: translate(-50%, -50%);
+}
+.cs-car-dot {
+  width: 8px; height: 8px;
+  background: var(--mode-sport-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--mode-sport-primary), 0 0 24px rgba(212, 112, 42, 0.3);
+  animation: car-pulse 2s ease-in-out infinite;
+}
+@keyframes car-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+.cs-nav-info {
+  position: absolute;
+  bottom: 8px; left: 12px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  padding: 6px 10px;
+}
+.cs-nav-dest {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  color: var(--text-primary);
+}
+.cs-nav-eta {
+  font-family: var(--font-label);
+  font-size: 9px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+.cs-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  border-top: 1px solid var(--border-hairline);
+}
+.cs-climate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cs-climate-icon { font-size: 9px; color: var(--mode-range-primary); }
+.cs-climate-temp {
+  font-family: var(--font-label);
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.cs-tabs {
+  display: flex;
+  gap: 4px;
+}
+.cs-tab {
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+  padding: 2px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease;
+}
+.cs-tab.active {
+  color: var(--text-secondary);
+  background: var(--border-hairline);
+}
+
+/* ── WARNING STRIP ───────────────────────────────────────── */
+.warning-strip {
+  grid-row: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  height: 32px;
+  border-top: 1px solid var(--border-hairline);
+  background: var(--black-oled);
+}
+.warn-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.warn-item.active { opacity: 1; animation: warn-blink 1.5s ease-in-out infinite; }
+@keyframes warn-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.warn-icon {
+  font-size: 10px;
+  color: var(--yellow);
+}
+.warn-text {
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--yellow);
+}
+.warn-item.red .warn-icon,
+.warn-item.red .warn-text { color: var(--red-bright); }
+
+/* ── KEY HINTS ───────────────────────────────────────────── */
+.key-hints {
+  position: fixed;
+  bottom: 40px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.3;
+  transition: opacity 200ms ease;
+  z-index: 50;
+}
+.key-hints:hover { opacity: 0.7; }
+.kh-item {
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+}
+.kh-sep { color: var(--text-dim); font-size: 8px; }
+
+/* ── LAUNCH CONTROL OVERLAY ──────────────────────────────── */
+.launch-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease;
+}
+.launch-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+.lco-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+.lco-ring {
+  position: absolute;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  border: 1px solid rgba(204, 34, 34, 0.3);
+  animation: lco-spin 4s linear infinite;
+}
+.lco-ring::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(204, 34, 34, 0.15);
+  animation: lco-spin 8s linear infinite reverse;
+}
+@keyframes lco-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.lco-label {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 8px;
+  color: var(--red-bright);
+  z-index: 1;
+}
+.lco-sub {
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 4px;
+  color: var(--text-tertiary);
+  z-index: 1;
+}
+.lco-count {
+  font-family: var(--font-instrument);
+  font-size: 64px;
+  font-weight: 200;
+  color: var(--red-bright);
+  letter-spacing: -2px;
+  z-index: 1;
+  text-shadow: 0 0 32px rgba(204, 34, 34, 0.4);
+}
+
+/* ── MANETTINO MODE TRANSITIONS ──────────────────────────── */
+/* Arc strokes respond to mode via CSS custom property */
+#leftArcActive, #centerArcActive, #rightArcActive {
+  stroke: var(--mode-arc);
+  transition: stroke 600ms var(--ease-mode);
+}
+/* Battery and regen arcs are ALWAYS cool blue — never change */
+#batteryActive { stroke: var(--battery-arc); }
+#leftArcRegen  { stroke: var(--regen-arc); opacity: 0.8; }
+/* Redline zone — always Ferrari red */
+#centerArcLimit { stroke: #FF2800; opacity: 0.65; }
+
+/* 5-position Manettino modes */
+.cockpit[data-mode="ice"] {
+  --mode-primary: var(--mode-ice-primary);
+  --mode-bg: var(--mode-ice-bg);
+  --mode-arc: var(--mode-ice-primary);
+}
+.cockpit[data-mode="wet"] {
+  --mode-primary: var(--mode-wet-primary);
+  --mode-bg: var(--mode-wet-bg);
+  --mode-arc: var(--mode-wet-primary);
+}
+.cockpit[data-mode="dry"] {
+  --mode-primary: var(--mode-dry-primary);
+  --mode-bg: var(--mode-dry-bg);
+  --mode-arc: var(--mode-dry-primary);
+}
+.cockpit[data-mode="tour"] {
+  --mode-primary: var(--mode-tour-primary);
+  --mode-bg: var(--mode-tour-bg);
+  --mode-arc: var(--mode-tour-primary);
+}
+.cockpit[data-mode="sport"] {
+  --mode-primary: var(--mode-sport-primary);
+  --mode-bg: var(--mode-sport-bg);
+  --mode-arc: var(--mode-sport-primary);
+}
+.cockpit[data-mode="performance"] {
+  --mode-primary: var(--mode-perf-primary);
+  --mode-bg: var(--mode-perf-bg);
+  --mode-arc: var(--mode-perf-primary);
+}
+
+/* ── RESPONSIVE — TABLET ─────────────────────────────────── */
+@media (max-width: 900px) {
+  :root {
+    --binnacle-height: 280px;
+    --overhead-h: 56px;
+  }
+  .dial-left, .dial-right { width: 160px; height: 160px; }
+  .dial-center { width: 220px; height: 220px; }
+  .pod { width: 60px; }
+  .pod-left  { right: calc(100% + 2px); }
+  .pod-right { left:  calc(100% + 2px); }
+  .steering-wheel { width: 150px; height: 150px; }
+  .sw-svg { width: 150px; height: 150px; }
+  .lh-grip { width: 30px; }
+  .lco-count { font-size: 48px; }
+}
+
+@media (max-width: 600px) {
+  .steering-wheel-zone { display: none; }
+  .dial-left, .dial-right { width: 130px; height: 130px; }
+  .dial-center { width: 180px; height: 180px; }
+  .center-screen { max-width: 280px; }
+  .drive-selector-zone { gap: 16px; }
+  .key-hints { display: none; }
+  .overhead-rail { flex-wrap: wrap; gap: 4px; }
+}
+
+/* ── COCKPIT SCAN LINE TEXTURE ───────────────────────────── */
+.cockpit::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.03) 3px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* Startup sweep line */
+.startup-sweep {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  z-index: 201;
+  transform: translateY(-2px);
+}
+.startup-sweep.animate {
+  animation: sweep-down 800ms 400ms var(--ease-startup) forwards;
+}
+@keyframes sweep-down {
+  from { transform: translateY(-2px); }
+  to   { transform: translateY(100vh); }
+}
+
+/* ── DIAL ARC SVG TEXT ───────────────────────────────────── */
+.dial-unit { font-family: 'Barlow Condensed', sans-serif; }
+.dial-bignum { font-family: 'Rajdhani', sans-serif; }

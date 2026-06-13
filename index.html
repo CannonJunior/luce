@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ferrari Luce — Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Barlow+Condensed:wght@100;200;300;400;500;600;700&family=Barlow:wght@100;200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- PRE-IGNITION REST STATE OVERLAY -->
+<div id="rest-overlay">
+  <div class="rest-wordmark">FERRARI</div>
+  <div class="rest-model">LUCE</div>
+  <div class="rest-cta">INSERT KEY TO BEGIN</div>
+  <div class="glass-key-rest" id="glassKeyRest" style="position:relative;">
+    <div class="gk-body">
+      <div class="gk-eink">
+        <span class="gk-e">e</span>
+      </div>
+      <div class="gk-grip"></div>
+    </div>
+    <div id="restTooltip">PRESS TO START</div>
+  </div>
+</div>
+
+<!-- STARTUP FLASH -->
+<div id="startup-flash"></div>
+
+<!-- MAIN COCKPIT -->
+<div id="cockpit" class="cockpit hidden">
+
+  <!-- OVERHEAD CONSOLE -->
+  <div class="overhead-console" id="overheadConsole">
+    <div class="overhead-rail">
+      <div class="toggle-group">
+        <div class="toggle-switch" data-label="HVAC" id="toggleHVAC">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">HVAC</span>
+        </div>
+        <div class="toggle-switch active" data-label="LIGHT" id="toggleLight">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">LIGHT</span>
+        </div>
+        <div class="toggle-switch" data-label="TRAC" id="toggleTrac">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">TRAC</span>
+        </div>
+        <div class="toggle-switch" data-label="ABS" id="toggleABS">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">ABS</span>
+        </div>
+      </div>
+
+      <div class="launch-handle-zone">
+        <div class="launch-handle" id="launchHandle">
+          <div class="lh-grip">
+            <span class="lh-label">LAUNCH</span>
+          </div>
+          <div class="lh-rail"></div>
+        </div>
+      </div>
+
+      <div class="toggle-group right">
+        <div class="toggle-switch active" data-label="REGEN" id="toggleRegen">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">REGEN</span>
+        </div>
+        <div class="toggle-switch" data-label="SPORT" id="toggleSport">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">SPORT</span>
+        </div>
+        <div class="toggle-switch" data-label="BEAM" id="toggleBeam">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">BEAM</span>
+        </div>
+        <div class="toggle-switch" data-label="AERO" id="toggleAero">
+          <div class="toggle-lever"></div>
+          <span class="toggle-label">AERO</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BINNACLE WRAPPER -->
+  <div class="binnacle-wrapper">
+
+    <!-- STEERING WHEEL -->
+    <div class="steering-wheel-zone">
+      <div class="steering-wheel" id="steeringWheel">
+        <div class="sw-hub"></div>
+        <svg class="sw-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- Rim -->
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#1a1a1a" stroke-width="14"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#2a2a2a" stroke-width="12"/>
+          <!-- Spokes -->
+          <line x1="100" y1="12" x2="100" y2="55" stroke="#222" stroke-width="18" stroke-linecap="round"/>
+          <line x1="100" y1="145" x2="30" y2="185" stroke="#222" stroke-width="14" stroke-linecap="round"/>
+          <line x1="100" y1="145" x2="170" y2="185" stroke="#222" stroke-width="14" stroke-linecap="round"/>
+          <!-- Hub detail -->
+          <circle cx="100" cy="100" r="22" fill="#111" stroke="#2a2a2a" stroke-width="1"/>
+          <circle cx="100" cy="100" r="8" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
+          <!-- Left turn signal (hidden until lit) -->
+          <circle cx="42" cy="72" r="5" fill="#0a0a0a" stroke="#1a1a1a" stroke-width="0.5" id="signalLeft"/>
+          <!-- Right turn signal -->
+          <circle cx="158" cy="72" r="5" fill="#0a0a0a" stroke="#1a1a1a" stroke-width="0.5" id="signalRight"/>
+          <!-- Paddle regen left -->
+          <rect x="8" y="88" width="20" height="36" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5" id="paddleLeft"/>
+          <!-- Paddle torque right -->
+          <rect x="172" y="88" width="20" height="36" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="0.5" id="paddleRight"/>
+        </svg>
+
+        <!-- Left Pod: e-Manettino -->
+        <div class="pod pod-left" id="eManettino">
+          <div class="pod-label">e-MANETTINO</div>
+          <div class="pod-rotary">
+            <div class="rotary-ring">
+              <div class="rotary-knob" id="eManettinoKnob">
+                <div class="rotary-indicator"></div>
+              </div>
+            </div>
+            <div class="rotary-positions">
+              <span class="rp rp-1">RNG</span>
+              <span class="rp rp-2">TUR</span>
+              <span class="rp rp-3">PRF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Pod: Manettino -->
+        <div class="pod pod-right" id="manettino">
+          <div class="pod-label">MANETTINO</div>
+          <div class="pod-rotary">
+            <div class="rotary-ring red">
+              <div class="rotary-knob red" id="manettinoKnob">
+                <div class="rotary-indicator"></div>
+              </div>
+            </div>
+            <div class="rotary-positions red">
+              <span class="rp rp-1">ICE</span>
+              <span class="rp rp-2">WET</span>
+              <span class="rp rp-3">DRY</span>
+              <span class="rp rp-4 active">SPT</span>
+              <span class="rp rp-5">PRF</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paddle labels -->
+        <div class="paddle-label paddle-left">REGEN</div>
+        <div class="paddle-label paddle-right">TORQUE</div>
+      </div>
+    </div>
+
+    <!-- BINNACLE (3 dials) -->
+    <div class="binnacle" id="binnacle">
+
+      <!-- DIAL LEFT: Power/Energy -->
+      <div class="dial-container dial-left">
+        <div class="dial-bezel">
+          <div class="dial-lens">
+            <svg class="dial-svg" viewBox="0 0 220 220" id="dialLeftSVG">
+              <!-- Background -->
+              <circle cx="110" cy="110" r="108" fill="#020202"/>
+              <!-- Depth rings -->
+              <circle cx="110" cy="110" r="105" fill="none" stroke="#111" stroke-width="0.5"/>
+              <circle cx="110" cy="110" r="98" fill="none" stroke="#0d0d0d" stroke-width="1"/>
+              <!-- Arc track -->
+              <path id="leftArcTrack" d="" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+              <!-- Active arc — stroke driven by CSS var(--mode-arc) -->
+              <path id="leftArcActive" d="" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Regen arc — always cool blue, immune to mode -->
+              <path id="leftArcRegen" d="" fill="none" stroke="#A8C4D4" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+              <!-- Tick marks -->
+              <g id="leftTicks"></g>
+              <!-- Needle -->
+              <g id="leftNeedle" transform="rotate(0, 110, 110)">
+                <line x1="110" y1="110" x2="110" y2="30" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.95"/>
+                <circle cx="110" cy="110" r="5" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                <circle cx="110" cy="110" r="2" fill="#fff" opacity="0.5"/>
+              </g>
+              <!-- Center labels -->
+              <text x="110" y="148" text-anchor="middle" class="dial-unit" font-family="Barlow Condensed" font-size="9" fill="#555" letter-spacing="2">POWER kW</text>
+              <text id="leftValue" x="110" y="165" text-anchor="middle" class="dial-bignum" font-family="Rajdhani" font-size="22" font-weight="300" fill="#ccc">0</text>
+            </svg>
+            <div class="dial-label-bottom">ENERGY OUTPUT</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIAL CENTER: Speedometer (PRIMARY) -->
+      <div class="dial-container dial-center">
+        <div class="dial-bezel center-bezel">
+          <div class="dial-lens center-lens">
+            <svg class="dial-svg" viewBox="0 0 300 300" id="dialCenterSVG">
+              <!-- Background -->
+              <circle cx="150" cy="150" r="148" fill="#010101"/>
+              <!-- Depth rings -->
+              <circle cx="150" cy="150" r="145" fill="none" stroke="#141414" stroke-width="0.5"/>
+              <circle cx="150" cy="150" r="136" fill="none" stroke="#0c0c0c" stroke-width="1.5"/>
+              <circle cx="150" cy="150" r="124" fill="none" stroke="#080808" stroke-width="1"/>
+              <!-- Speed arc track -->
+              <path id="centerArcTrack" d="" fill="none" stroke="#161616" stroke-width="4"/>
+              <!-- Speed arc active — stroke driven by CSS var(--mode-arc) -->
+              <path id="centerArcActive" d="" fill="none" stroke-width="3" stroke-linecap="round"/>
+              <!-- Redline zone — always Ferrari red #FF2800 -->
+              <path id="centerArcLimit" d="" fill="none" stroke="#FF2800" stroke-width="4" stroke-linecap="round" opacity="0.65"/>
+              <!-- Tick marks -->
+              <g id="centerTicks"></g>
+              <!-- Speed needle -->
+              <g id="centerNeedle" transform="rotate(0, 150, 150)">
+                <polygon points="150,22 148,150 152,150" fill="#ffffff" opacity="0.92"/>
+                <circle cx="150" cy="150" r="8" fill="#080808" stroke="#2a2a2a" stroke-width="1.5"/>
+                <circle cx="150" cy="150" r="3" fill="#e8e8e8" opacity="0.7"/>
+              </g>
+              <!-- Battery arc — always cool blue #A8C4D4, never changes with mode -->
+              <path id="batteryTrack" d="" fill="none" stroke="#0d0d0d" stroke-width="6"/>
+              <path id="batteryActive" d="" fill="none" stroke="#A8C4D4" stroke-width="5" stroke-linecap="round"/>
+              <!-- Main speed readout -->
+              <text id="speedValue" x="150" y="210" text-anchor="middle" font-family="Rajdhani" font-size="58" font-weight="200" fill="#f0f0f0" letter-spacing="-2">0</text>
+              <text x="150" y="228" text-anchor="middle" font-family="Barlow Condensed" font-size="10" font-weight="300" fill="#444" letter-spacing="4">km/h</text>
+              <!-- Battery % -->
+              <text id="batteryPct" x="150" y="252" text-anchor="middle" font-family="Rajdhani" font-size="16" font-weight="300" fill="#3a9a3a">98%</text>
+              <!-- Range -->
+              <text id="rangeValue" x="150" y="268" text-anchor="middle" font-family="Barlow Condensed" font-size="9" font-weight="300" fill="#444" letter-spacing="3">458 km</text>
+            </svg>
+            <div class="dial-label-bottom">VELOCITÀ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIAL RIGHT: Configurable -->
+      <div class="dial-container dial-right">
+        <div class="dial-bezel">
+          <div class="dial-lens">
+            <svg class="dial-svg" viewBox="0 0 220 220" id="dialRightSVG">
+              <!-- Background -->
+              <circle cx="110" cy="110" r="108" fill="#020202"/>
+              <circle cx="110" cy="110" r="105" fill="none" stroke="#111" stroke-width="0.5"/>
+              <circle cx="110" cy="110" r="98" fill="none" stroke="#0d0d0d" stroke-width="1"/>
+              <!-- Arc track -->
+              <path id="rightArcTrack" d="" fill="none" stroke="#1a1a1a" stroke-width="3"/>
+              <!-- Active arc — stroke driven by CSS var(--mode-arc) -->
+              <path id="rightArcActive" d="" fill="none" stroke-width="2.5" stroke-linecap="round"/>
+              <!-- Ticks -->
+              <g id="rightTicks"></g>
+              <!-- G-force ball (for G mode) -->
+              <g id="gForceBall" opacity="0">
+                <circle cx="110" cy="110" r="35" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+                <circle cx="110" cy="110" r="24" fill="none" stroke="#141414" stroke-width="0.5"/>
+                <line x1="110" y1="75" x2="110" y2="145" stroke="#111" stroke-width="0.5"/>
+                <line x1="75" y1="110" x2="145" y2="110" stroke="#111" stroke-width="0.5"/>
+                <circle id="gBall" cx="110" cy="110" r="5" fill="#e8e8e8"/>
+              </g>
+              <!-- Needle -->
+              <g id="rightNeedle" transform="rotate(0, 110, 110)">
+                <line x1="110" y1="110" x2="110" y2="30" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.95"/>
+                <circle cx="110" cy="110" r="5" fill="#0a0a0a" stroke="#333" stroke-width="1"/>
+                <circle cx="110" cy="110" r="2" fill="#fff" opacity="0.5"/>
+              </g>
+              <!-- Right dial label / mode -->
+              <text id="rightModeLabel" x="110" y="148" text-anchor="middle" font-family="Barlow Condensed" font-size="9" fill="#555" letter-spacing="2">G-FORCE</text>
+              <text id="rightValue" x="110" y="165" text-anchor="middle" font-family="Rajdhani" font-size="22" font-weight="300" fill="#ccc">0.0</text>
+            </svg>
+            <div class="dial-label-bottom" id="rightDialLabel">G-FORCE</div>
+          </div>
+        </div>
+        <!-- Right dial mode cycle button -->
+        <div class="dial-mode-btn" id="rightDialMode" title="Cycle display mode">
+          <span>⟳</span>
+        </div>
+      </div>
+
+    </div><!-- /binnacle -->
+
+    <!-- DRIVE SELECTOR STRIP -->
+    <div class="drive-selector-zone">
+      <div class="drive-selector" id="driveSelector">
+        <div class="ds-gate">
+          <div class="ds-position" data-pos="P" id="dsP">P</div>
+          <div class="ds-divider"></div>
+          <div class="ds-position" data-pos="R" id="dsR">R</div>
+          <div class="ds-divider"></div>
+          <div class="ds-position" data-pos="N" id="dsN">N</div>
+          <div class="ds-divider"></div>
+          <div class="ds-position active" data-pos="D" id="dsD">D</div>
+        </div>
+        <div class="ds-glass-body">
+          <div class="ds-selector-knob" id="dsSelectorKnob"></div>
+        </div>
+      </div>
+
+      <!-- MULTIGRAPH -->
+      <div class="multigraph" id="multigraph">
+        <div class="mg-bezel">
+          <div class="mg-face">
+            <svg class="mg-svg" viewBox="0 0 140 140" id="mgSVG">
+              <!-- Watch face -->
+              <circle cx="70" cy="70" r="68" fill="#010101"/>
+              <circle cx="70" cy="70" r="65" fill="none" stroke="#1a1a1a" stroke-width="0.5"/>
+              <circle cx="70" cy="70" r="58" fill="none" stroke="#111" stroke-width="0.3"/>
+              <!-- Hour markers -->
+              <g id="mgMarkers"></g>
+              <!-- Chronograph sub-dials hint -->
+              <circle cx="70" cy="42" r="10" fill="none" stroke="#111" stroke-width="0.5"/>
+              <circle cx="70" cy="98" r="10" fill="none" stroke="#111" stroke-width="0.5"/>
+              <!-- Hands -->
+              <g id="mgHourHand" transform="rotate(0, 70, 70)">
+                <rect x="68.5" y="30" width="3" height="42" rx="1.5" fill="#cccccc"/>
+                <circle cx="70" cy="70" r="3.5" fill="#111" stroke="#333" stroke-width="0.5"/>
+              </g>
+              <g id="mgMinHand" transform="rotate(0, 70, 70)">
+                <rect x="69" y="20" width="2" height="52" rx="1" fill="#aaaaaa"/>
+              </g>
+              <g id="mgSecHand" transform="rotate(0, 70, 70)">
+                <rect x="69.6" y="18" width="0.8" height="54" rx="0.4" fill="#c8972a"/>
+                <circle cx="70" cy="72" r="2" fill="#c8972a"/>
+              </g>
+              <circle cx="70" cy="70" r="2" fill="#888" stroke="#444" stroke-width="0.5"/>
+            </svg>
+            <div class="mg-mode-label" id="mgModeLabel">CLOCK</div>
+          </div>
+        </div>
+        <div class="mg-mode-btn" id="mgModeBtn">⟳</div>
+      </div>
+
+      <!-- GLASS KEY INSERTED STATE -->
+      <div class="glass-key-slot" id="glassKeySlot">
+        <div class="gks-body">
+          <div class="gks-eink" id="gksEink">
+            <span class="gks-e">e</span>
+          </div>
+        </div>
+        <div class="gks-label">LUCE</div>
+      </div>
+    </div>
+
+  </div><!-- /binnacle-wrapper -->
+
+  <!-- CENTER TOUCHSCREEN -->
+  <div class="center-screen-zone">
+    <div class="center-screen" id="centerScreen">
+      <div class="cs-bezel">
+        <div class="cs-display">
+          <div class="cs-header">
+            <div class="cs-time" id="csTime">--:--</div>
+            <div class="cs-temp">22°</div>
+            <div class="cs-signal">
+              <div class="sig-bar"></div>
+              <div class="sig-bar"></div>
+              <div class="sig-bar"></div>
+              <div class="sig-bar"></div>
+            </div>
+          </div>
+          <div class="cs-nav-area">
+            <div class="cs-map-bg">
+              <div class="cs-map-grid"></div>
+              <div class="cs-route-line"></div>
+              <div class="cs-car-marker">
+                <div class="cs-car-dot"></div>
+              </div>
+            </div>
+            <div class="cs-nav-info">
+              <div class="cs-nav-dest">MARANELLO</div>
+              <div class="cs-nav-eta">14 min · 18.4 km</div>
+            </div>
+          </div>
+          <div class="cs-footer">
+            <div class="cs-climate">
+              <span class="cs-climate-icon">❄</span>
+              <span class="cs-climate-temp">19°</span>
+            </div>
+            <div class="cs-tabs">
+              <div class="cs-tab active">NAV</div>
+              <div class="cs-tab">AUDIO</div>
+              <div class="cs-tab">CAR</div>
+            </div>
+            <div class="cs-climate right">
+              <span class="cs-climate-temp">21°</span>
+              <span class="cs-climate-icon">❄</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WARNING STRIP -->
+  <div class="warning-strip" id="warningStrip">
+    <div class="warn-item" id="warnBattery">
+      <div class="warn-icon">⚡</div>
+      <div class="warn-text">CHARGE LOW</div>
+    </div>
+    <div class="warn-item" id="warnTemp">
+      <div class="warn-icon">⬆</div>
+      <div class="warn-text">BAT TEMP</div>
+    </div>
+    <div class="warn-item" id="warnTrac">
+      <div class="warn-icon">◈</div>
+      <div class="warn-text">TRAC ACT</div>
+    </div>
+  </div>
+
+  <!-- KEYBOARD HINT -->
+  <div class="key-hints" id="keyHints">
+    <div class="kh-item">↑↓ SPEED</div>
+    <div class="kh-sep">·</div>
+    <div class="kh-item">←→ STEER</div>
+    <div class="kh-sep">·</div>
+    <div class="kh-item">M e-MODE</div>
+    <div class="kh-sep">·</div>
+    <div class="kh-item">SPACE DEMO</div>
+    <div class="kh-sep">·</div>
+    <div class="kh-item">L LAUNCH</div>
+  </div>
+
+  <!-- LAUNCH CONTROL OVERLAY -->
+  <div class="launch-overlay" id="launchOverlay">
+    <div class="lco-inner">
+      <div class="lco-ring"></div>
+      <div class="lco-label">LAUNCH CONTROL</div>
+      <div class="lco-sub">RELEASE BRAKE TO DEPLOY</div>
+      <div class="lco-count" id="lcoCount">READY</div>
+    </div>
+  </div>
+
+</div><!-- /cockpit -->
+
+<script src="cockpit.js"></script>
+</body>
+</html>
