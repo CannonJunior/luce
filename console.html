@@ -3,267 +3,277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ferrari Luce — Center Console</title>
+<title>Ferrari Luce — Control Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700&family=Barlow+Condensed:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   background: #0a0a0a;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: flex; flex-direction: column; align-items: center;
   justify-content: flex-start;
-  min-height: 100vh;
-  padding: 30px 0 80px;
+  min-height: 100vh; padding: 30px 0 80px;
   font-family: 'Barlow Condensed', sans-serif;
 }
 
 /* ── TOOLBAR ── */
-.toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-.toolbar-label {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  color: rgba(255,255,255,0.22);
-  letter-spacing: 1px;
-}
+.toolbar { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.toolbar-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: rgba(255,255,255,0.22); letter-spacing: 1px; }
 .toolbar-btn {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.14);
-  color: rgba(255,255,255,0.65);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  padding: 5px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.65); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; font-weight: 500; letter-spacing: 1px; padding: 5px 14px;
+  border-radius: 20px; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 .toolbar-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.toolbar-btn.active {
-  background: rgba(255,242,0,0.12);
-  border-color: rgba(255,242,0,0.45);
-  color: #FFF200;
-}
+.toolbar-btn.active { background: rgba(255,242,0,0.12); border-color: rgba(255,242,0,0.45); color: #FFF200; }
 .toolbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08); }
-#currentLayoutLabel {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: rgba(255,255,255,0.35);
-  letter-spacing: 0.5px;
-}
+#currentLayoutLabel { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; }
 
 /* ── CONSOLE SHELL ── */
 .console {
-  width: 650px;
-  background: #111114;
-  border-radius: 30px;
-  display: flex;
-  flex-direction: column;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.055),
-    0 24px 70px rgba(0,0,0,0.92),
-    inset 0 1px 0 rgba(255,255,255,0.07);
-  position: relative;
-  overflow: hidden;
-  user-select: none;
+  width: 650px; background: #111114; border-radius: 30px;
+  display: block;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.055), 0 24px 70px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.07);
+  position: relative; overflow: hidden; user-select: none;
 }
-
-/* Image overlay */
+.console-inner { display: flex; flex-direction: column; width: 650px; }
 .ref-overlay {
-  position: absolute;
-  top: -12px;
-  left: -25px;
-  width: 700px;
-  height: 700px;
-  pointer-events: none;
-  z-index: 500;
-  opacity: 0.5;
-  transition: opacity 0.3s;
+  position: absolute; top: -12px; left: -25px; width: 700px; height: 700px;
+  pointer-events: none; z-index: 500; opacity: 0.5; transition: opacity 0.3s;
 }
 .ref-overlay.hidden { opacity: 0; }
-
-/* Night-mode dim */
 .console.night-mode::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  pointer-events: none;
-  z-index: 50;
-  border-radius: 30px;
+  content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+  pointer-events: none; z-index: 50; border-radius: 30px;
 }
 
-/* Status dot */
+/* ── STATUS DOT ── */
 .status-dot {
-  position: absolute;
-  top: 16px;
-  right: 20px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #FF2800;
-  box-shadow: 0 0 6px #FF2800;
-  z-index: 2;
+  position: absolute; top: 16px; right: 20px; width: 8px; height: 8px;
+  border-radius: 50%; background: #FF2800; box-shadow: 0 0 6px #FF2800; z-index: 2;
+  cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
 }
+.status-dot:hover { box-shadow: 0 0 10px #FF2800, 0 0 18px rgba(255,40,0,0.5); }
+.status-dot:active { transform: scale(0.82); }
+.sw-reset-btn {
+  position: absolute; right: -5px; top: 52px; width: 10px; height: 10px;
+  border-radius: 50%; background: #FFF200; box-shadow: 0 0 5px rgba(255,242,0,0.6); z-index: 2;
+  cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
+}
+.sw-reset-btn:hover { box-shadow: 0 0 10px #FFF200, 0 0 18px rgba(255,242,0,0.5); }
+.sw-reset-btn:active { transform: scale(0.82); }
 
 /* ── SCREEN ROW ── */
-.screen-row {
-  position: relative;
-  padding: 52px 24px 0;
-}
-
-/* horse + enzo */
-.horse-enzo {
-  position: absolute;
-  top: 16px;
-  left: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  z-index: 2;
+.screen-row { position: relative; padding: 52px 24px 0; }
+.horse-enzo-wrap {
+  position: absolute; top: 16px; left: 24px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px; z-index: 2;
 }
 .horse-svg { width: 28px; height: 32px; }
+.horse-img { width: 28px; height: auto; filter: invert(1); mix-blend-mode: screen; display: block; }
 .enzo-badge {
-  background: #FF2800;
-  color: #fff;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 2.5px;
-  padding: 2px 5px;
-  border-radius: 2px;
-  cursor: default;
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 3px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; cursor: default; width: fit-content;
+  background: transparent; border: 1px solid #FF2800; color: #FF2800;
+  transition: opacity 0.2s;
 }
 
 /* ── SCREEN AREA ── */
 .screen-area {
-  background: #0b0b0e;
-  border-radius: 12px;
-  padding: 14px 14px 12px;
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 12px;
-  border: 1px solid rgba(255,255,255,0.055);
-  position: relative;
+  background: #0b0b0e; border-radius: 12px; padding: 14px 14px 12px;
+  display: flex; flex-direction: row; align-items: stretch; gap: 0;
+  border: 1px solid rgba(255,255,255,0.055); position: relative;
 }
-.screen-area.hud-on {
-  border-color: rgba(0,255,100,0.3);
-  box-shadow: inset 0 0 20px rgba(0,255,80,0.06);
-}
+.screen-area.hud-on { border-color: rgba(0,255,100,0.3); box-shadow: inset 0 0 20px rgba(0,255,80,0.06); }
 
-/* ── METRICS ── */
-.metrics-col { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+/* ── SCREEN MAIN (mode panels host) ── */
+.screen-main {
+  flex: 1; min-width: 0; min-height: 155px;
+  display: flex; flex-direction: column;
+  padding-right: 12px; border-right: 1px solid rgba(255,255,255,0.065);
+}
+.mode-panel { display: none; flex: 1; }
+.mode-panel.active { display: flex; }
+
+/* ── PANEL: OFF (metrics) ── */
+#panelOff { flex-direction: row; align-items: stretch; gap: 0; }
+.metrics-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.metrics-pos { display: flex; flex-direction: column; gap: 6px; align-self: flex-start; }
 .metric-block { display: flex; flex-direction: column; gap: 3px; }
 .mode-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  cursor: pointer;
-  width: fit-content;
-  transition: opacity 0.2s, border-color 0.3s, color 0.3s;
-  background: transparent;
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 3px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; cursor: pointer; width: fit-content;
+  transition: opacity 0.2s; background: transparent;
 }
 .mode-badge:hover { opacity: 0.8; }
-.mode-badge:active { opacity: 0.6; }
 .metric-value {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 42px;
-  font-weight: 700;
-  color: #e8e8e0;
-  line-height: 1;
-  letter-spacing: -1.5px;
+  font-family: 'Rajdhani', sans-serif; font-size: 42px; font-weight: 700;
+  color: #e8e8e0; line-height: 1; letter-spacing: 1px; width: fit-content;
 }
-.metric-value .unit {
-  font-size: 13px;
-  font-weight: 400;
-  color: rgba(232,232,224,0.45);
-  margin-left: 3px;
-  letter-spacing: 0.5px;
-}
-.waveform-wrap { position: relative; height: 44px; margin-top: 2px; }
+.metric-value .unit { font-size: 13px; font-weight: 400; color: rgba(232,232,224,0.45); margin-left: 3px; letter-spacing: 0.5px; }
+.waveform-wrap { position: relative; height: 44px; margin-top: 2px; width: 200px; }
 .waveform-wrap canvas { width: 100%; height: 100%; display: block; }
-.waveform-label {
-  position: absolute; right: 0; bottom: 0;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 8px; color: rgba(255,255,255,0.25);
-  line-height: 1.4; text-align: right; pointer-events: none;
-}
+.waveform-label { position: absolute; right: 0; bottom: 0; font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.25); line-height: 1.4; text-align: right; pointer-events: none; }
 .screen-divider { height: 1px; background: rgba(255,255,255,0.055); margin: 3px 0; }
-
-/* ── INFO COL ── */
 .info-col {
-  display: flex; flex-direction: column; justify-content: center;
-  gap: 4px; padding: 0 10px;
-  border-left: 1px solid rgba(255,255,255,0.065);
-  border-right: 1px solid rgba(255,255,255,0.065);
-  min-width: 82px;
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  padding: 0 10px; border-left: 1px solid rgba(255,255,255,0.065); min-width: 82px;
+  align-self: flex-start; width: fit-content;
 }
-.info-time { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 600; color: #e8e8e0; letter-spacing: 0.5px; line-height: 1; }
+.info-time { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 600; color: #e8e8e0; letter-spacing: 0.5px; line-height: 1; }
 .info-date { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500; color: rgba(232,232,224,0.6); letter-spacing: 1px; }
-.info-temp { font-family: 'Orbitron', sans-serif; font-size: 17px; font-weight: 400; color: #e8e8e0; margin-top: 5px; }
+.info-temp { font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 400; color: #e8e8e0; margin-top: 5px; }
 .info-aqi, .info-heading { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: rgba(232,232,224,0.5); letter-spacing: 0.5px; }
 
+/* ── PANEL HEADER (climate/settings/media) ── */
+.cp-panel-header {
+  display: flex; align-items: center; margin-bottom: 6px;
+}
+.cp-panel-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 600;
+  letter-spacing: 2.5px; color: rgba(255,255,255,0.22); padding: 1px 6px;
+  border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
+}
+
+/* ── PANEL: CLIMATE ── */
+#panelClimate { flex-direction: column; }
+.cp-climate { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.cp-climate-zones { display: flex; flex-direction: row; align-items: stretch; flex: 1; }
+.cp-zone { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 4px; }
+.cp-zone-center {
+  width: 64px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 5px; padding: 0 6px;
+  border-left: 1px solid rgba(255,255,255,0.055); border-right: 1px solid rgba(255,255,255,0.055);
+}
+.cp-zone-label { font-family: 'Barlow Condensed', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 1.5px; color: rgba(255,255,255,0.28); }
+.cp-temp-adj {
+  background: none; border: none; color: rgba(255,255,255,0.35); font-size: 11px;
+  cursor: pointer; padding: 0 10px; line-height: 1.4; transition: color 0.15s;
+}
+.cp-temp-adj:hover { color: rgba(255,255,255,0.85); }
+.cp-temp-big { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 600; color: #e8e8e0; letter-spacing: 0.5px; line-height: 1; }
+.cp-seat-heat { display: flex; gap: 3px; cursor: pointer; margin-top: 2px; }
+.cp-heat-bar { width: 10px; height: 3px; border-radius: 1.5px; background: rgba(255,255,255,0.1); transition: background 0.2s; }
+.cp-heat-bar.lit { background: #ff7820; box-shadow: 0 0 3px rgba(255,120,30,0.6); }
+.cp-seat-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 7px; letter-spacing: 1px; color: rgba(255,255,255,0.18); }
+.cp-fan-label { font-family: 'Barlow Condensed', sans-serif; font-size: 7px; letter-spacing: 1.5px; color: rgba(255,255,255,0.22); }
+.cp-fan-dots { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+.cp-fan-dot { width: 12px; height: 3px; border-radius: 1.5px; background: rgba(255,255,255,0.08); transition: background 0.2s; }
+.cp-fan-dot.lit { background: #A8C4D4; }
+.cp-sync-btn {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 7px; font-weight: 600;
+  letter-spacing: 0.8px; color: rgba(255,255,255,0.35); background: none;
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 2px 5px; cursor: pointer; transition: all 0.15s;
+}
+.cp-sync-btn:hover { color: rgba(255,255,255,0.75); border-color: rgba(255,255,255,0.25); }
+.cp-sync-btn.synced { color: #4caf50; border-color: rgba(76,175,80,0.45); }
+.cp-ac-row { display: flex; gap: 3px; }
+.cp-ac-btn {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 7px; font-weight: 600;
+  letter-spacing: 0.8px; color: rgba(255,255,255,0.3); background: none;
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; padding: 2px 5px; cursor: pointer; transition: all 0.15s;
+}
+.cp-ac-btn:hover { color: rgba(255,255,255,0.65); }
+.cp-ac-btn.active { color: #A8C4D4; border-color: rgba(168,196,212,0.45); }
+
+/* ── PANEL: SETTINGS ── */
+#panelSettings { flex-direction: column; }
+.cp-settings { display: flex; flex-direction: column; gap: 5px; flex: 1; justify-content: center; }
+.cp-setting-row { display: flex; gap: 5px; }
+.cp-setting {
+  flex: 1; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.065);
+  border-radius: 6px; padding: 5px 8px; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s; display: flex; flex-direction: column; gap: 2px;
+}
+.cp-setting:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.14); }
+.cp-setting-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 7px; font-weight: 600; letter-spacing: 1.5px; color: rgba(255,255,255,0.25); }
+.cp-setting-val { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.8px; color: rgba(220,220,216,0.82); }
+
+/* ── PANEL: MEDIA ── */
+#panelMedia { flex-direction: column; justify-content: center; }
+.cp-media { display: flex; flex-direction: column; gap: 6px; }
+.cp-media-source {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 600;
+  letter-spacing: 2px; color: rgba(255,255,255,0.28); cursor: pointer;
+  width: fit-content; padding: 1px 7px; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; transition: color 0.2s, border-color 0.2s;
+}
+.cp-media-source:hover { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.2); }
+.cp-track-name {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 17px; font-weight: 600;
+  letter-spacing: 0.4px; color: #e8e8e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cp-track-artist { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: rgba(220,220,216,0.4); letter-spacing: 0.5px; }
+.cp-progress-bar { height: 2px; background: rgba(255,255,255,0.1); border-radius: 1px; overflow: hidden; cursor: pointer; }
+.cp-progress-fill { height: 100%; background: #FF2800; border-radius: 1px; transition: width 0.5s linear; }
+.cp-time-row { display: flex; justify-content: space-between; font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: rgba(255,255,255,0.28); margin-top: 2px; }
+.cp-media-controls { display: flex; align-items: center; gap: 8px; }
+.cp-media-btn {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-size: 11px; color: rgba(255,255,255,0.55);
+  transition: background 0.15s, color 0.15s;
+}
+.cp-media-btn:hover { background: rgba(255,255,255,0.09); color: #fff; }
+.cp-play-btn { width: 34px; height: 34px; font-size: 14px; border-color: rgba(255,255,255,0.14); }
+
 /* ── MULTIGRAPH ── */
-.multigraph-col { display: flex; align-items: center; justify-content: center; }
+.multigraph-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding-left: 12px; gap: 6px; flex-shrink: 0;
+  align-self: center;
+}
+.mg-sw-time {
+  font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 600;
+  color: #e8e8e0; letter-spacing: 0.5px; line-height: 1.1; margin-top: 5px;
+}
+.mg-sw-cs { font-size: 11px; font-weight: 400; color: rgba(232,232,224,0.45); }
+.mg-bearing {
+  font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700;
+  color: #e8e8e0; letter-spacing: 1px; line-height: 1; margin-top: 5px;
+}
+.mg-bearing-dir {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+  color: #FF2800; letter-spacing: 1.5px; vertical-align: super; margin-left: 2px;
+}
 .multigraph-bezel {
-  width: 115px; height: 115px;
-  border-radius: 50%;
+  width: 115px; height: 115px; border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #28282e 0%, #141416 55%, #0e0e12 100%);
   border: 2px solid rgba(255,255,255,0.13);
   box-shadow: 0 0 0 1px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.6);
-  cursor: pointer;
-  position: relative;
-  transition: box-shadow 0.3s;
-  overflow: hidden;
+  cursor: pointer; position: relative; transition: box-shadow 0.3s; overflow: hidden;
 }
 .multigraph-bezel:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.18), inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.7); }
 .multigraph-bezel canvas { position: absolute; top:0; left:0; width:100%; height:100%; }
+.multigraph-mode-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 600;
+  letter-spacing: 2px; color: rgba(255,255,255,0.32); cursor: pointer;
+  text-align: center; padding: 2px 8px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07); transition: color 0.2s, border-color 0.2s;
+}
+.multigraph-mode-label:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
+.multigraph-mode-label.sw-running { color: #FFF200; border-color: rgba(255,242,0,0.3); }
 
 /* ── WATERMARK ZONE ── */
-.watermark-zone {
-  flex: 1;
-  min-height: 130px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-.ferrari-watermark {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 72px;
-  font-weight: 600;
-  font-style: italic;
-  color: rgba(255,255,255,0.038);
-  letter-spacing: -2px;
-  white-space: nowrap;
-  line-height: 1;
-  pointer-events: none;
-}
+.watermark-zone { flex: 1; min-height: 130px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.ferrari-watermark { }
+.ferrari-watermark-img { height: 64px; width: auto; display: block; filter: invert(1); mix-blend-mode: screen; opacity: 0.065; }
 
 /* ── LOWER SECTION ── */
 .lower { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 14px; }
 
+/* ── STATUS BAR ── */
+.status-bar { display: flex; gap: 10px; padding: 0 4px; align-items: center; flex-wrap: wrap; min-height: 18px; }
+.status-pill { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 1px 7px; border-radius: 10px; color: rgba(200,200,196,0.5); border: 1px solid rgba(255,255,255,0.07); transition: color 0.3s, border-color 0.3s, background 0.3s; }
+.status-pill.active-pill { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
 /* ── CLIMATE STRIP ── */
 .climate-strip { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
 .climate-group { display: flex; align-items: center; gap: 10px; }
-.seat-icon { cursor: pointer; opacity: 0.4; transition: opacity 0.2s; position: relative; }
+.seat-icon { cursor: pointer; opacity: 0.4; transition: opacity 0.2s; }
 .seat-icon:hover { opacity: 0.75; }
 .seat-icon.heating-low  { opacity: 0.65; }
 .seat-icon.heating-med  { opacity: 0.85; }
@@ -273,31 +283,21 @@ body {
 .fan-icon:hover { opacity: 0.7; }
 .fan-icon.active { opacity: 0.9; filter: drop-shadow(0 0 5px rgba(150,200,255,0.7)); }
 .fan-icon svg { width: 22px; height: 22px; }
-.temp-ring {
-  width: 40px; height: 40px; border-radius: 50%;
-  border: 1.5px solid rgba(255,255,255,0.2);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-  background: rgba(255,255,255,0.025);
-}
+.temp-ring { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.025); }
 .temp-ring:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.055); }
 .temp-ring:active { transform: scale(0.94); }
-.temp-ring-val { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.72); line-height: 1; }
+.temp-ring-val { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.72); line-height: 1; }
 
 /* ── BUTTON ROW ── */
 .button-row { display: flex; align-items: center; justify-content: center; gap: 9px; }
 .dome-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .dome-btn {
-  width: 38px; height: 22px;
-  border-radius: 50% / 65%;
+  width: 38px; height: 22px; border-radius: 50% / 65%;
   background: linear-gradient(180deg, #2c2c30 0%, #1c1c1e 55%, #131315 100%);
-  border: 1px solid rgba(255,255,255,0.1);
-  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07);
   transition: box-shadow 0.15s, transform 0.1s;
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
+  position: relative; display: flex; align-items: center; justify-content: center;
 }
 .dome-btn::after { content: ''; position: absolute; top: 3px; left: 6px; right: 6px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.055); }
 .dome-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12); }
@@ -311,14 +311,7 @@ body {
 .dome-led.on-amber { background: #ffb400; box-shadow: 0 0 5px #ffb400; }
 .dome-led.on-red   { background: #FF2800; box-shadow: 0 0 5px #FF2800; }
 .dome-led.on-blue  { background: #4a78ff; box-shadow: 0 0 5px #4a78ff; }
-.icon-btn {
-  width: 34px; height: 34px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.025);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-}
+.icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.025); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s, border-color 0.2s, box-shadow 0.2s; }
 .icon-btn svg { width: 16px; height: 16px; }
 .icon-btn:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.22); }
 .icon-btn.active-moon { background: rgba(30,60,200,0.28); border-color: #5577ff; box-shadow: 0 0 10px rgba(60,100,255,0.4); }
@@ -347,260 +340,105 @@ body {
 }
 .handle-bar::before { content: ''; position: absolute; top: 5px; left: 18px; right: 18px; height: 5px; background: rgba(255,255,255,0.14); border-radius: 3px; }
 
-/* ── STATUS BAR ── */
-.status-bar { display: flex; gap: 10px; padding: 0 4px; align-items: center; flex-wrap: wrap; min-height: 18px; }
-.status-pill {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px; font-weight: 600; letter-spacing: 1px;
-  padding: 1px 7px; border-radius: 10px;
-  color: rgba(200,200,196,0.5);
-  border: 1px solid rgba(255,255,255,0.07);
-  transition: color 0.3s, border-color 0.3s, background 0.3s;
-}
-.status-pill.active-pill { color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
-
-/* ── CUSTOM TOOLTIP ── */
-#tip {
-  position: fixed;
-  background: rgba(10,10,12,0.96);
-  border: 1px solid rgba(255,255,255,0.13);
-  border-radius: 8px;
-  padding: 8px 12px;
-  pointer-events: none;
-  z-index: 9999;
-  display: none;
-  max-width: 230px;
-}
+/* ── TOOLTIP ── */
+#tip { position: fixed; background: rgba(10,10,12,0.96); border: 1px solid rgba(255,255,255,0.13); border-radius: 8px; padding: 8px 12px; pointer-events: none; z-index: 9999; display: none; max-width: 230px; }
 #tip-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 600; color: #e0e0dc; letter-spacing: 0.8px; margin-bottom: 3px; }
 #tip-fn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 400; color: rgba(200,200,196,0.62); line-height: 1.4; }
 
-/* ══════════════════════════════════════════════════════
-   POSITIONING SYSTEM
-   ══════════════════════════════════════════════════════ */
-
-/* Ctrl-held cursor hint */
+/* ══ POSITIONING SYSTEM ══ */
 body.ctrl-held [data-pos-id] { cursor: crosshair !important; }
-body.ctrl-held [data-pos-id]:hover {
-  outline: 1px dashed rgba(255,242,0,0.38) !important;
-  outline-offset: 4px;
-}
-
-/* Selected element */
-[data-pos-id].pos-selected {
-  outline: 2px solid #FFF200 !important;
-  outline-offset: 3px;
-  z-index: 20 !important;
-  position: relative !important;
-}
+body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !important; outline-offset: 4px; }
+[data-pos-id].pos-selected { outline: 2px solid #FFF200 !important; outline-offset: 3px; z-index: 20 !important; position: relative !important; }
 [data-pos-id].pos-selected::before {
   content: attr(data-pos-label);
-  position: absolute;
-  top: -22px;
-  left: 0;
-  font-family: 'Barlow Condensed', monospace;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: #FFF200;
-  background: rgba(0,0,0,0.85);
-  padding: 2px 5px;
-  border-radius: 3px;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 100;
+  position: absolute; top: -22px; left: 0;
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 400; letter-spacing: 0.5px;
+  color: #FFF200; background: rgba(0,0,0,0.85); padding: 2px 5px; border-radius: 3px;
+  white-space: nowrap; pointer-events: none; z-index: 100;
 }
-
-/* Pos hint bar (bottom of viewport) */
 #posHint {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: rgba(6,6,8,0.96);
-  border-top: 1px solid rgba(255,242,0,0.2);
-  padding: 8px 20px;
-  display: none;
-  align-items: center;
-  gap: 16px;
-  z-index: 8000;
+  position: fixed; bottom: 0; left: 0; right: 0; background: rgba(6,6,8,0.96);
+  border-top: 1px solid rgba(255,242,0,0.2); padding: 8px 20px;
+  display: none; align-items: center; gap: 16px; z-index: 8000;
   font-family: 'Barlow Condensed', sans-serif;
 }
-#posHint .hint-selected {
-  font-size: 12px;
-  font-weight: 600;
-  color: #FFF200;
-  letter-spacing: 0.5px;
-}
-#posHint .hint-keys {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.3px;
-}
-#posHint .hint-key {
-  display: inline-block;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 3px;
-  padding: 0px 5px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  color: rgba(255,255,255,0.6);
-  margin: 0 2px;
-}
-#posHint .hint-clear {
-  margin-left: auto;
-  font-size: 11px;
-  color: rgba(255,255,255,0.3);
-  cursor: pointer;
-  letter-spacing: 0.5px;
-  padding: 2px 8px;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px;
-  transition: color 0.2s, border-color 0.2s;
-}
+#posHint .hint-selected { font-size: 12px; font-weight: 600; color: #FFF200; letter-spacing: 0.5px; }
+#posHint .hint-keys { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 0.3px; }
+#posHint .hint-key { display: inline-block; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); border-radius: 3px; padding: 0px 5px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.6); margin: 0 2px; }
+#posHint .hint-clear { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.3); cursor: pointer; letter-spacing: 0.5px; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; transition: color 0.2s, border-color 0.2s; }
 #posHint .hint-clear:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+#consoleRadiusControl { display: none; align-items: center; gap: 8px; }
+#consoleRadiusControl label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px; white-space: nowrap; }
+#consoleRadiusSlider { width: 100px; accent-color: #FFF200; cursor: pointer; }
+#consoleRadiusVal { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #FFF200; min-width: 32px; }
 
 /* ── SAVE MODAL ── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.72);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9000;
-  backdrop-filter: blur(4px);
-}
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 9000; backdrop-filter: blur(4px); }
 .modal-overlay.open { display: flex; }
-.modal-box {
-  background: #13131a;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 16px;
-  padding: 28px;
-  width: 380px;
-  max-width: 95vw;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-}
-.modal-title {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  color: #e0e0dc;
-  margin-bottom: 6px;
-}
-.modal-sub {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  color: rgba(200,200,196,0.45);
-  margin-bottom: 18px;
-  letter-spacing: 0.3px;
-  line-height: 1.5;
-}
-.modal-input {
-  width: 100%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.14);
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 14px;
-  color: #e0e0dc;
-  letter-spacing: 0.5px;
-  outline: none;
-  transition: border-color 0.2s;
-  margin-bottom: 6px;
-}
+.modal-box { background: #13131a; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 28px; width: 380px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 600; letter-spacing: 1.5px; color: #e0e0dc; margin-bottom: 6px; }
+.modal-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; color: rgba(200,200,196,0.45); margin-bottom: 18px; letter-spacing: 0.3px; line-height: 1.5; }
+.modal-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 10px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #e0e0dc; letter-spacing: 0.5px; outline: none; transition: border-color 0.2s; margin-bottom: 6px; }
 .modal-input:focus { border-color: rgba(255,242,0,0.4); }
 .modal-input::placeholder { color: rgba(255,255,255,0.2); }
-.modal-error {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  color: #FF2800;
-  min-height: 16px;
-  margin-bottom: 8px;
-  letter-spacing: 0.5px;
-}
-.modal-saves {
-  max-height: 200px;
-  overflow-y: auto;
-  margin-bottom: 18px;
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
-}
-.save-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: background 0.15s;
-}
+.modal-error { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: #FF2800; min-height: 16px; margin-bottom: 8px; letter-spacing: 0.5px; }
+.modal-saves { max-height: 200px; overflow-y: auto; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+.save-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
 .save-item:last-child { border-bottom: none; }
 .save-item:hover { background: rgba(255,255,255,0.03); }
 .save-item.current-layout { background: rgba(255,242,0,0.04); }
-.save-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 13px;
-  color: rgba(220,220,216,0.8);
-  letter-spacing: 0.5px;
-  flex: 1;
-}
+.save-name { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; color: rgba(220,220,216,0.8); letter-spacing: 0.5px; flex: 1; }
 .save-item.current-layout .save-name { color: #FFF200; }
 .save-actions { display: flex; align-items: center; gap: 6px; }
-.save-item-btn {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  padding: 2px 8px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.04);
-  color: rgba(220,220,216,0.65);
-}
+.save-item-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 1px; padding: 2px 8px; border-radius: 10px; cursor: pointer; transition: background 0.15s, color 0.15s; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); color: rgba(220,220,216,0.65); }
 .save-item-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
 .save-item-btn.delete-btn { color: rgba(255,80,60,0.55); border-color: rgba(255,80,60,0.15); }
 .save-item-btn.delete-btn:hover { background: rgba(255,40,0,0.12); color: #FF2800; border-color: rgba(255,40,0,0.35); }
 .save-item-locked { font-size: 12px; opacity: 0.3; padding: 0 4px; }
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-.modal-btn {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  padding: 7px 20px;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(255,255,255,0.05);
-  color: rgba(220,220,216,0.7);
-}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.modal-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; padding: 7px 20px; border-radius: 20px; cursor: pointer; transition: background 0.2s, color 0.2s; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: rgba(220,220,216,0.7); }
 .modal-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.modal-btn.primary {
-  background: rgba(255,242,0,0.12);
-  border-color: rgba(255,242,0,0.4);
-  color: #FFF200;
-}
+.modal-btn.primary { background: rgba(255,242,0,0.12); border-color: rgba(255,242,0,0.4); color: #FFF200; }
 .modal-btn.primary:hover { background: rgba(255,242,0,0.2); }
-.modal-reset {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 11px;
-  color: rgba(255,255,255,0.25);
-  cursor: pointer;
-  margin-right: auto;
-  padding: 7px 0;
-  transition: color 0.2s;
-  letter-spacing: 0.5px;
-}
+.modal-reset { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: rgba(255,255,255,0.25); cursor: pointer; margin-right: auto; padding: 7px 0; transition: color 0.2s; letter-spacing: 0.5px; }
 .modal-reset:hover { color: rgba(255,255,255,0.6); }
+
+/* ── LAYOUT DROPDOWN ── */
+.layout-selector-wrap { position: relative; }
+.layout-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0;
+  background: rgba(8,8,12,0.98); border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px; padding: 4px; min-width: 160px; display: none; z-index: 6000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+}
+.layout-dropdown.open { display: block; }
+.layout-dropdown-item {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: 0.8px; color: rgba(200,200,196,0.7); padding: 5px 12px;
+  border-radius: 6px; cursor: pointer; transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.layout-dropdown-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.layout-dropdown-item.active-layout-item { color: #FFF200; background: rgba(255,242,0,0.04); }
+
+/* ── RESIZE OVERLAY ── */
+#resizeOverlay {
+  position: fixed; pointer-events: none; z-index: 200; display: none;
+  border: 1.5px dashed rgba(255,242,0,0.45); box-sizing: border-box;
+}
+.resize-handle {
+  position: absolute; width: 8px; height: 8px;
+  background: #FFF200; border: 1px solid rgba(0,0,0,0.55);
+  border-radius: 1px; pointer-events: all; box-sizing: border-box;
+}
+.rh-nw { top: -4px; left: -4px; cursor: nw-resize; }
+.rh-n  { top: -4px; left: calc(50% - 4px); cursor: n-resize; }
+.rh-ne { top: -4px; right: -4px; cursor: ne-resize; }
+.rh-e  { top: calc(50% - 4px); right: -4px; cursor: e-resize; }
+.rh-se { bottom: -4px; right: -4px; cursor: se-resize; }
+.rh-s  { bottom: -4px; left: calc(50% - 4px); cursor: s-resize; }
+.rh-sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+.rh-w  { top: calc(50% - 4px); left: -4px; cursor: w-resize; }
 </style>
 </head>
 <body>
@@ -609,108 +447,254 @@ body.ctrl-held [data-pos-id]:hover {
 <div class="toolbar">
   <button class="toolbar-btn active" id="overlayToggle" onclick="toggleOverlay()">OVERLAY: ON</button>
   <button class="toolbar-btn" id="saveBtn" onclick="openSaveModal()">SAVE LAYOUT</button>
+  <div class="layout-selector-wrap" id="layoutSelectorWrap">
+    <button class="toolbar-btn" id="layoutSelectorBtn" onclick="toggleLayoutDropdown()">▾ <span id="layoutSelectorLabel">DEFAULT</span></button>
+    <div class="layout-dropdown" id="layoutDropdown"></div>
+  </div>
   <div class="toolbar-divider"></div>
   <span class="toolbar-label">LAYOUT:</span>
   <span id="currentLayoutLabel">Default</span>
   <div class="toolbar-divider"></div>
-  <span class="toolbar-label">Ferrari Luce · Center Console</span>
+  <span class="toolbar-label">Ferrari Luce · Control Panel</span>
 </div>
 
 <!-- ── CONSOLE ── -->
-<div class="console" id="console">
+<div class="console" id="console"
+  data-pos-id="console" data-pos-label="Console Shell"
+  data-tip="Console Shell" data-tip-fn="Ctrl+click to select. Drag resize handles to change bounding size (content is clipped, not scaled). Corner radius is configurable when selected.">
 
-  <!-- Reference image overlay -->
   <img src="ferrari_console.jpeg" class="ref-overlay" id="refOverlay" alt="">
 
-  <!-- Status dot -->
-  <div class="status-dot"
-    data-pos-id="status-dot"
-    data-pos-label="Status Indicator"
-    data-tip="System Status Indicator"
-    data-tip-fn="Red LED confirms ignition-on and all vehicle systems are awake. Dims to 10% brightness in rest state."></div>
+  <div class="status-dot" id="swStartStopBtn"
+    data-pos-id="status-dot" data-pos-label="Stopwatch Start/Stop"
+    data-tip="Start / Stop" data-tip-fn="Red button starts and stops the stopwatch. Switch to STOPWATCH mode on the Multigraph to activate."></div>
 
+  <div class="sw-reset-btn" id="swResetBtn"
+    data-tip="Reset Stopwatch" data-tip-fn="Yellow button resets the stopwatch to 00:00.00."></div>
+
+  <div class="console-inner">
   <!-- Screen row -->
   <div class="screen-row">
 
-    <!-- Horse + ENZO -->
-    <div class="horse-enzo"
-      data-pos-id="horse-enzo"
-      data-pos-label="Horse & ENZO Badge">
-      <svg class="horse-svg" viewBox="0 0 80 100" fill="none">
-        <path d="M40 4C36 4 30 7 27 13C24 19 26 25 22 30C18 35 12 35 9 40C6 45 7 51 10 55C13 59 18 61 20 66C22 71 19 76 21 81C24 86 30 88 35 90C38 91 40 93 40 97C40 97 42 91 44 90C49 88 55 86 58 81C60 76 57 71 59 66C61 61 66 59 69 55C72 51 73 45 70 40C67 35 61 35 57 30C53 25 55 19 52 13C49 7 44 4 40 4Z" fill="white"/>
-      </svg>
+    <!-- Horse + ENZO (separate pos-ids) -->
+    <div class="horse-enzo-wrap">
+      <img class="horse-img"
+        src="prancing_horse.png"
+        data-pos-id="horse-svg" data-pos-label="Prancing Horse"
+        data-tip="Prancing Horse" data-tip-fn="Ferrari's iconic Cavallino Rampante. Silhouette drawn from Enzo Ferrari's personal insignia adopted in 1932."
+        alt="">
       <div class="enzo-badge"
-        data-tip="ENZO Driver Profile"
-        data-tip-fn="Driver identity badge — indicates the active driver profile. ENZO personalizes seat position, mirror angles, and driving preference presets.">
+        data-pos-id="enzo-badge" data-pos-label="ENZO Badge"
+        data-tip="ENZO Driver Profile" data-tip-fn="Active driver profile. ENZO personalises seat position, mirror angles, and driving preference presets.">
         ENZO
       </div>
     </div>
 
     <!-- Screen area -->
-    <div class="screen-area" id="screenArea"
-      data-pos-id="screen-area"
-      data-pos-label="Screen Panel">
+    <div class="screen-area" id="screenArea">
 
-      <!-- Metrics col -->
-      <div class="metrics-col"
-        data-pos-id="metrics-col"
-        data-pos-label="Metrics Column">
-        <div class="metric-block">
-          <div class="mode-badge" id="modeBadge"
-            data-tip="Manettino — Chassis Mode"
-            data-tip-fn="Click to cycle: ICE → WET → DRY → SPORT → PERFORMANCE. Controls traction, ESC sensitivity, damper stiffness, and steering weight.">
-            MODE: DRY
-          </div>
-          <div class="metric-value" id="speedVal">210 <span class="unit">km/h</span></div>
-          <div class="waveform-wrap">
-            <canvas id="speedWave" width="200" height="44"></canvas>
-            <div class="waveform-label">km/h<br>0–280</div>
+      <!-- ── Screen main: mode panels ── -->
+      <div class="screen-main">
+
+        <!-- Panel: Off (driving metrics — default view) -->
+        <div class="mode-panel active" id="panelOff">
+          <div class="metrics-col">
+            <div class="metrics-pos"
+              data-pos-id="metrics-col" data-pos-label="Metrics Column">
+            <div class="metric-block">
+              <div class="mode-badge" id="modeBadge"
+                data-pos-id="mode-badge" data-pos-label="Manettino Badge"
+                data-tip="Manettino — Chassis Mode"
+                data-tip-fn="Click to cycle: ICE → WET → DRY → SPORT → PERFORMANCE. Controls traction, ESC sensitivity, damper stiffness, and steering weight.">
+                MODE: DRY
+              </div>
+              <div class="metric-value" id="speedVal"
+                data-pos-id="speed-value" data-pos-label="Speed Readout">
+                210 <span class="unit">km/h</span>
+              </div>
+              <div class="waveform-wrap"
+                data-pos-id="speed-wave" data-pos-label="Speed Waveform">
+                <canvas id="speedWave" width="200" height="44"></canvas>
+                <div class="waveform-label">km/h<br>0–280</div>
+              </div>
+            </div>
+            <div class="screen-divider"></div>
+            <div class="metric-block">
+              <div class="mode-badge" id="powerBadge"
+                data-pos-id="power-badge" data-pos-label="e-Manettino Badge"
+                data-tip="e-Manettino — Power Mode"
+                data-tip-fn="Click to cycle: RANGE → TOUR → PERFO. Controls powertrain energy delivery, regenerative braking intensity, and throttle mapping.">
+                POWER: TOUR
+              </div>
+              <div class="metric-value" id="powerVal"
+                data-pos-id="power-value" data-pos-label="Power Readout">
+                464 <span class="unit">kW</span>
+              </div>
+              <div class="waveform-wrap"
+                data-pos-id="power-wave" data-pos-label="Power Waveform">
+                <canvas id="powerWave" width="200" height="44"></canvas>
+                <div class="waveform-label">kW<br>0–600</div>
+              </div>
+            </div>
+            </div><!-- /metrics-pos -->
+          </div><!-- /metrics-col -->
+
+          <div class="info-col"
+            data-pos-id="info-col" data-pos-label="Info Column">
+            <div class="info-time" id="infoTime"
+              data-pos-id="info-time" data-pos-label="Time Display">10:10</div>
+            <div class="info-date" id="infoDate"
+              data-pos-id="info-date" data-pos-label="Date Display">MON 25</div>
+            <!-- CLOCK mode sub-info -->
+            <div id="mgInfoClock">
+              <div class="info-temp" data-pos-id="info-temp" data-pos-label="Ambient Temp">27°</div>
+              <div class="info-aqi" id="infoAqi" data-pos-id="info-aqi" data-pos-label="Air Quality">AQI: 36</div>
+              <div class="info-heading" id="infoHeading" data-pos-id="info-heading" data-pos-label="Heading">330° NW</div>
+            </div>
+            <!-- STOPWATCH mode sub-info -->
+            <div id="mgInfoStopwatch" style="display:none">
+              <div class="mg-sw-time" id="mgSwTime">00:00<span class="mg-sw-cs">.00</span></div>
+              <div class="info-aqi" id="mgSwKm">0 km</div>
+              <div class="info-aqi" id="mgSwKw">0 kW</div>
+            </div>
+            <!-- COMPASS mode sub-info -->
+            <div id="mgInfoCompass" style="display:none">
+              <div class="mg-bearing" id="mgBearing">330<span class="mg-bearing-dir" id="mgBearingDir">NW</span></div>
+              <div class="info-aqi" id="mgAlt">2,451 FT</div>
+              <div class="info-aqi" id="mgTempC">27° C</div>
+            </div>
           </div>
         </div>
-        <div class="screen-divider"></div>
-        <div class="metric-block">
-          <div class="mode-badge" id="powerBadge"
-            data-tip="e-Manettino — Power Mode"
-            data-tip-fn="Click to cycle: RANGE → TOUR → PERFO. Controls powertrain energy delivery, regenerative braking intensity, and throttle mapping.">
-            POWER: TOUR
-          </div>
-          <div class="metric-value" id="powerVal">464 <span class="unit">kW</span></div>
-          <div class="waveform-wrap">
-            <canvas id="powerWave" width="200" height="44"></canvas>
-            <div class="waveform-label">kW<br>0–600</div>
+
+        <!-- Panel: Climate -->
+        <div class="mode-panel" id="panelClimate">
+          <div class="cp-panel-header"><span class="cp-panel-title">CLIMATE</span></div>
+          <div class="cp-climate">
+            <div class="cp-climate-zones">
+              <div class="cp-zone">
+                <div class="cp-zone-label">DRIVER</div>
+                <button class="cp-temp-adj" data-side="left" data-dir="1">▲</button>
+                <div class="cp-temp-big" id="cpTempL">22°</div>
+                <button class="cp-temp-adj" data-side="left" data-dir="-1">▼</button>
+                <div class="cp-seat-heat" id="cpHeatL" title="Seat heating">
+                  <span class="cp-heat-bar" data-level="1"></span>
+                  <span class="cp-heat-bar" data-level="2"></span>
+                  <span class="cp-heat-bar" data-level="3"></span>
+                </div>
+                <div class="cp-seat-sub">SEAT</div>
+              </div>
+
+              <div class="cp-zone-center">
+                <div class="cp-fan-label">FAN</div>
+                <div class="cp-fan-dots" id="cpFanDots">
+                  <span class="cp-fan-dot" data-speed="1"></span>
+                  <span class="cp-fan-dot" data-speed="2"></span>
+                  <span class="cp-fan-dot" data-speed="3"></span>
+                  <span class="cp-fan-dot" data-speed="4"></span>
+                </div>
+                <button class="cp-sync-btn" id="cpSyncBtn">SYNC</button>
+                <div class="cp-ac-row">
+                  <button class="cp-ac-btn active" id="cpAcBtn">A/C</button>
+                  <button class="cp-ac-btn" id="cpAutoBtn">AUTO</button>
+                </div>
+              </div>
+
+              <div class="cp-zone">
+                <div class="cp-zone-label">PASSENGER</div>
+                <button class="cp-temp-adj" data-side="right" data-dir="1">▲</button>
+                <div class="cp-temp-big" id="cpTempR">18°</div>
+                <button class="cp-temp-adj" data-side="right" data-dir="-1">▼</button>
+                <div class="cp-seat-heat" id="cpHeatR" title="Seat heating">
+                  <span class="cp-heat-bar" data-level="1"></span>
+                  <span class="cp-heat-bar" data-level="2"></span>
+                  <span class="cp-heat-bar" data-level="3"></span>
+                </div>
+                <div class="cp-seat-sub">SEAT</div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Info col -->
-      <div class="info-col"
-        data-pos-id="info-col"
-        data-pos-label="Info Column">
-        <div class="info-time" id="infoTime">10:10</div>
-        <div class="info-date" id="infoDate">MON 25</div>
-        <div class="info-temp">27°</div>
-        <div class="info-aqi" id="infoAqi">AOI: 36</div>
-        <div class="info-heading" id="infoHeading">330° NW</div>
-      </div>
+        <!-- Panel: Settings -->
+        <div class="mode-panel" id="panelSettings">
+          <div class="cp-panel-header"><span class="cp-panel-title">SETTINGS</span></div>
+          <div class="cp-settings">
+            <div class="cp-setting-row">
+              <div class="cp-setting" id="csManet" data-tip="Manettino" data-tip-fn="Click to cycle chassis mode.">
+                <div class="cp-setting-lbl">MANETTINO</div>
+                <div class="cp-setting-val" id="csManetVal">DRY</div>
+              </div>
+              <div class="cp-setting" id="csEManet" data-tip="e-Manettino" data-tip-fn="Click to cycle power mode.">
+                <div class="cp-setting-lbl">e-MANETTINO</div>
+                <div class="cp-setting-val" id="csEManetVal">TOUR</div>
+              </div>
+            </div>
+            <div class="cp-setting-row">
+              <div class="cp-setting" id="csESC" data-tip="ESC Mode" data-tip-fn="Click to cycle ESC sensitivity.">
+                <div class="cp-setting-lbl">ESC</div>
+                <div class="cp-setting-val" id="csESCVal">FULL</div>
+              </div>
+              <div class="cp-setting" id="csSUSP" data-tip="Suspension" data-tip-fn="Click to cycle damper mode.">
+                <div class="cp-setting-lbl">SUSPENSION</div>
+                <div class="cp-setting-val" id="csSUSPVal">COMFORT</div>
+              </div>
+            </div>
+            <div class="cp-setting-row">
+              <div class="cp-setting" id="csRegen" data-tip="Regen Braking" data-tip-fn="Click to cycle regen level.">
+                <div class="cp-setting-lbl">REGEN</div>
+                <div class="cp-setting-val" id="csRegenVal">MED</div>
+              </div>
+              <div class="cp-setting" id="csADAS" data-tip="Driver Assistance" data-tip-fn="Click to toggle ADAS suite.">
+                <div class="cp-setting-lbl">ADAS</div>
+                <div class="cp-setting-val" id="csADASVal">ON</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <!-- Multigraph -->
-      <div class="multigraph-col">
+        <!-- Panel: Media -->
+        <div class="mode-panel" id="panelMedia">
+          <div class="cp-panel-header"><span class="cp-panel-title">MEDIA</span></div>
+          <div class="cp-media">
+            <div class="cp-media-source" id="cpSource"
+              data-tip="Audio Source" data-tip-fn="Click to cycle: BLUETOOTH → FM → USB.">BLUETOOTH</div>
+            <div class="cp-track-name" id="cpTrack">Maranello Dreams</div>
+            <div class="cp-track-artist" id="cpArtist">Ferrari Sound Labs</div>
+            <div class="cp-progress-bar">
+              <div class="cp-progress-fill" id="cpProgressFill" style="width:37%"></div>
+            </div>
+            <div class="cp-time-row">
+              <span id="cpTimeElapsed">1:24</span>
+              <span id="cpTimeDur">3:47</span>
+            </div>
+            <div class="cp-media-controls">
+              <button class="cp-media-btn" id="cpPrev" data-tip="Previous Track" data-tip-fn="Skip to previous track.">⏮</button>
+              <button class="cp-media-btn cp-play-btn" id="cpPlay" data-tip="Play / Pause" data-tip-fn="Toggle audio playback.">⏸</button>
+              <button class="cp-media-btn" id="cpNext" data-tip="Next Track" data-tip-fn="Skip to next track.">⏭</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /screen-main -->
+
+      <!-- ── Multigraph (always visible) ── -->
+      <div class="multigraph-wrap"
+        data-pos-id="multigraph" data-pos-label="Multigraph">
         <div class="multigraph-bezel" id="multigraphBezel"
-          data-pos-id="multigraph"
-          data-pos-label="Multigraph Clock"
           data-tip="Multigraph Instrument"
-          data-tip-fn="Click to toggle: Analog Clock ↔ Compass. Clock mode: real-time hands, red second hand. Compass mode: rotating dial with live bearing readout.">
+          data-tip-fn="Tap dial in STOPWATCH mode to start/stop; double-tap to reset. Tap mode label below to cycle CLOCK → STOPWATCH → COMPASS.">
           <canvas id="clockFace" width="115" height="115"></canvas>
         </div>
+        <div class="multigraph-mode-label" id="multigraphLabel">CLOCK</div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- /screen-area -->
+  </div><!-- /screen-row -->
 
   <!-- Watermark zone -->
-  <div class="watermark-zone"
-    data-pos-id="watermark"
-    data-pos-label="Ferrari Watermark">
-    <div class="ferrari-watermark">Ferrari</div>
+  <div class="watermark-zone">
+    <div class="ferrari-watermark"
+      data-pos-id="watermark-text" data-pos-label="Ferrari Watermark"><img src="ferrari_text.png" class="ferrari-watermark-img" alt="Ferrari"></div>
   </div>
 
   <!-- Lower section -->
@@ -718,24 +702,21 @@ body.ctrl-held [data-pos-id]:hover {
 
     <!-- Status bar -->
     <div class="status-bar" id="statusBar"
-      data-pos-id="status-bar"
-      data-pos-label="Status Bar">
-      <div class="status-pill" id="pill-tc">TC: ON</div>
+      data-pos-id="status-bar" data-pos-label="Status Bar">
       <div class="status-pill" id="pill-esc">ESC: FULL</div>
       <div class="status-pill" id="pill-susp">SUSP: COMFORT</div>
       <div class="status-pill" id="pill-regen">REGEN: MED</div>
       <div class="status-pill" id="pill-adas">ADAS: ON</div>
       <div class="status-pill" id="pill-vol">VOL: 60%</div>
+      <div class="status-pill" id="pill-cp">CP: OFF</div>
     </div>
 
     <!-- Climate strip -->
-    <div class="climate-strip"
-      data-pos-id="climate"
-      data-pos-label="Climate Controls">
+    <div class="climate-strip">
       <div class="climate-group">
         <div class="seat-icon" id="seatLeft"
-          data-tip="Left Seat Heating"
-          data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH. Controls left seat heating element intensity.">
+          data-pos-id="seat-left" data-pos-label="Left Seat Icon"
+          data-tip="Left Seat Heating" data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH.">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
             <path d="M8 5 C8 5 7 9 8 13 C8.5 15 10 16 11 17 L11 21"/>
             <path d="M7 21 L15 21"/>
@@ -744,13 +725,13 @@ body.ctrl-held [data-pos-id]:hover {
           </svg>
         </div>
         <div class="temp-ring" id="tempLeft"
-          data-tip="Left Climate Zone"
-          data-tip-fn="Click upper half to raise (+1°) or lower half to reduce (−1°) left zone temperature. Range: 16°–30°.">
+          data-pos-id="temp-left" data-pos-label="Left Temp Ring"
+          data-tip="Left Climate Zone" data-tip-fn="Click upper half to raise, lower half to reduce left zone temperature. Range 16°–30°.">
           <div class="temp-ring-val" id="tempLeftVal">22°</div>
         </div>
         <div class="fan-icon" id="fanIcon"
-          data-tip="Climate Fan / A/C"
-          data-tip-fn="Click to cycle fan speed: OFF → LOW → MED → HIGH. Controls cabin airflow for both climate zones.">
+          data-pos-id="fan-icon" data-pos-label="Fan Icon"
+          data-tip="Climate Fan / A/C" data-tip-fn="Click to cycle fan speed: OFF → LOW → MED → HIGH.">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
             <circle cx="12" cy="12" r="2"/>
             <path d="M12 10 C11.5 8 11.5 5 13 4 C14.5 3 16 4.5 14.5 6.5 C13.5 7.8 12 10 12 10Z" fill="rgba(255,255,255,0.25)"/>
@@ -760,18 +741,16 @@ body.ctrl-held [data-pos-id]:hover {
           </svg>
         </div>
       </div>
-
       <div style="flex:1"></div>
-
       <div class="climate-group">
         <div class="temp-ring" id="tempRight"
-          data-tip="Right Climate Zone"
-          data-tip-fn="Click upper half to raise (+1°) or lower half to reduce (−1°) right zone temperature. Range: 16°–30°.">
+          data-pos-id="temp-right" data-pos-label="Right Temp Ring"
+          data-tip="Right Climate Zone" data-tip-fn="Click upper half to raise, lower half to reduce right zone temperature. Range 16°–30°.">
           <div class="temp-ring-val" id="tempRightVal">18°</div>
         </div>
         <div class="seat-icon" id="seatRight"
-          data-tip="Right Seat Heating"
-          data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH. Controls right seat heating element intensity.">
+          data-pos-id="seat-right" data-pos-label="Right Seat Icon"
+          data-tip="Right Seat Heating" data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH.">
           <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
             <path d="M16 5 C16 5 17 9 16 13 C15.5 15 14 16 13 17 L13 21"/>
             <path d="M9 21 L17 21"/>
@@ -783,51 +762,48 @@ body.ctrl-held [data-pos-id]:hover {
     </div>
 
     <!-- Button row -->
-    <div class="button-row"
-      data-pos-id="buttons"
-      data-pos-label="Button Row">
-      <div class="dome-group">
-        <div class="dome-btn" id="domeTC"
-          data-tip="Traction Control"
-          data-tip-fn="Toggle traction control on/off. OFF allows controlled wheel spin for performance launches. System re-enables automatically above 80 km/h."></div>
-        <div class="dome-led" id="ledTC"></div>
+    <div class="button-row">
+      <!-- Mode dome buttons -->
+      <div class="dome-group"
+        data-pos-id="dome-climate" data-pos-label="Climate Button">
+        <div class="dome-btn" id="domeClimate"
+          data-tip="Climate Mode" data-tip-fn="Activates Climate Control panel. Shows dual-zone temperature, fan speed, and seat heating. Tap again to return to driving metrics."></div>
+        <div class="dome-led" id="ledClimate"></div>
       </div>
-      <div class="dome-group">
-        <div class="dome-btn" id="domeESC"
-          data-tip="Electronic Stability Control"
-          data-tip-fn="Cycle ESC mode: FULL → SPORT → OFF. SPORT allows more lateral slip for dynamic cornering. OFF only available in SPORT/PERFORMANCE Manettino."></div>
-        <div class="dome-led" id="ledESC"></div>
+      <div class="dome-group"
+        data-pos-id="dome-settings" data-pos-label="Settings Button">
+        <div class="dome-btn" id="domeSettings"
+          data-tip="Settings Mode" data-tip-fn="Activates Vehicle Settings panel. Configure Manettino, e-Manettino, suspension, ESC, and regen level."></div>
+        <div class="dome-led" id="ledSettings"></div>
       </div>
-      <div class="dome-group">
-        <div class="dome-btn" id="domeSUSP"
-          data-tip="Adaptive Suspension"
-          data-tip-fn="Cycle damper mode: COMFORT → SPORT → RACE. RACE mode reduces ride height by 10mm and increases damper stiffness by 40%."></div>
-        <div class="dome-led" id="ledSUSP"></div>
+      <div class="dome-group"
+        data-pos-id="dome-media" data-pos-label="Media Button">
+        <div class="dome-btn" id="domeMedia"
+          data-tip="Media Mode" data-tip-fn="Activates Media Control panel. Shows current track, playback controls, and audio source selection."></div>
+        <div class="dome-led" id="ledMedia"></div>
       </div>
 
       <div class="btn-separator"></div>
 
       <div class="icon-btn" id="btnMoon"
-        data-tip="Night Mode"
-        data-tip-fn="Dim all display panels for night driving. Reduces screen brightness to 15% and enables red-tinted instrument lighting.">
+        data-pos-id="btn-moon" data-pos-label="Night Mode Btn"
+        data-tip="Night Mode" data-tip-fn="Dim all display panels. Reduces screen brightness to 15% and enables red-tinted instrument lighting.">
         <svg viewBox="0 0 24 24" fill="none" stroke="rgba(100,140,255,0.8)" stroke-width="2" stroke-linecap="round">
           <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/>
         </svg>
       </div>
-
       <div class="icon-btn" id="btnHex"
-        data-tip="Hazard Warning Lights"
-        data-tip-fn="Toggle hazard flashers. All four turn signals blink simultaneously at 1.5 Hz. Overrides all other turn signal states.">
+        data-pos-id="btn-hex" data-pos-label="Hazard Btn"
+        data-tip="Hazard Warning Lights" data-tip-fn="Toggle hazard flashers. All four turn signals blink simultaneously at 1.5 Hz.">
         <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,242,0,0.75)" stroke-width="1.8">
           <polygon points="12,2 20.5,7.5 20.5,16.5 12,22 3.5,16.5 3.5,7.5"/>
           <line x1="12" y1="8" x2="12" y2="13" stroke="rgba(255,242,0,0.75)" stroke-width="2" stroke-linecap="round"/>
           <circle cx="12" cy="15.5" r="0.8" fill="rgba(255,242,0,0.75)"/>
         </svg>
       </div>
-
       <div class="icon-btn" id="btnHUD"
-        data-tip="Head-Up Display"
-        data-tip-fn="Toggle windscreen HUD projection. Displays speed, navigation turn arrows, and speed limit sign recognition at eye level.">
+        data-pos-id="btn-hud" data-pos-label="HUD Btn"
+        data-tip="Head-Up Display" data-tip-fn="Toggle windscreen HUD projection. Displays speed, navigation arrows, and speed limit recognition.">
         <svg viewBox="0 0 24 24" fill="none" stroke="rgba(180,180,180,0.7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="7" width="18" height="10" rx="1.5"/>
           <line x1="8" y1="17" x2="6" y2="21" stroke-width="1.5"/>
@@ -838,63 +814,70 @@ body.ctrl-held [data-pos-id]:hover {
       <div class="btn-separator"></div>
 
       <div class="volume-knob" id="volumeKnob"
-        data-tip="Audio Volume"
-        data-tip-fn="Drag up to increase / down to decrease volume (0–100%). Current level shown in status bar."></div>
+        data-pos-id="volume-knob" data-pos-label="Volume Knob"
+        data-tip="Audio Volume" data-tip-fn="Drag up to increase / down to decrease volume (0–100%). Current level shown in status bar."></div>
 
       <div class="btn-separator"></div>
 
-      <div class="dome-group">
+      <div class="dome-group"
+        data-pos-id="dome-regen" data-pos-label="Regen Button">
         <div class="dome-btn" id="domeREGEN"
-          data-tip="Regenerative Braking"
-          data-tip-fn="Cycle regen level: LOW → MED → HIGH → MAX. MAX enables one-pedal driving. Affects energy recuperation during deceleration."></div>
+          data-tip="Regenerative Braking" data-tip-fn="Cycle regen level: LOW → MED → HIGH → MAX. MAX enables one-pedal driving."></div>
         <div class="dome-led" id="ledREGEN"></div>
       </div>
-      <div class="dome-group">
+      <div class="dome-group"
+        data-pos-id="dome-adas" data-pos-label="ADAS Button">
         <div class="dome-btn" id="domeADAS"
-          data-tip="Driver Assistance Systems"
-          data-tip-fn="Toggle ADAS suite: lane keep, adaptive cruise, emergency brake assist, and blind-spot monitoring. Disabled automatically in PERFORMANCE mode."></div>
+          data-tip="Driver Assistance" data-tip-fn="Toggle ADAS suite: lane keep, adaptive cruise, emergency brake assist, and blind-spot monitoring."></div>
         <div class="dome-led" id="ledADAS"></div>
       </div>
     </div>
 
-  </div>
+  </div><!-- /lower -->
 
   <!-- Handle -->
-  <div class="handle"
-    data-pos-id="handle"
-    data-pos-label="Handle">
+  <div class="handle">
     <div class="handle-bar"
-      data-tip="Aluminum Handle"
-      data-tip-fn="Ergonomic console grab handle machined from 6061-T6 aluminium. Assists passenger entry/exit and serves as a structural console mount point."></div>
+      data-pos-id="handle" data-pos-label="Handle"
+      data-tip="Aluminum Handle" data-tip-fn="Ergonomic grab handle machined from 6061-T6 aluminium. Assists entry/exit and serves as structural console mount."></div>
   </div>
+
+  </div><!-- /console-inner -->
+</div><!-- /console -->
+
+<div id="resizeOverlay">
+  <div class="resize-handle rh-nw" data-rh="nw"></div>
+  <div class="resize-handle rh-n"  data-rh="n"></div>
+  <div class="resize-handle rh-ne" data-rh="ne"></div>
+  <div class="resize-handle rh-e"  data-rh="e"></div>
+  <div class="resize-handle rh-se" data-rh="se"></div>
+  <div class="resize-handle rh-s"  data-rh="s"></div>
+  <div class="resize-handle rh-sw" data-rh="sw"></div>
+  <div class="resize-handle rh-w"  data-rh="w"></div>
 </div>
 
-<!-- ── TOOLTIP ── -->
-<div id="tip">
-  <div id="tip-title"></div>
-  <div id="tip-fn"></div>
-</div>
+<div id="tip"><div id="tip-title"></div><div id="tip-fn"></div></div>
 
-<!-- ── POSITION HINT BAR ── -->
 <div id="posHint">
   <span class="hint-selected">Selected: <span id="posHintNames"></span></span>
   <span class="hint-keys">
     <span class="hint-key">W</span><span class="hint-key">A</span><span class="hint-key">S</span><span class="hint-key">D</span> to move
-    &nbsp;·&nbsp;
-    <span class="hint-key">⇧</span>+WASD = ×5
-    &nbsp;·&nbsp;
-    <span class="hint-key">Ctrl</span>+Click to toggle select
-    &nbsp;·&nbsp;
-    <span class="hint-key">⇧</span>+Click to add
+    &nbsp;·&nbsp; <span class="hint-key">⇧</span>+WASD = ×5
+    &nbsp;·&nbsp; <span class="hint-key">Ctrl</span>+Click to toggle
+    &nbsp;·&nbsp; <span class="hint-key">⇧</span>+Click to add
   </span>
+  <div id="consoleRadiusControl">
+    <label>CORNER RADIUS</label>
+    <input type="range" id="consoleRadiusSlider" min="0" max="80" value="30">
+    <span id="consoleRadiusVal">30px</span>
+  </div>
   <span class="hint-clear" onclick="clearSelection()">CLEAR SELECTION</span>
 </div>
 
-<!-- ── SAVE MODAL ── -->
 <div class="modal-overlay" id="saveModal">
   <div class="modal-box">
     <div class="modal-title">SAVE LAYOUT</div>
-    <div class="modal-sub">Name this set of element positions. Load any saved layout to restore it. The Default layout cannot be overwritten.</div>
+    <div class="modal-sub">Name this set of element positions. The Default layout cannot be overwritten.</div>
     <input type="text" class="modal-input" id="saveNameInput" placeholder="Layout name…" maxlength="40"
       onkeydown="if(event.key==='Enter') confirmSave()">
     <div class="modal-error" id="saveError"></div>
@@ -908,60 +891,90 @@ body.ctrl-held [data-pos-id]:hover {
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// CONSTANTS
-// ══════════════════════════════════════════════════════
+// ══ CONSTANTS ══
 const MANETTINO    = ['ICE','WET','DRY','SPORT','PERFORMANCE'];
 const E_MANET      = ['RANGE','TOUR','PERFO'];
 const MODE_COLOR   = { ICE:'#A8C4D4', WET:'#B8D0E0', DRY:'#4caf50', SPORT:'#E87722', PERFORMANCE:'#FF2800' };
 const EMODE_COLOR  = { RANGE:'#A8C4D4', TOUR:'#FFF200', PERFO:'#FF2800' };
-const TC_STATES    = ['ON','OFF'];
 const ESC_STATES   = ['FULL','SPORT','OFF'];
 const SUSP_STATES  = ['COMFORT','SPORT','RACE'];
 const REGEN_STATES = ['LOW','MED','HIGH','MAX'];
+const SOURCES      = ['BLUETOOTH','FM RADIO','USB'];
+const TRACKS = [
+  { name:'Maranello Dreams',   artist:'Ferrari Sound Labs',   dur:227 },
+  { name:'Fiorano Circuit',    artist:'E. Morricone Tribute', dur:193 },
+  { name:'Cavallino Rampante', artist:'Loveform Audio',       dur:314 },
+  { name:'Luce du Soir',       artist:'Marc Newson Sessions', dur:267 },
+];
 
-// Positionable element registry: id → human label
+// ══ POSITIONABLE ELEMENTS ══
 const POS_ELEMENTS = {
-  'status-dot':  'Status Indicator',
-  'horse-enzo':  'Horse & ENZO Badge',
-  'screen-area': 'Screen Panel',
-  'metrics-col': 'Metrics Column',
-  'info-col':    'Info Column',
-  'multigraph':  'Multigraph Clock',
-  'watermark':   'Ferrari Watermark',
-  'status-bar':  'Status Bar',
-  'climate':     'Climate Controls',
-  'buttons':     'Button Row',
-  'handle':      'Handle',
+  'console':       'Console Shell',
+  'status-dot':    'Status Dot',
+  'horse-svg':     'Prancing Horse',
+  'enzo-badge':    'ENZO Badge',
+  'metrics-col':   'Metrics Column',
+  'mode-badge':    'Manettino Badge',
+  'speed-value':   'Speed Readout',
+  'speed-wave':    'Speed Waveform',
+  'power-badge':   'e-Manettino Badge',
+  'power-value':   'Power Readout',
+  'power-wave':    'Power Waveform',
+  'info-col':      'Info Column',
+  'info-time':     'Time Display',
+  'info-date':     'Date Display',
+  'info-temp':     'Ambient Temp',
+  'info-aqi':      'Air Quality',
+  'info-heading':  'Heading',
+  'multigraph':    'Multigraph',
+  'watermark-text':'Ferrari Watermark',
+  'status-bar':    'Status Bar',
+  'seat-left':     'Left Seat Icon',
+  'temp-left':     'Left Temp Ring',
+  'fan-icon':      'Fan Icon',
+  'temp-right':    'Right Temp Ring',
+  'seat-right':    'Right Seat Icon',
+  'dome-climate':  'Climate Button',
+  'dome-settings': 'Settings Button',
+  'dome-media':    'Media Button',
+  'btn-moon':      'Night Mode Btn',
+  'btn-hex':       'Hazard Btn',
+  'btn-hud':       'HUD Btn',
+  'volume-knob':   'Volume Knob',
+  'dome-regen':    'Regen Button',
+  'dome-adas':     'ADAS Button',
+  'handle':        'Handle',
 };
 
-// ══════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════
+// ══ STATE ══
 const s = {
   mIdx:2, eIdx:1,
   multigraph:'CLOCK',
   tempLeft:22, tempRight:18,
-  tcIdx:0, escIdx:0, suspIdx:0, regenIdx:1, adasOn:true,
-  fanIdx:0,
+  escIdx:0, suspIdx:0, regenIdx:1, adasOn:true,
+  fanIdx:0, seatHeatL:0, seatHeatR:0,
+  cpAcOn:true, cpAuto:false, cpSync:false,
   nightMode:false, hazard:false, hudOn:false,
   volume:60, knobAngle:0,
-  waveSpeedColor: '#4caf50',
+  cpMode:'off',
+  // Stopwatch
+  swRunning:false, swElapsed:0, swStart:null,
+  // Media
+  mediaPlaying:true, trackIdx:0,
+  mediaBaseTime:84, mediaStartT:Date.now(), sourceIdx:0,
+  waveSpeedColor:'#4caf50',
+  bearing:330,
 };
 
 // Waveform buffers
-const WAVE = 60;
-const speedBuf = new Float32Array(WAVE);
-const powerBuf = new Float32Array(WAVE);
-let wPtr = 0;
-for (let i=0;i<WAVE;i++){
-  speedBuf[i] = 175 + 45*Math.sin(i*0.28) + (Math.random()-0.5)*18;
-  powerBuf[i] = 410 + 90*Math.sin(i*0.22+1) + (Math.random()-0.5)*55;
+const WAVE=60, speedBuf=new Float32Array(WAVE), powerBuf=new Float32Array(WAVE);
+let wPtr=0;
+for(let i=0;i<WAVE;i++){
+  speedBuf[i]=175+45*Math.sin(i*0.28)+(Math.random()-.5)*18;
+  powerBuf[i]=410+90*Math.sin(i*0.22+1)+(Math.random()-.5)*55;
 }
 
-// ══════════════════════════════════════════════════════
-// DOM REFS
-// ══════════════════════════════════════════════════════
+// ══ DOM REFS ══
 const dom = {
   modeBadge:   document.getElementById('modeBadge'),
   powerBadge:  document.getElementById('powerBadge'),
@@ -971,6 +984,7 @@ const dom = {
   powerWave:   document.getElementById('powerWave'),
   clockFace:   document.getElementById('clockFace'),
   multigraph:  document.getElementById('multigraphBezel'),
+  multigraphLabel: document.getElementById('multigraphLabel'),
   infoTime:    document.getElementById('infoTime'),
   infoDate:    document.getElementById('infoDate'),
   infoHeading: document.getElementById('infoHeading'),
@@ -978,116 +992,92 @@ const dom = {
   tempRightEl: document.getElementById('tempRightVal'),
   screenArea:  document.getElementById('screenArea'),
   console:     document.getElementById('console'),
-  domeTC:   document.getElementById('domeTC'),
-  domeESC:  document.getElementById('domeESC'),
-  domeSUSP: document.getElementById('domeSUSP'),
-  domeREGEN:document.getElementById('domeREGEN'),
-  domeADAS: document.getElementById('domeADAS'),
-  ledTC:    document.getElementById('ledTC'),
-  ledESC:   document.getElementById('ledESC'),
-  ledSUSP:  document.getElementById('ledSUSP'),
-  ledREGEN: document.getElementById('ledREGEN'),
-  ledADAS:  document.getElementById('ledADAS'),
-  btnMoon:  document.getElementById('btnMoon'),
-  btnHex:   document.getElementById('btnHex'),
-  btnHUD:   document.getElementById('btnHUD'),
-  volKnob:  document.getElementById('volumeKnob'),
-  seatLeft:  document.getElementById('seatLeft'),
-  seatRight: document.getElementById('seatRight'),
-  fanIcon:   document.getElementById('fanIcon'),
-  pillTC:    document.getElementById('pill-tc'),
-  pillESC:   document.getElementById('pill-esc'),
-  pillSUSP:  document.getElementById('pill-susp'),
-  pillRegen: document.getElementById('pill-regen'),
-  pillAdas:  document.getElementById('pill-adas'),
-  pillVol:   document.getElementById('pill-vol'),
+  domeClimate: document.getElementById('domeClimate'),
+  domeSettings:document.getElementById('domeSettings'),
+  domeMedia:   document.getElementById('domeMedia'),
+  domeREGEN:   document.getElementById('domeREGEN'),
+  domeADAS:    document.getElementById('domeADAS'),
+  ledClimate:  document.getElementById('ledClimate'),
+  ledSettings: document.getElementById('ledSettings'),
+  ledMedia:    document.getElementById('ledMedia'),
+  ledREGEN:    document.getElementById('ledREGEN'),
+  ledADAS:     document.getElementById('ledADAS'),
+  btnMoon:     document.getElementById('btnMoon'),
+  btnHex:      document.getElementById('btnHex'),
+  btnHUD:      document.getElementById('btnHUD'),
+  volKnob:     document.getElementById('volumeKnob'),
+  seatLeft:    document.getElementById('seatLeft'),
+  seatRight:   document.getElementById('seatRight'),
+  fanIcon:     document.getElementById('fanIcon'),
+  pillESC:     document.getElementById('pill-esc'),
+  pillSUSP:    document.getElementById('pill-susp'),
+  pillRegen:   document.getElementById('pill-regen'),
+  pillAdas:    document.getElementById('pill-adas'),
+  pillVol:     document.getElementById('pill-vol'),
+  pillCp:      document.getElementById('pill-cp'),
 };
 
 const ctxSpeed = dom.speedWave.getContext('2d');
 const ctxPower = dom.powerWave.getContext('2d');
 const ctxClock = dom.clockFace.getContext('2d');
 
-// ══════════════════════════════════════════════════════
-// BADGES
-// ══════════════════════════════════════════════════════
+// ══ BADGES ══
 function applyBadgesClean(){
   const m=MANETTINO[s.mIdx], e=E_MANET[s.eIdx];
   const mc=MODE_COLOR[m], ec=EMODE_COLOR[e];
-  dom.modeBadge.textContent  = 'MODE: '+m;
-  dom.modeBadge.style.border = `1px solid ${mc}`;
-  dom.modeBadge.style.color  = mc;
-  dom.powerBadge.textContent = 'POWER: '+e;
-  dom.powerBadge.style.border= `1px solid ${ec}`;
-  dom.powerBadge.style.color = ec;
-  s.waveSpeedColor = mc;
+  dom.modeBadge.textContent='MODE: '+m;
+  dom.modeBadge.style.border='1px solid '+mc;
+  dom.modeBadge.style.color=mc;
+  dom.powerBadge.textContent='POWER: '+e;
+  dom.powerBadge.style.border='1px solid '+ec;
+  dom.powerBadge.style.color=ec;
+  s.waveSpeedColor=mc;
+  if(s.cpMode==='settings') updateSettingsPanel();
 }
 
-// ══════════════════════════════════════════════════════
-// WAVEFORMS
-// ══════════════════════════════════════════════════════
-function resizeCanvas(c){
-  const r=c.getBoundingClientRect();
-  c.width  = r.width  || 200;
-  c.height = r.height || 44;
-}
-function hexToRgba(hex,a){
-  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${a})`;
-}
-function drawWave(ctx, buf, color, minV, maxV){
-  const w=ctx.canvas.width, h=ctx.canvas.height, range=maxV-minV;
+// ══ WAVEFORMS ══
+function resizeCanvas(c){ const r=c.getBoundingClientRect(); c.width=r.width||200; c.height=r.height||44; }
+function hexToRgba(hex,a){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; }
+function drawWave(ctx,buf,color,minV,maxV){
+  const w=ctx.canvas.width,h=ctx.canvas.height,range=maxV-minV;
   ctx.clearRect(0,0,w,h);
   ctx.beginPath();
-  for(let i=0;i<WAVE;i++){
-    const x=(i/(WAVE-1))*w, idx=(wPtr+i)%WAVE;
-    const y=h-((buf[idx]-minV)/range)*(h-4)-2;
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  }
+  for(let i=0;i<WAVE;i++){ const x=(i/(WAVE-1))*w,idx=(wPtr+i)%WAVE,y=h-((buf[idx]-minV)/range)*(h-4)-2; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
   ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
   ctx.fillStyle=hexToRgba(color,0.1); ctx.fill();
   ctx.beginPath();
-  for(let i=0;i<WAVE;i++){
-    const x=(i/(WAVE-1))*w, idx=(wPtr+i)%WAVE;
-    const y=h-((buf[idx]-minV)/range)*(h-4)-2;
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  }
+  for(let i=0;i<WAVE;i++){ const x=(i/(WAVE-1))*w,idx=(wPtr+i)%WAVE,y=h-((buf[idx]-minV)/range)*(h-4)-2; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
   ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.stroke();
 }
 
-// ══════════════════════════════════════════════════════
-// CLOCK
-// ══════════════════════════════════════════════════════
+// ══ CLOCK ══
 function drawClock(){
-  const W=dom.clockFace.width, H=dom.clockFace.height, cx=W/2, cy=H/2, r=W/2-2;
+  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-2;
   ctxClock.clearRect(0,0,W,H);
-  const now=new Date();
-  const sec=now.getSeconds()+now.getMilliseconds()/1000;
-  const min=now.getMinutes()+sec/60;
-  const hr=(now.getHours()%12)+min/60;
-  const g=ctxClock.createRadialGradient(cx-r*.22,cy-r*.22,0,cx,cy,r);
-  g.addColorStop(0,'#26262c'); g.addColorStop(1,'#0e0e12');
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-1,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
+  const now=new Date(),sec=now.getSeconds()+now.getMilliseconds()/1000,min=now.getMinutes()+sec/60,hr=(now.getHours()%12)+min/60;
+  // Deep black face
+  const g=ctxClock.createRadialGradient(cx-r*.15,cy-r*.18,0,cx,cy,r);
+  g.addColorStop(0,'#1c1c22'); g.addColorStop(1,'#080810');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
+  // Tick ring — minute marks with pinkish hue, hour marks brighter
   for(let i=0;i<60;i++){
-    const a=(i/60)*Math.PI*2-Math.PI/2, maj=i%5===0, ro=r-2, ri=ro-(maj?9:4);
-    ctxClock.beginPath();
-    ctxClock.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a));
-    ctxClock.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    ctxClock.strokeStyle=maj?'rgba(255,255,255,0.72)':'rgba(255,255,255,0.18)';
-    ctxClock.lineWidth=maj?1.5:0.8; ctxClock.stroke();
+    const a=(i/60)*Math.PI*2-Math.PI/2,maj=i%5===0,ro=r-1,ri=ro-(maj?7:3.5);
+    ctxClock.beginPath(); ctxClock.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctxClock.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    ctxClock.strokeStyle=maj?'rgba(255,255,255,0.82)':'rgba(220,160,160,0.38)'; ctxClock.lineWidth=maj?1.4:0.65; ctxClock.stroke();
   }
-  ctxClock.font=`600 ${Math.round(r*.17)}px Barlow Condensed,sans-serif`;
-  ctxClock.fillStyle='rgba(255,255,255,0.72)';
-  ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  // All 12 numerals
   const nr=r-16;
-  [[12,0],[3,90],[6,180],[9,270]].forEach(([n,d])=>{
-    const a=(d-90)*Math.PI/180;
-    ctxClock.fillText(n,cx+nr*Math.cos(a),cy+nr*Math.sin(a));
-  });
-  hand(cx,cy,(hr/12)*Math.PI*2-Math.PI/2,r*.5,3,'rgba(255,255,255,0.88)');
-  hand(cx,cy,(min/60)*Math.PI*2-Math.PI/2,r*.73,2,'rgba(255,255,255,0.82)');
-  hand(cx,cy,(sec/60)*Math.PI*2-Math.PI/2,r*.82,1,'#FF2800');
-  hand(cx,cy,(sec/60)*Math.PI*2-Math.PI/2+Math.PI,r*.2,1.5,'#FF2800');
+  ctxClock.font=`600 ${Math.round(r*.155)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(255,255,255,0.82)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  for(let n=1;n<=12;n++){ const a=(n/12)*Math.PI*2-Math.PI/2; ctxClock.fillText(n,cx+nr*Math.cos(a),cy+nr*Math.sin(a)); }
+  // Hands
+  hand(cx,cy,(hr/12)*Math.PI*2-Math.PI/2,r*.44,3.5,'rgba(255,255,255,0.92)');
+  hand(cx,cy,(min/60)*Math.PI*2-Math.PI/2,r*.68,2.2,'rgba(255,255,255,0.88)');
+  const sa=(sec/60)*Math.PI*2-Math.PI/2;
+  hand(cx,cy,sa,r*.79,1,'#FF2800');
+  hand(cx,cy,sa+Math.PI,r*.21,1.8,'#FF2800');
+  // Hub
   ctxClock.beginPath(); ctxClock.arc(cx,cy,3.5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,1.4,0,Math.PI*2); ctxClock.fillStyle='#ddd'; ctxClock.fill();
 }
 function hand(cx,cy,angle,len,w,color){
   ctxClock.save(); ctxClock.translate(cx,cy); ctxClock.rotate(angle);
@@ -1096,184 +1086,360 @@ function hand(cx,cy,angle,len,w,color){
   ctxClock.restore();
 }
 
-// ══════════════════════════════════════════════════════
-// COMPASS
-// ══════════════════════════════════════════════════════
-let cBearing=330, cTarget=330, cVel=0;
-function drawCompass(){
-  const W=dom.clockFace.width, H=dom.clockFace.height, cx=W/2, cy=H/2, r=W/2-2;
+// ══ STOPWATCH ══
+function swGetMs(){ return s.swRunning ? s.swElapsed+(Date.now()-s.swStart) : s.swElapsed; }
+function swToggle(){
+  if(s.swRunning){ s.swElapsed=swGetMs(); s.swRunning=false; }
+  else { s.swStart=Date.now(); s.swRunning=true; }
+  dom.multigraphLabel.classList.toggle('sw-running',s.swRunning);
+}
+function swReset(){ s.swRunning=false; s.swElapsed=0; s.swStart=null; dom.multigraphLabel.classList.remove('sw-running'); }
+function drawStopwatch(){
+  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-2;
   ctxClock.clearRect(0,0,W,H);
-  if(Math.random()<0.008) cTarget+=(Math.random()-0.5)*25;
-  cVel=cVel*0.92+(cTarget-cBearing)*0.04;
-  cBearing+=cVel;
-  s.bearing=((cBearing%360)+360)%360;
-  updateHeading();
-  const g=ctxClock.createRadialGradient(cx,cy,0,cx,cy,r);
-  g.addColorStop(0,'#18181e'); g.addColorStop(1,'#0e0e12');
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-1,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
-  const ang=-(s.bearing*Math.PI/180);
-  for(let i=0;i<36;i++){
-    const ba=(i/36)*Math.PI*2+ang-Math.PI/2, maj=i%9===0, ro=r-2, ri=ro-(maj?10:5);
-    ctxClock.beginPath();
-    ctxClock.moveTo(cx+ro*Math.cos(ba),cy+ro*Math.sin(ba));
-    ctxClock.lineTo(cx+ri*Math.cos(ba),cy+ri*Math.sin(ba));
-    ctxClock.strokeStyle=maj?'rgba(255,255,255,0.78)':'rgba(255,255,255,0.22)';
-    ctxClock.lineWidth=maj?1.5:0.8; ctxClock.stroke();
+  const ms=swGetMs(), mainFrac=(ms/1000%60)/60, elapsedMin=Math.floor(ms/60000), subSecFrac=(ms%1000)/1000;
+  // Ferrari yellow face
+  const g=ctxClock.createRadialGradient(cx-r*.18,cy-r*.22,0,cx,cy,r);
+  g.addColorStop(0,'#FFFC9A'); g.addColorStop(0.55,'#FFF200'); g.addColorStop(1,'#e8d900');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
+  // Outer tick scale 0-60s
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2-Math.PI/2,maj=i%5===0,ro=r-1,ri=ro-(maj?7:3.5);
+    ctxClock.beginPath(); ctxClock.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctxClock.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    ctxClock.strokeStyle=maj?'rgba(0,0,0,0.65)':'rgba(0,0,0,0.28)'; ctxClock.lineWidth=maj?1.2:0.6; ctxClock.stroke();
   }
-  ctxClock.font=`700 ${Math.round(r*.19)}px Barlow Condensed,sans-serif`;
-  ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
-  const lr=r-16;
-  [['N',0],['E',90],['S',180],['W',270]].forEach(([l,d])=>{
-    const a=(d*Math.PI/180)+ang-Math.PI/2;
-    ctxClock.fillStyle=l==='N'?'#FF2800':'rgba(255,255,255,0.72)';
-    ctxClock.fillText(l,cx+lr*Math.cos(a),cy+lr*Math.sin(a));
+  // Scale numbers every 5s (60 at top)
+  const numR=r-15; ctxClock.font=`600 ${Math.round(r*.135)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(0,0,0,0.75)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  for(let i=0;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctxClock.fillText(i===0?60:i*5,cx+numR*Math.cos(a),cy+numR*Math.sin(a)); }
+  // Sub-dials
+  const sdR=Math.round(r*.27), sdOx=Math.round(r*.31), sdOy=Math.round(r*.17);
+  [[cx-sdOx,cy+sdOy,0],[cx+sdOx,cy+sdOy,1]].forEach(([scx,scy,idx])=>{
+    ctxClock.beginPath(); ctxClock.arc(scx,scy,sdR,0,Math.PI*2); ctxClock.fillStyle='#111'; ctxClock.fill();
+    // Sub ticks
+    for(let i=0;i<12;i++){
+      const a=(i/12)*Math.PI*2-Math.PI/2,smaj=i%3===0,sro=sdR-1,sri=sro-(smaj?4:2);
+      ctxClock.beginPath(); ctxClock.moveTo(scx+sro*Math.cos(a),scy+sro*Math.sin(a)); ctxClock.lineTo(scx+sri*Math.cos(a),scy+sri*Math.sin(a));
+      ctxClock.strokeStyle='rgba(255,255,255,0.35)'; ctxClock.lineWidth=0.7; ctxClock.stroke();
+    }
+    // Sub labels
+    ctxClock.font=`500 ${Math.round(sdR*.36)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(255,255,255,0.6)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+    const lr=sdR-5;
+    if(idx===0){ [[12,0],[9,270],[6,180],[3,90]].forEach(([n,d])=>{ const a=d*Math.PI/180-Math.PI/2; ctxClock.fillText(n,scx+lr*Math.cos(a),scy+lr*Math.sin(a)); }); }
+    else        { [[60,0],[10,60],[20,120],[30,180],[40,240],[50,300]].forEach(([n,d])=>{ const a=d*Math.PI/180-Math.PI/2; ctxClock.fillText(n,scx+lr*Math.cos(a),scy+lr*Math.sin(a)); }); }
+    // Sub hand
+    const hfrac = idx===0 ? (elapsedMin%30)/30 : subSecFrac;
+    const ha=hfrac*Math.PI*2-Math.PI/2;
+    ctxClock.beginPath(); ctxClock.moveTo(scx,scy); ctxClock.lineTo(scx+(sdR-3)*Math.cos(ha),scy+(sdR-3)*Math.sin(ha));
+    ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=1; ctxClock.lineCap='round'; ctxClock.stroke();
+    ctxClock.beginPath(); ctxClock.arc(scx,scy,2,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
   });
-  const nl=r*.54;
-  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy-nl);
-  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2; ctxClock.lineCap='round'; ctxClock.stroke();
-  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy+nl*.65);
-  ctxClock.strokeStyle='rgba(255,255,255,0.55)'; ctxClock.lineWidth=1.5; ctxClock.stroke();
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,4,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
-  ctxClock.font=`600 ${Math.round(r*.15)}px Share Tech Mono,monospace`;
-  ctxClock.fillStyle='rgba(255,255,255,0.55)'; ctxClock.textBaseline='bottom';
-  ctxClock.fillText(String(Math.round(s.bearing)).padStart(3,'0')+'°',cx,H-5);
+  // Main sweep hand
+  const ma=mainFrac*Math.PI*2-Math.PI/2;
+  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx+r*.8*Math.cos(ma),cy+r*.8*Math.sin(ma));
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=1.5; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx+r*.18*Math.cos(ma+Math.PI),cy+r*.18*Math.sin(ma+Math.PI));
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2.2; ctxClock.lineCap='round'; ctxClock.stroke();
+  // Center hub
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,4.5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,1.8,0,Math.PI*2); ctxClock.fillStyle='#222'; ctxClock.fill();
 }
 
-// ══════════════════════════════════════════════════════
-// TIME / HEADING
-// ══════════════════════════════════════════════════════
+// ══ COMPASS ══
+let cBearing=330,cTarget=330,cVel=0;
+function drawCompass(){
+  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-2;
+  ctxClock.clearRect(0,0,W,H);
+  if(Math.random()<0.008) cTarget+=(Math.random()-.5)*25;
+  cVel=cVel*0.92+(cTarget-cBearing)*0.04; cBearing+=cVel;
+  s.bearing=((cBearing%360)+360)%360;
+  updateHeading();
+  // Dark bezel ring
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle='#141416'; ctxClock.fill();
+  // Clip to inner face
+  ctxClock.save();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-2,0,Math.PI*2); ctxClock.clip();
+  // Rotate card with bearing
+  ctxClock.save();
+  ctxClock.translate(cx,cy); ctxClock.rotate(-(s.bearing*Math.PI/180));
+  // White compass card
+  ctxClock.beginPath(); ctxClock.arc(0,0,r-2,0,Math.PI*2); ctxClock.fillStyle='#ccccc4'; ctxClock.fill();
+  // Red north sector (wedge ±22° around N)
+  const iR=r*.41;
+  ctxClock.beginPath(); ctxClock.moveTo(iR*Math.cos(-Math.PI/2-Math.PI/8.2),iR*Math.sin(-Math.PI/2-Math.PI/8.2));
+  ctxClock.arc(0,0,r-2,-Math.PI/2-Math.PI/8.2,-Math.PI/2+Math.PI/8.2);
+  ctxClock.arc(0,0,iR,-Math.PI/2+Math.PI/8.2,-Math.PI/2-Math.PI/8.2,true);
+  ctxClock.closePath(); ctxClock.fillStyle='rgba(208,36,20,0.32)'; ctxClock.fill();
+  // Degree ticks (every 10°, 36 total)
+  for(let i=0;i<36;i++){
+    const a=(i/36)*Math.PI*2-Math.PI/2,ev30=i%3===0,ro=r-3,ri=ro-(ev30?8:4);
+    ctxClock.beginPath(); ctxClock.moveTo(ro*Math.cos(a),ro*Math.sin(a)); ctxClock.lineTo(ri*Math.cos(a),ri*Math.sin(a));
+    ctxClock.strokeStyle='rgba(0,0,0,0.58)'; ctxClock.lineWidth=ev30?1.1:0.6; ctxClock.stroke();
+  }
+  // Degree numbers every 30° (skip 0/360, N label fills that)
+  const dNumR=r-17; ctxClock.font=`400 ${Math.round(r*.11)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(0,0,0,0.58)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  for(let i=1;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctxClock.fillText(i*30,dNumR*Math.cos(a),dNumR*Math.sin(a)); }
+  // N/E/S/W
+  const cR=r-25; ctxClock.font=`700 ${Math.round(r*.19)}px Barlow Condensed,sans-serif`;
+  [['N',0,'rgba(10,10,10,0.92)'],['E',90,'rgba(20,20,20,0.72)'],['S',180,'rgba(20,20,20,0.72)'],['W',270,'rgba(20,20,20,0.72)']].forEach(([l,d,c])=>{
+    const a=d*Math.PI/180-Math.PI/2; ctxClock.fillStyle=c; ctxClock.fillText(l,cR*Math.cos(a),cR*Math.sin(a));
+  });
+  ctxClock.restore(); // un-rotate
+  // Fixed dark inner circle
+  const ig=ctxClock.createRadialGradient(cx-r*.1,cy-r*.1,0,cx,cy,r*.42);
+  ig.addColorStop(0,'#242428'); ig.addColorStop(1,'#101012');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r*.42,0,Math.PI*2); ctxClock.fillStyle=ig; ctxClock.fill();
+  ctxClock.restore(); // un-clip
+  // Fixed needle (points to current heading)
+  const nl=r*.52;
+  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy-nl); ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy+nl*.55); ctxClock.strokeStyle='rgba(210,210,210,0.72)'; ctxClock.lineWidth=1.5; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,4,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,1.5,0,Math.PI*2); ctxClock.fillStyle='#ddd'; ctxClock.fill();
+}
+
+// ══ TIME / HEADING ══
 function updateTime(){
   const now=new Date();
   dom.infoTime.textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
   dom.infoDate.textContent=days[now.getDay()]+' '+now.getDate();
 }
+function bearingLabel(brg){
+  const dirs=[[22.5,'N'],[45,'NNE'],[67.5,'NE'],[90,'ENE'],[112.5,'E'],[135,'ESE'],[157.5,'SE'],[180,'SSE'],[202.5,'S'],[225,'SSW'],[247.5,'SW'],[270,'WSW'],[292.5,'W'],[315,'WNW'],[337.5,'NW'],[360,'NNW']];
+  let label='N'; for(const [limit,l] of dirs){ if(brg<limit){label=l;break;} } return label;
+}
 function updateHeading(){
   const brg=((s.bearing%360)+360)%360;
-  const dirs=[[22.5,'N'],[45,'NNE'],[67.5,'NE'],[90,'ENE'],[112.5,'E'],[135,'ESE'],[157.5,'SE'],[180,'SSE'],[202.5,'S'],[225,'SSW'],[247.5,'SW'],[270,'WSW'],[292.5,'W'],[315,'WNW'],[337.5,'NW'],[360,'NNW']];
-  let label='N';
-  for(const [limit,l] of dirs){ if(brg<limit){label=l;break;} }
-  dom.infoHeading.textContent=Math.round(brg)+'° '+label;
+  dom.infoHeading.textContent=Math.round(brg)+'° '+bearingLabel(brg);
+}
+function updateMgInfo(){
+  const mode=s.multigraph;
+  document.getElementById('mgInfoClock').style.display=mode==='CLOCK'?'':'none';
+  document.getElementById('mgInfoStopwatch').style.display=mode==='STOPWATCH'?'':'none';
+  document.getElementById('mgInfoCompass').style.display=mode==='COMPASS'?'':'none';
+  if(mode==='STOPWATCH'){
+    const ms=swGetMs(),m=Math.floor(ms/60000),sc=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);
+    document.getElementById('mgSwTime').innerHTML=`${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}<span class="mg-sw-cs">.${String(cs).padStart(2,'0')}</span>`;
+    document.getElementById('mgSwKm').textContent=Math.round(s.speed/10*10)/10+' km';
+    document.getElementById('mgSwKw').textContent=Math.round(s.power)+' kW';
+  }
+  if(mode==='COMPASS'){
+    const brg=((s.bearing%360)+360)%360;
+    document.getElementById('mgBearing').innerHTML=Math.round(brg)+'<span class="mg-bearing-dir">'+bearingLabel(brg)+'</span>';
+  }
 }
 
-// ══════════════════════════════════════════════════════
-// STATUS PILLS
-// ══════════════════════════════════════════════════════
+// ══ STATUS PILLS ══
 function updatePills(){
   const set=(el,text,active)=>{ el.textContent=text; el.classList.toggle('active-pill',active); };
-  set(dom.pillTC,   'TC: '+TC_STATES[s.tcIdx],       s.tcIdx===0);
-  set(dom.pillESC,  'ESC: '+ESC_STATES[s.escIdx],     s.escIdx!==2);
-  set(dom.pillSUSP, 'SUSP: '+SUSP_STATES[s.suspIdx],  true);
+  set(dom.pillESC,  'ESC: '+ESC_STATES[s.escIdx],    s.escIdx!==2);
+  set(dom.pillSUSP, 'SUSP: '+SUSP_STATES[s.suspIdx], true);
   set(dom.pillRegen,'REGEN: '+REGEN_STATES[s.regenIdx],true);
-  set(dom.pillAdas, 'ADAS: '+(s.adasOn?'ON':'OFF'),   s.adasOn);
-  set(dom.pillVol,  'VOL: '+Math.round(s.volume)+'%', true);
+  set(dom.pillAdas, 'ADAS: '+(s.adasOn?'ON':'OFF'),  s.adasOn);
+  set(dom.pillVol,  'VOL: '+Math.round(s.volume)+'%',true);
+  const cpLabel=s.cpMode==='off'?'CP: OFF':'CP: '+s.cpMode.toUpperCase();
+  set(dom.pillCp, cpLabel, s.cpMode!=='off');
 }
 
-// ══════════════════════════════════════════════════════
-// LED HELPERS
-// ══════════════════════════════════════════════════════
-function setLed(led,btn,color){
-  led.className='dome-led on-'+color;
-  btn.classList.remove('active-green','active-amber','active-red','active-blue');
-  btn.classList.add('active-'+color);
-}
-function offLed(led,btn){
-  led.className='dome-led';
-  btn.classList.remove('active-green','active-amber','active-red','active-blue');
-}
-function applyDomeStates(){
-  if(s.tcIdx===0) setLed(dom.ledTC,dom.domeTC,'green'); else offLed(dom.ledTC,dom.domeTC);
-  if(s.escIdx===0) setLed(dom.ledESC,dom.domeESC,'green');
-  else if(s.escIdx===1) setLed(dom.ledESC,dom.domeESC,'amber');
-  else offLed(dom.ledESC,dom.domeESC);
-  if(s.suspIdx===0) setLed(dom.ledSUSP,dom.domeSUSP,'blue');
-  else if(s.suspIdx===1) setLed(dom.ledSUSP,dom.domeSUSP,'amber');
-  else setLed(dom.ledSUSP,dom.domeSUSP,'red');
+// ══ LED HELPERS ══
+function setLed(led,btn,color){ led.className='dome-led on-'+color; btn.classList.remove('active-green','active-amber','active-red','active-blue'); btn.classList.add('active-'+color); }
+function offLed(led,btn){ led.className='dome-led'; btn.classList.remove('active-green','active-amber','active-red','active-blue'); }
+function updateModeLeds(){
+  if(s.cpMode==='climate')  setLed(dom.ledClimate, dom.domeClimate,'blue');   else offLed(dom.ledClimate, dom.domeClimate);
+  if(s.cpMode==='settings') setLed(dom.ledSettings,dom.domeSettings,'amber'); else offLed(dom.ledSettings,dom.domeSettings);
+  if(s.cpMode==='media')    setLed(dom.ledMedia,   dom.domeMedia,'green');    else offLed(dom.ledMedia,   dom.domeMedia);
   setLed(dom.ledREGEN,dom.domeREGEN,['blue','green','amber','red'][s.regenIdx]);
   if(s.adasOn) setLed(dom.ledADAS,dom.domeADAS,'green'); else offLed(dom.ledADAS,dom.domeADAS);
 }
 
-// ══════════════════════════════════════════════════════
-// SIMULATION
-// ══════════════════════════════════════════════════════
+// ══ CP MODE SWITCHING ══
+function setCpMode(mode){
+  s.cpMode = (s.cpMode===mode) ? 'off' : mode;
+  document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));
+  const ids={off:'panelOff',climate:'panelClimate',settings:'panelSettings',media:'panelMedia'};
+  document.getElementById(ids[s.cpMode]).classList.add('active');
+  updateModeLeds();
+  updatePills();
+  if(s.cpMode==='settings') updateSettingsPanel();
+  if(s.cpMode==='climate')  updateClimatePanel();
+}
+
+// ══ SETTINGS PANEL SYNC ══
+function updateSettingsPanel(){
+  const m=MANETTINO[s.mIdx], e=E_MANET[s.eIdx];
+  const mv=document.getElementById('csManetVal'), ev=document.getElementById('csEManetVal');
+  mv.textContent=m; mv.style.color=MODE_COLOR[m];
+  ev.textContent=e; ev.style.color=EMODE_COLOR[e];
+  document.getElementById('csESCVal').textContent=ESC_STATES[s.escIdx];
+  document.getElementById('csSUSPVal').textContent=SUSP_STATES[s.suspIdx];
+  document.getElementById('csRegenVal').textContent=REGEN_STATES[s.regenIdx];
+  const av=document.getElementById('csADASVal'); av.textContent=s.adasOn?'ON':'OFF'; av.style.color=s.adasOn?'#4caf50':'rgba(220,220,216,0.5)';
+}
+
+// ══ CLIMATE PANEL SYNC ══
+function updateClimatePanel(){
+  document.getElementById('cpTempL').textContent=s.tempLeft+'°';
+  document.getElementById('cpTempR').textContent=s.tempRight+'°';
+  updateHeatBars('cpHeatL',s.seatHeatL);
+  updateHeatBars('cpHeatR',s.seatHeatR);
+  updateFanDots();
+  document.getElementById('cpAcBtn').classList.toggle('active',s.cpAcOn);
+  document.getElementById('cpAutoBtn').classList.toggle('active',s.cpAuto);
+  document.getElementById('cpSyncBtn').classList.toggle('synced',s.cpSync);
+}
+function updateHeatBars(containerId,level){
+  document.querySelectorAll('#'+containerId+' .cp-heat-bar').forEach(b=>{
+    b.classList.toggle('lit', parseInt(b.dataset.level)<=level);
+  });
+}
+function updateFanDots(){
+  document.querySelectorAll('#cpFanDots .cp-fan-dot').forEach(d=>{
+    d.classList.toggle('lit', parseInt(d.dataset.speed)<=s.fanIdx);
+  });
+}
+
+// ══ MEDIA ══
+function formatTime(sec){ return Math.floor(sec/60)+':'+String(Math.floor(sec%60)).padStart(2,'0'); }
+function updateMedia(){
+  if(s.mediaPlaying){
+    const elapsed=(Date.now()-s.mediaStartT)/1000;
+    const ct=s.mediaBaseTime+elapsed;
+    const track=TRACKS[s.trackIdx];
+    if(ct>=track.dur){ s.trackIdx=(s.trackIdx+1)%TRACKS.length; s.mediaBaseTime=0; s.mediaStartT=Date.now(); }
+  }
+  const elapsed=s.mediaPlaying?(Date.now()-s.mediaStartT)/1000:0;
+  const ct=s.mediaBaseTime+elapsed;
+  const track=TRACKS[s.trackIdx];
+  const pct=Math.min(100,(ct/track.dur)*100);
+  const fill=document.getElementById('cpProgressFill'); if(fill) fill.style.width=pct+'%';
+  const te=document.getElementById('cpTimeElapsed'); if(te) te.textContent=formatTime(Math.floor(ct));
+  const td=document.getElementById('cpTimeDur'); if(td) td.textContent=formatTime(track.dur);
+  document.getElementById('cpTrack').textContent=track.name;
+  document.getElementById('cpArtist').textContent=track.artist;
+  const pb=document.getElementById('cpPlay'); if(pb) pb.textContent=s.mediaPlaying?'⏸':'▶';
+}
+
+// ══ SIMULATION ══
 let simT=0;
 function updateSim(){
   simT+=0.022;
-  s.speed = Math.max(0, 180+35*Math.sin(simT*.65)+18*Math.sin(simT*2.1)+(Math.random()-.5)*5);
-  s.power = Math.max(0, 420+85*Math.sin(simT*.85)+45*Math.sin(simT*3.0)+(Math.random()-.5)*18);
-  speedBuf[wPtr%WAVE]=s.speed;
-  powerBuf[wPtr%WAVE]=s.power;
-  wPtr=(wPtr+1)%WAVE;
+  s.speed=Math.max(0,180+35*Math.sin(simT*.65)+18*Math.sin(simT*2.1)+(Math.random()-.5)*5);
+  s.power=Math.max(0,420+85*Math.sin(simT*.85)+45*Math.sin(simT*3.0)+(Math.random()-.5)*18);
+  speedBuf[wPtr%WAVE]=s.speed; powerBuf[wPtr%WAVE]=s.power; wPtr=(wPtr+1)%WAVE;
   dom.speedVal.innerHTML=Math.round(s.speed)+' <span class="unit">km/h</span>';
   dom.powerVal.innerHTML=Math.round(s.power)+' <span class="unit">kW</span>';
 }
 
-// ══════════════════════════════════════════════════════
-// MAIN LOOP
-// ══════════════════════════════════════════════════════
+// ══ MAIN LOOP ══
 function loop(){
   updateSim(); updateTime();
   resizeCanvas(dom.speedWave); resizeCanvas(dom.powerWave);
-  drawWave(ctxSpeed, speedBuf, s.waveSpeedColor, 0, 280);
-  drawWave(ctxPower, powerBuf, '#FFF200', 0, 600);
-  if(s.multigraph==='CLOCK') drawClock(); else drawCompass();
+  drawWave(ctxSpeed,speedBuf,s.waveSpeedColor,0,280);
+  drawWave(ctxPower,powerBuf,'#FFF200',0,600);
+  if(s.multigraph==='CLOCK') drawClock();
+  else if(s.multigraph==='STOPWATCH') drawStopwatch();
+  else drawCompass();
+  updateMgInfo();
+  updateMedia();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
 
-// ══════════════════════════════════════════════════════
-// NORMAL INTERACTIONS
-// ══════════════════════════════════════════════════════
+// ══ INTERACTIONS ══
 dom.modeBadge.addEventListener('click',()=>{ s.mIdx=(s.mIdx+1)%MANETTINO.length; applyBadgesClean(); });
 dom.powerBadge.addEventListener('click',()=>{ s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean(); });
 
-dom.multigraph.addEventListener('click',()=>{
-  s.multigraph=s.multigraph==='CLOCK'?'COMPASS':'CLOCK';
-  dom.multigraph.style.boxShadow='0 0 22px rgba(255,255,255,0.25)';
-  setTimeout(()=>dom.multigraph.style.boxShadow='',320);
-});
+function mgCycleMode(){
+  const modes=['CLOCK','STOPWATCH','COMPASS'];
+  s.multigraph=modes[(modes.indexOf(s.multigraph)+1)%3];
+  dom.multigraphLabel.textContent=s.multigraph;
+  dom.multigraphLabel.classList.toggle('sw-running',s.swRunning&&s.multigraph==='STOPWATCH');
+  dom.multigraph.setAttribute('data-tip','Multigraph — '+s.multigraph);
+  updateMgInfo();
+}
 
+// Multigraph dial and label: always cycle mode
+dom.multigraph.addEventListener('click', mgCycleMode);
+dom.multigraphLabel.addEventListener('click',(e)=>{ e.stopPropagation(); mgCycleMode(); });
+
+// Physical buttons: red = start/stop, yellow = reset
+document.getElementById('swStartStopBtn').addEventListener('click', swToggle);
+document.getElementById('swResetBtn').addEventListener('click', swReset);
+
+// Temp rings
 function attachTemp(el,valEl,side){
   el.addEventListener('click',(e)=>{
-    const r=el.getBoundingClientRect();
-    const delta=(e.clientY-r.top)<r.height/2?1:-1;
+    const r=el.getBoundingClientRect(), delta=(e.clientY-r.top)<r.height/2?1:-1;
     if(side==='left'){ s.tempLeft=Math.min(30,Math.max(16,s.tempLeft+delta)); valEl.textContent=s.tempLeft+'°'; }
     else             { s.tempRight=Math.min(30,Math.max(16,s.tempRight+delta)); valEl.textContent=s.tempRight+'°'; }
+    if(s.cpMode==='climate') updateClimatePanel();
   });
 }
-attachTemp(document.getElementById('tempLeft'),  dom.tempLeftEl,  'left');
-attachTemp(document.getElementById('tempRight'), dom.tempRightEl, 'right');
+attachTemp(document.getElementById('tempLeft'), dom.tempLeftEl,'left');
+attachTemp(document.getElementById('tempRight'),dom.tempRightEl,'right');
 
-let fanIdx=0;
-dom.fanIcon.addEventListener('click',()=>{
-  fanIdx=(fanIdx+1)%4;
-  dom.fanIcon.classList.toggle('active',fanIdx>0);
+// Climate panel temp adj buttons
+document.querySelectorAll('.cp-temp-adj').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const side=btn.dataset.side, dir=parseInt(btn.dataset.dir);
+    if(side==='left'){ s.tempLeft=Math.min(30,Math.max(16,s.tempLeft+dir)); dom.tempLeftEl.textContent=s.tempLeft+'°'; }
+    else             { s.tempRight=Math.min(30,Math.max(16,s.tempRight+dir)); dom.tempRightEl.textContent=s.tempRight+'°'; }
+    updateClimatePanel();
+  });
 });
 
-function attachSeat(el){
-  let idx=0;
+// Fan
+dom.fanIcon.addEventListener('click',()=>{ s.fanIdx=(s.fanIdx+1)%5; dom.fanIcon.classList.toggle('active',s.fanIdx>0); if(s.cpMode==='climate') updateFanDots(); });
+document.getElementById('cpFanDots').addEventListener('click',()=>{ s.fanIdx=(s.fanIdx+1)%5; dom.fanIcon.classList.toggle('active',s.fanIdx>0); updateFanDots(); });
+
+// Seat heat (strip)
+function attachSeat(el,side){
   el.addEventListener('click',()=>{
-    idx=(idx+1)%4;
+    if(side==='left')  s.seatHeatL=(s.seatHeatL+1)%4;
+    else               s.seatHeatR=(s.seatHeatR+1)%4;
+    const idx=side==='left'?s.seatHeatL:s.seatHeatR;
     el.className='seat-icon '+['','heating-low','heating-med','heating-high'][idx];
+    if(s.cpMode==='climate') updateClimatePanel();
   });
 }
-attachSeat(document.getElementById('seatLeft'));
-attachSeat(document.getElementById('seatRight'));
+attachSeat(dom.seatLeft,'left');
+attachSeat(dom.seatRight,'right');
 
-dom.domeTC.addEventListener('click',()=>{ s.tcIdx=(s.tcIdx+1)%2; applyDomeStates(); updatePills(); });
-dom.domeESC.addEventListener('click',()=>{ s.escIdx=(s.escIdx+1)%3; applyDomeStates(); updatePills(); });
-dom.domeSUSP.addEventListener('click',()=>{ s.suspIdx=(s.suspIdx+1)%3; applyDomeStates(); updatePills(); });
-dom.domeREGEN.addEventListener('click',()=>{ s.regenIdx=(s.regenIdx+1)%4; applyDomeStates(); updatePills(); });
-dom.domeADAS.addEventListener('click',()=>{ s.adasOn=!s.adasOn; applyDomeStates(); updatePills(); });
+// Seat heat (climate panel)
+document.getElementById('cpHeatL').addEventListener('click',()=>{ s.seatHeatL=(s.seatHeatL+1)%4; dom.seatLeft.className='seat-icon '+['','heating-low','heating-med','heating-high'][s.seatHeatL]; updateHeatBars('cpHeatL',s.seatHeatL); });
+document.getElementById('cpHeatR').addEventListener('click',()=>{ s.seatHeatR=(s.seatHeatR+1)%4; dom.seatRight.className='seat-icon '+['','heating-low','heating-med','heating-high'][s.seatHeatR]; updateHeatBars('cpHeatR',s.seatHeatR); });
 
-dom.btnMoon.addEventListener('click',()=>{
-  s.nightMode=!s.nightMode;
-  dom.btnMoon.classList.toggle('active-moon',s.nightMode);
-  dom.console.classList.toggle('night-mode',s.nightMode);
+// A/C, Auto, Sync
+document.getElementById('cpAcBtn').addEventListener('click',()=>{ s.cpAcOn=!s.cpAcOn; document.getElementById('cpAcBtn').classList.toggle('active',s.cpAcOn); });
+document.getElementById('cpAutoBtn').addEventListener('click',()=>{ s.cpAuto=!s.cpAuto; document.getElementById('cpAutoBtn').classList.toggle('active',s.cpAuto); });
+document.getElementById('cpSyncBtn').addEventListener('click',()=>{
+  s.cpSync=!s.cpSync;
+  if(s.cpSync){ s.tempRight=s.tempLeft; dom.tempRightEl.textContent=s.tempRight+'°'; }
+  document.getElementById('cpSyncBtn').classList.toggle('synced',s.cpSync);
+  updateClimatePanel();
 });
+
+// Settings panel
+document.getElementById('csManet').addEventListener('click',()=>{ s.mIdx=(s.mIdx+1)%MANETTINO.length; applyBadgesClean(); updateSettingsPanel(); });
+document.getElementById('csEManet').addEventListener('click',()=>{ s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean(); updateSettingsPanel(); });
+document.getElementById('csESC').addEventListener('click',()=>{ s.escIdx=(s.escIdx+1)%3; updateSettingsPanel(); updatePills(); });
+document.getElementById('csSUSP').addEventListener('click',()=>{ s.suspIdx=(s.suspIdx+1)%3; updateSettingsPanel(); updatePills(); });
+document.getElementById('csRegen').addEventListener('click',()=>{ s.regenIdx=(s.regenIdx+1)%4; updateSettingsPanel(); updatePills(); updateModeLeds(); });
+document.getElementById('csADAS').addEventListener('click',()=>{ s.adasOn=!s.adasOn; updateSettingsPanel(); updatePills(); updateModeLeds(); });
+
+// Dome mode buttons
+dom.domeClimate.addEventListener('click',()=>setCpMode('climate'));
+dom.domeSettings.addEventListener('click',()=>setCpMode('settings'));
+dom.domeMedia.addEventListener('click',()=>setCpMode('media'));
+dom.domeREGEN.addEventListener('click',()=>{ s.regenIdx=(s.regenIdx+1)%4; updateModeLeds(); updatePills(); if(s.cpMode==='settings') updateSettingsPanel(); });
+dom.domeADAS.addEventListener('click',()=>{ s.adasOn=!s.adasOn; updateModeLeds(); updatePills(); if(s.cpMode==='settings') updateSettingsPanel(); });
+
+// Icon buttons
+dom.btnMoon.addEventListener('click',()=>{ s.nightMode=!s.nightMode; dom.btnMoon.classList.toggle('active-moon',s.nightMode); dom.console.classList.toggle('night-mode',s.nightMode); });
 dom.btnHex.addEventListener('click',()=>{ s.hazard=!s.hazard; dom.btnHex.classList.toggle('active-hex',s.hazard); });
 dom.btnHUD.addEventListener('click',()=>{ s.hudOn=!s.hudOn; dom.btnHUD.classList.toggle('active-rect',s.hudOn); dom.screenArea.classList.toggle('hud-on',s.hudOn); });
 
+// Volume knob
 let knobY=null;
 dom.volKnob.addEventListener('mousedown',(e)=>{ knobY=e.clientY; e.preventDefault(); });
 window.addEventListener('mousemove',(e)=>{
@@ -1281,304 +1447,258 @@ window.addEventListener('mousemove',(e)=>{
   const d=knobY-e.clientY; knobY=e.clientY;
   s.volume=Math.min(100,Math.max(0,s.volume+d*.6));
   s.knobAngle+=d*3;
-  dom.volKnob.style.transform=`rotate(${s.knobAngle}deg)`;
+  applyPosition('volume-knob');
   updatePills();
 });
-window.addEventListener('mouseup',()=>{ knobY=null; });
+window.addEventListener('mouseup',()=>{ knobY=null; resizing=null; });
 
+// Dome press flash
 document.querySelectorAll('.dome-btn').forEach(b=>{
-  b.addEventListener('mousedown',()=>{
-    b.style.boxShadow='0 0 14px rgba(255,255,255,0.22), inset 0 1px 0 rgba(255,255,255,0.15)';
-    setTimeout(()=>b.style.boxShadow='',220);
+  b.addEventListener('mousedown',()=>{ b.style.boxShadow='0 0 14px rgba(255,255,255,0.22), inset 0 1px 0 rgba(255,255,255,0.15)'; setTimeout(()=>b.style.boxShadow='',220); });
+});
+
+// ══ RESIZE SYSTEM ══
+let resizing=null;
+
+function updateResizeOverlay(){
+  const ov=document.getElementById('resizeOverlay');
+  if(selectedIds.size!==1){ov.style.display='none';return;}
+  const id=[...selectedIds][0];
+  if(id==='volume-knob'){ov.style.display='none';return;}
+  const el=getPosEl(id); if(!el){ov.style.display='none';return;}
+  const r=el.getBoundingClientRect();
+  ov.style.display='block';
+  ov.style.left=r.left+'px'; ov.style.top=r.top+'px';
+  ov.style.width=r.width+'px'; ov.style.height=r.height+'px';
+}
+
+document.querySelectorAll('.resize-handle').forEach(h=>{
+  h.addEventListener('mousedown',(e)=>{
+    e.preventDefault(); e.stopPropagation();
+    if(selectedIds.size!==1) return;
+    const id=[...selectedIds][0];
+    const el=getPosEl(id); if(!el) return;
+    const r=el.getBoundingClientRect();
+    const cur=resizes[id]||{w:1,h:1};
+    resizing={id, handle:h.dataset.rh, startX:e.clientX, startY:e.clientY,
+      startW:cur.w, startH:cur.h,
+      startPX:positions[id].x, startPY:positions[id].y,
+      origW:r.width/cur.w, origH:r.height/cur.h};
   });
 });
 
-// ══════════════════════════════════════════════════════
-// TOOLTIP
-// ══════════════════════════════════════════════════════
-const tipEl=document.getElementById('tip');
-const tipTitle=document.getElementById('tip-title');
-const tipFn=document.getElementById('tip-fn');
-let tipTimer=null;
-
-document.addEventListener('mouseover',(e)=>{
-  const el=e.target.closest('[data-tip]');
-  if(!el){ hideTip(); return; }
-  clearTimeout(tipTimer);
-  tipTimer=setTimeout(()=>{
-    tipTitle.textContent=el.getAttribute('data-tip');
-    tipFn.textContent=el.getAttribute('data-tip-fn');
-    tipEl.style.display='block';
-    posTip(e);
-  },120);
+window.addEventListener('mousemove',(e)=>{
+  if(!resizing) return;
+  const {id,handle,startX,startY,startW,startH,startPX,startPY,origW,origH}=resizing;
+  const dx=e.clientX-startX, dy=e.clientY-startY;
+  const MIN=0.15;
+  if(handle.length===2){
+    // Corner drag — project onto the element's diagonal to get a single scale ratio
+    const W=origW*startW, H=origH*startH, d=Math.sqrt(W*W+H*H);
+    let proj=0;
+    if(handle==='se') proj=( dx*W+dy*H)/d;
+    else if(handle==='sw') proj=(-dx*W+dy*H)/d;
+    else if(handle==='ne') proj=( dx*W-dy*H)/d;
+    else if(handle==='nw') proj=(-dx*W-dy*H)/d;
+    const ratio=Math.max(MIN/Math.max(startW,startH),(d+proj)/d);
+    resizes[id].w=startW*ratio; resizes[id].h=startH*ratio;
+    // Anchor the opposite corner by compensating position
+    if(handle.includes('w')) positions[id].x=startPX+origW*startW-origW*resizes[id].w;
+    if(handle.includes('n')) positions[id].y=startPY+origH*startH-origH*resizes[id].h;
+  } else {
+    // Edge drag — free single-axis resize
+    if(handle==='e'){ resizes[id].w=Math.max(MIN,(origW*startW+dx)/origW); }
+    if(handle==='s'){ resizes[id].h=Math.max(MIN,(origH*startH+dy)/origH); }
+    if(handle==='w'){ const nw=Math.max(MIN,(origW*startW-dx)/origW); positions[id].x=startPX+(origW*startW-origW*nw); resizes[id].w=nw; }
+    if(handle==='n'){ const nh=Math.max(MIN,(origH*startH-dy)/origH); positions[id].y=startPY+(origH*startH-origH*nh); resizes[id].h=nh; }
+  }
+  applyPosition(id);
 });
+
+window.addEventListener('scroll', updateResizeOverlay);
+window.addEventListener('resize', updateResizeOverlay);
+
+// Media controls
+document.getElementById('cpPlay').addEventListener('click',()=>{
+  s.mediaPlaying=!s.mediaPlaying;
+  if(s.mediaPlaying){ s.mediaStartT=Date.now(); }
+  else { s.mediaBaseTime+=(Date.now()-s.mediaStartT)/1000; }
+  updateMedia();
+});
+document.getElementById('cpPrev').addEventListener('click',()=>{
+  s.trackIdx=(s.trackIdx-1+TRACKS.length)%TRACKS.length;
+  s.mediaBaseTime=0; s.mediaStartT=Date.now(); updateMedia();
+});
+document.getElementById('cpNext').addEventListener('click',()=>{
+  s.trackIdx=(s.trackIdx+1)%TRACKS.length;
+  s.mediaBaseTime=0; s.mediaStartT=Date.now(); updateMedia();
+});
+document.getElementById('cpSource').addEventListener('click',()=>{
+  s.sourceIdx=(s.sourceIdx+1)%SOURCES.length;
+  document.getElementById('cpSource').textContent=SOURCES[s.sourceIdx];
+});
+
+// ══ TOOLTIP ══
+const tipEl=document.getElementById('tip'),tipTitle=document.getElementById('tip-title'),tipFn=document.getElementById('tip-fn');
+let tipTimer=null;
+document.addEventListener('mouseover',(e)=>{ const el=e.target.closest('[data-tip]'); if(!el){hideTip();return;} clearTimeout(tipTimer); tipTimer=setTimeout(()=>{ tipTitle.textContent=el.getAttribute('data-tip'); tipFn.textContent=el.getAttribute('data-tip-fn'); tipEl.style.display='block'; posTip(e); },120); });
 document.addEventListener('mousemove',(e)=>{ if(tipEl.style.display==='block') posTip(e); });
 document.addEventListener('mouseout',(e)=>{ if(!e.target.closest('[data-tip]')){ clearTimeout(tipTimer); hideTip(); } });
 function hideTip(){ tipEl.style.display='none'; }
-function posTip(e){
-  tipEl.style.left=Math.min(e.clientX+14,window.innerWidth-245)+'px';
-  tipEl.style.top=Math.max(e.clientY-54,8)+'px';
-}
+function posTip(e){ tipEl.style.left=Math.min(e.clientX+14,window.innerWidth-245)+'px'; tipEl.style.top=Math.max(e.clientY-54,8)+'px'; }
 
-// ══════════════════════════════════════════════════════
-// OVERLAY TOGGLE
-// ══════════════════════════════════════════════════════
+// ══ OVERLAY TOGGLE ══
 function toggleOverlay(){
-  const img=document.getElementById('refOverlay');
-  const btn=document.getElementById('overlayToggle');
-  img.classList.toggle('hidden');
-  const on=!img.classList.contains('hidden');
-  btn.textContent='OVERLAY: '+(on?'ON':'OFF');
-  btn.classList.toggle('active',on);
+  const img=document.getElementById('refOverlay'),btn=document.getElementById('overlayToggle');
+  img.classList.toggle('hidden'); const on=!img.classList.contains('hidden');
+  btn.textContent='OVERLAY: '+(on?'ON':'OFF'); btn.classList.toggle('active',on);
 }
 
 // ══════════════════════════════════════════════════════
-// ██████████ POSITIONING SYSTEM ██████████
+// POSITIONING SYSTEM
 // ══════════════════════════════════════════════════════
+const positions={};
+Object.keys(POS_ELEMENTS).forEach(id=>{ positions[id]={x:0,y:0}; });
+const resizes={};
+Object.keys(POS_ELEMENTS).forEach(id=>{ resizes[id]={w:1,h:1}; });
+const selectedIds=new Set();
 
-// Current offsets for every positionable element
-const positions = {};
-Object.keys(POS_ELEMENTS).forEach(id => { positions[id]={x:0,y:0}; });
+function getPosEl(id){ return document.querySelector(`[data-pos-id="${id}"]`); }
 
-// Currently selected set
-const selectedIds = new Set();
-
-function getPosEl(id){
-  return document.querySelector(`[data-pos-id="${id}"]`);
-}
+const CONSOLE_NAT_W=650;
+let CONSOLE_NAT_H=0;
 
 function applyPosition(id){
-  const el=getPosEl(id);
-  if(!el) return;
-  const {x,y}=positions[id];
-  // volume knob has its own rotation transform — compose on the knob itself, not the button-row
-  el.style.transform=`translate(${x}px,${y}px)`;
-}
-
-function selectPosEl(id){
-  const el=getPosEl(id);
-  if(!el) return;
-  selectedIds.add(id);
-  el.classList.add('pos-selected');
-  updatePosHint();
-}
-
-function deselectPosEl(id){
-  const el=getPosEl(id);
-  if(el) el.classList.remove('pos-selected');
-  selectedIds.delete(id);
-  updatePosHint();
-}
-
-function clearSelection(){
-  selectedIds.forEach(id=>{
-    const el=getPosEl(id);
-    if(el) el.classList.remove('pos-selected');
-  });
-  selectedIds.clear();
-  updatePosHint();
-}
-
-function updatePosHint(){
-  const hint=document.getElementById('posHint');
-  const namesEl=document.getElementById('posHintNames');
-  if(selectedIds.size===0){ hint.style.display='none'; return; }
-  hint.style.display='flex';
-  namesEl.textContent=[...selectedIds].map(id=>POS_ELEMENTS[id]).join(', ');
-}
-
-// ── Click capture: Ctrl/Shift intercepted before element handlers ──
-document.addEventListener('click',(e)=>{
-  const isCtrl=e.ctrlKey||e.metaKey;
-  const isShift=e.shiftKey;
-  if(!isCtrl&&!isShift) return; // let normal clicks pass through
-
-  // Don't intercept modal or toolbar clicks
-  if(e.target.closest('.modal-overlay')||e.target.closest('.toolbar')) return;
-
-  const posEl=e.target.closest('[data-pos-id]');
-  if(!posEl) return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  const id=posEl.getAttribute('data-pos-id');
-
-  if(isCtrl&&!isShift){
-    // Toggle: Ctrl+click selects or deselects
-    if(selectedIds.has(id)) deselectPosEl(id);
-    else selectPosEl(id);
-  } else {
-    // Shift+click always adds to selection
-    selectPosEl(id);
+  const el=getPosEl(id); if(!el) return;
+  const {x,y}=positions[id]||{x:0,y:0};
+  const {w=1,h=1}=resizes[id]||{};
+  if(id==='console'){
+    // Resize by changing actual dimensions so inner content is clipped, not scaled
+    if(!CONSOLE_NAT_H) CONSOLE_NAT_H=el.getBoundingClientRect().height||600;
+    el.style.transform=x||y?`translate(${x}px,${y}px)`:'';
+    el.style.width=(CONSOLE_NAT_W*w)+'px';
+    el.style.height=h!==1?(CONSOLE_NAT_H*h)+'px':'';
+    updateResizeOverlay(); return;
   }
-},true); // capture phase — runs before bubble-phase element handlers
+  const hasScale=w!==1||h!==1;
+  if(id==='volume-knob'){
+    el.style.transform=`translate(${x}px,${y}px) rotate(${s.knobAngle}deg)`;
+  } else {
+    el.style.transformOrigin=hasScale?'0 0':'';
+    el.style.transform=`translate(${x}px,${y}px)`+(hasScale?` scaleX(${w}) scaleY(${h})`:'');
+  }
+  updateResizeOverlay();
+}
 
-// ── WASD movement ──
-document.addEventListener('keydown',(e)=>{
-  // Don't capture when typing in modal input
-  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-  // Don't capture when no elements selected
-  if(selectedIds.size===0) return;
-
-  const key=e.key.toLowerCase();
-  if(!['w','a','s','d'].includes(key)) return;
-
-  e.preventDefault();
-  const step=e.shiftKey?5:1;
-  const dx=key==='a'?-step:key==='d'?step:0;
-  const dy=key==='w'?-step:key==='s'?step:0;
-
-  selectedIds.forEach(id=>{
-    positions[id].x+=dx;
-    positions[id].y+=dy;
-    applyPosition(id);
-  });
+function selectPosEl(id){ const el=getPosEl(id); if(!el) return; selectedIds.add(id); el.classList.add('pos-selected'); updatePosHint(); updateResizeOverlay(); }
+function deselectPosEl(id){ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); selectedIds.delete(id); updatePosHint(); updateResizeOverlay(); }
+function clearSelection(){ selectedIds.forEach(id=>{ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); }); selectedIds.clear(); updatePosHint(); updateResizeOverlay(); }
+let consoleRadius=30;
+function updatePosHint(){
+  const hint=document.getElementById('posHint'),namesEl=document.getElementById('posHintNames');
+  if(selectedIds.size===0){hint.style.display='none';return;}
+  hint.style.display='flex'; namesEl.textContent=[...selectedIds].map(id=>POS_ELEMENTS[id]).join(', ');
+  const rc=document.getElementById('consoleRadiusControl');
+  rc.style.display=selectedIds.has('console')?'flex':'none';
+}
+document.getElementById('consoleRadiusSlider').addEventListener('input',e=>{
+  consoleRadius=parseInt(e.target.value);
+  document.getElementById('console').style.borderRadius=consoleRadius+'px';
+  document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px';
 });
 
-// ── Ctrl key body class for hover crosshair feedback ──
+// Capture phase: Ctrl/Shift click
+document.addEventListener('click',(e)=>{
+  const isCtrl=e.ctrlKey||e.metaKey, isShift=e.shiftKey;
+  if(!isCtrl&&!isShift) return;
+  if(e.target.closest('.modal-overlay')||e.target.closest('.toolbar')) return;
+  const posEl=e.target.closest('[data-pos-id]'); if(!posEl) return;
+  e.preventDefault(); e.stopPropagation();
+  const id=posEl.getAttribute('data-pos-id');
+  if(isCtrl&&!isShift){ if(selectedIds.has(id)) deselectPosEl(id); else selectPosEl(id); }
+  else selectPosEl(id);
+},true);
+
+// WASD movement
+document.addEventListener('keydown',(e)=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(selectedIds.size===0) return;
+  const key=e.key.toLowerCase(); if(!['w','a','s','d'].includes(key)) return;
+  e.preventDefault();
+  const step=e.shiftKey?5:1, dx=key==='a'?-step:key==='d'?step:0, dy=key==='w'?-step:key==='s'?step:0;
+  selectedIds.forEach(id=>{ positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
+});
+
 document.addEventListener('keydown',(e)=>{ if(e.ctrlKey||e.metaKey) document.body.classList.add('ctrl-held'); });
 document.addEventListener('keyup',  (e)=>{ if(!e.ctrlKey&&!e.metaKey) document.body.classList.remove('ctrl-held'); });
 window.addEventListener('blur',()=>document.body.classList.remove('ctrl-held'));
-
-// ── Escape clears selection ──
-document.addEventListener('keydown',(e)=>{
-  if(e.key==='Escape'){
-    if(selectedIds.size>0){ clearSelection(); e.preventDefault(); }
-    else closeSaveModal();
-  }
-});
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(selectedIds.size>0){clearSelection();e.preventDefault();}else closeSaveModal(); } });
 
 // ══════════════════════════════════════════════════════
-// ██████████ SAVE / LOAD SYSTEM ██████████
+// SAVE / LOAD SYSTEM
 // ══════════════════════════════════════════════════════
 const LS_KEY='ferrari-console-layouts';
 let currentLayoutName='Default';
-
-function getLayouts(){
-  try{ return JSON.parse(localStorage.getItem(LS_KEY))||{}; }
-  catch{ return {}; }
-}
+let activeLayoutName='Default';
+function getLayouts(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch{return{};} }
 function putLayouts(obj){ localStorage.setItem(LS_KEY,JSON.stringify(obj)); }
-
-function snapshot(){
-  const snap={};
-  Object.keys(POS_ELEMENTS).forEach(id=>{ snap[id]={...positions[id]}; });
-  return snap;
-}
-
+function snapshot(){ const snap={}; Object.keys(POS_ELEMENTS).forEach(id=>{ const {w=1,h=1}=resizes[id]||{}; snap[id]={...positions[id],w,h}; }); snap._consoleRadius=consoleRadius; return snap; }
 function applySnapshot(snap){
-  Object.keys(POS_ELEMENTS).forEach(id=>{
-    if(snap&&snap[id]){
-      positions[id]={...snap[id]};
-      applyPosition(id);
-    }
-  });
+  Object.keys(POS_ELEMENTS).forEach(id=>{ if(snap&&snap[id]){ const {x=0,y=0,w=1,h=1}=snap[id]; positions[id]={x,y}; resizes[id]={w,h}; applyPosition(id); } });
+  if(snap&&snap._consoleRadius!=null){ consoleRadius=snap._consoleRadius; document.getElementById('console').style.borderRadius=consoleRadius+'px'; document.getElementById('consoleRadiusSlider').value=consoleRadius; document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px'; }
 }
-
-function resetToDefault(){
-  Object.keys(POS_ELEMENTS).forEach(id=>{ positions[id]={x:0,y:0}; applyPosition(id); });
-  currentLayoutName='Default';
-  document.getElementById('currentLayoutLabel').textContent='Default';
-  closeSaveModal();
-}
-
-// Modal open / close
-function openSaveModal(){
-  const modal=document.getElementById('saveModal');
-  modal.classList.add('open');
-  const input=document.getElementById('saveNameInput');
-  input.value=currentLayoutName==='Default'?'':currentLayoutName;
-  document.getElementById('saveError').textContent='';
-  renderSavedList();
-  setTimeout(()=>input.focus(),50);
-}
-function closeSaveModal(){
-  document.getElementById('saveModal').classList.remove('open');
-}
-
+function resetToDefault(){ Object.keys(POS_ELEMENTS).forEach(id=>{positions[id]={x:0,y:0};resizes[id]={w:1,h:1};applyPosition(id);}); consoleRadius=30; document.getElementById('console').style.borderRadius='30px'; document.getElementById('consoleRadiusSlider').value=30; document.getElementById('consoleRadiusVal').textContent='30px'; currentLayoutName='Default'; document.getElementById('currentLayoutLabel').textContent='Default'; syncLayoutToolbar('Default'); closeSaveModal(); }
+function openSaveModal(){ const m=document.getElementById('saveModal'); m.classList.add('open'); const i=document.getElementById('saveNameInput'); i.value=currentLayoutName==='Default'?'':currentLayoutName; document.getElementById('saveError').textContent=''; renderSavedList(); setTimeout(()=>i.focus(),50); }
+function closeSaveModal(){ document.getElementById('saveModal').classList.remove('open'); }
 function renderSavedList(){
-  const layouts=getLayouts();
-  const userNames=Object.keys(layouts);
-  const allNames=['Default',...userNames];
-  const list=document.getElementById('savedList');
-
-  list.innerHTML=allNames.map(name=>{
-    const isDefault=name==='Default';
-    const isCurrent=name===currentLayoutName;
-    return `<div class="save-item${isCurrent?' current-layout':''}">
-      <span class="save-name">${name}${isCurrent?' ●':''}</span>
-      <div class="save-actions">
-        <button class="save-item-btn" onclick="loadLayout('${escHTML(name)}')">LOAD</button>
-        ${isDefault
-          ? '<span class="save-item-locked" title="Default layout is protected">🔒</span>'
-          : `<button class="save-item-btn delete-btn" onclick="deleteLayout('${escHTML(name)}')">✕</button>`
-        }
-      </div>
-    </div>`;
-  }).join('');
+  const layouts=getLayouts(), userNames=Object.keys(layouts), allNames=['Default',...userNames], list=document.getElementById('savedList');
+  list.innerHTML=allNames.map(name=>{ const isDefault=name==='Default',isCurrent=name===currentLayoutName; return `<div class="save-item${isCurrent?' current-layout':''}"><span class="save-name">${name}${isCurrent?' ●':''}</span><div class="save-actions"><button class="save-item-btn" onclick="loadLayout('${escHTML(name)}')">LOAD</button>${isDefault?'<span class="save-item-locked" title="Default layout is protected">🔒</span>':`<button class="save-item-btn delete-btn" onclick="deleteLayout('${escHTML(name)}')">✕</button>`}</div></div>`; }).join('');
 }
-
 function escHTML(s){ return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
 function confirmSave(){
-  const name=document.getElementById('saveNameInput').value.trim();
-  const errEl=document.getElementById('saveError');
-  errEl.textContent='';
+  const name=document.getElementById('saveNameInput').value.trim(), errEl=document.getElementById('saveError'); errEl.textContent='';
+  if(!name){errEl.textContent='Please enter a layout name.';return;}
+  if(name.toLowerCase()==='default'){errEl.textContent='Cannot save over the Default layout.';return;}
+  const layouts=getLayouts(); layouts[name]=snapshot(); putLayouts(layouts); currentLayoutName=name; document.getElementById('currentLayoutLabel').textContent=name; closeSaveModal();
+}
+function loadLayout(name){ if(name==='Default'){resetToDefault();return;} const layouts=getLayouts(); if(layouts[name]){applySnapshot(layouts[name]);currentLayoutName=name;document.getElementById('currentLayoutLabel').textContent=name;syncLayoutToolbar(name);} closeSaveModal(); }
+function deleteLayout(name){ if(name==='Default') return; if(!confirm(`Delete layout "${name}"?`)) return; const layouts=getLayouts(); delete layouts[name]; putLayouts(layouts); if(currentLayoutName===name){currentLayoutName='Default';document.getElementById('currentLayoutLabel').textContent='Default';} if(activeLayoutName===name) selectActiveLayout('Default'); renderSavedList(); }
+document.getElementById('saveModal').addEventListener('click',(e)=>{ if(e.target===document.getElementById('saveModal')) closeSaveModal(); });
 
-  if(!name){ errEl.textContent='Please enter a layout name.'; return; }
-  if(name.toLowerCase()==='default'){ errEl.textContent='Cannot save over the Default layout. Choose a different name.'; return; }
-
-  const layouts=getLayouts();
-  layouts[name]=snapshot();
-  putLayouts(layouts);
-  currentLayoutName=name;
-  document.getElementById('currentLayoutLabel').textContent=name;
-  closeSaveModal();
+// ══ LAYOUT DROPDOWN ══
+function toggleLayoutDropdown(){ renderLayoutDropdown(); document.getElementById('layoutDropdown').classList.toggle('open'); }
+function renderLayoutDropdown(){
+  const layouts=getLayouts(), names=['Default',...Object.keys(layouts)];
+  document.getElementById('layoutDropdown').innerHTML=names.map(name=>
+    `<div class="layout-dropdown-item${name===activeLayoutName?' active-layout-item':''}" onclick="selectActiveLayout('${escHTML(name)}')">${escHTML(name)}</div>`
+  ).join('');
+}
+function selectActiveLayout(name){
+  activeLayoutName=name;
+  document.getElementById('layoutSelectorLabel').textContent=name.toUpperCase();
+  document.getElementById('layoutSelectorBtn').classList.toggle('active',name!=='Default');
+  document.getElementById('layoutDropdown').classList.remove('open');
+  loadLayout(name);
+}
+function syncLayoutToolbar(name){
+  activeLayoutName=name;
+  document.getElementById('layoutSelectorLabel').textContent=name.toUpperCase();
+  document.getElementById('layoutSelectorBtn').classList.toggle('active',name!=='Default');
 }
 
-function loadLayout(name){
-  if(name==='Default'){
-    resetToDefault();
-    return;
-  }
-  const layouts=getLayouts();
-  if(layouts[name]){
-    applySnapshot(layouts[name]);
-    currentLayoutName=name;
-    document.getElementById('currentLayoutLabel').textContent=name;
-  }
-  closeSaveModal();
-}
-
-function deleteLayout(name){
-  if(name==='Default') return;
-  if(!confirm(`Delete layout "${name}"?`)) return;
-  const layouts=getLayouts();
-  delete layouts[name];
-  putLayouts(layouts);
-  if(currentLayoutName===name){
-    currentLayoutName='Default';
-    document.getElementById('currentLayoutLabel').textContent='Default';
-  }
-  renderSavedList();
-}
-
-// Close modal on overlay click
-document.getElementById('saveModal').addEventListener('click',(e)=>{
-  if(e.target===document.getElementById('saveModal')) closeSaveModal();
+// Close layout dropdown on outside click
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('#layoutSelectorWrap')) document.getElementById('layoutDropdown').classList.remove('open');
 });
 
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
+// ══ INIT ══
 applyBadgesClean();
-applyDomeStates();
+updateModeLeds();
 updatePills();
 updateTime();
 updateHeading();
-dom.tempLeftEl.textContent  = s.tempLeft+'°';
-dom.tempRightEl.textContent = s.tempRight+'°';
+dom.tempLeftEl.textContent=s.tempLeft+'°';
+dom.tempRightEl.textContent=s.tempRight+'°';
 document.getElementById('overlayToggle').classList.add('active');
 </script>
 </body>
