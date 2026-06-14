@@ -30,35 +30,55 @@ body {
 .toolbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08); }
 #currentLayoutLabel { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.35); letter-spacing: 0.5px; }
 
-/* ── CONSOLE SHELL ── */
+/* ── CONTROL PANEL DISPLAY & SHELL ── */
 .console {
-  width: 650px; background: #111114; border-radius: 30px;
-  display: block;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.055), 0 24px 70px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.07);
-  position: relative; overflow: hidden; user-select: none;
+  /* transparent 5px halo — Control Panel Display */
+  width: 660px; padding: 5px;
+  display: block; background: transparent;
+  position: relative; overflow: visible; user-select: none;
 }
-.console-inner { display: flex; flex-direction: column; width: 650px; }
+#cpShell {
+  /* Control Panel Shell — positionable dark visual container */
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  background: #111114; border-radius: 30px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.055), 0 24px 70px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.07);
+}
 .ref-overlay {
   position: absolute; top: -12px; left: -25px; width: 700px; height: 700px;
   pointer-events: none; z-index: 500; opacity: 0.5; transition: opacity 0.3s;
 }
 .ref-overlay.hidden { opacity: 0; }
-.console.night-mode::after {
+#cpShell.night-mode::after {
   content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.45);
-  pointer-events: none; z-index: 50; border-radius: 30px;
+  pointer-events: none; z-index: 50; border-radius: var(--sr, 30px);
+}
+/* ── CORNER RADIUS HANDLE ── */
+.cp-radius-handle {
+  position: absolute; top: 10px; right: 10px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
+  cursor: ew-resize; z-index: 60;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+.cp-radius-handle:hover {
+  background: rgba(255,255,255,0.45); transform: scale(1.4);
+  box-shadow: 0 0 6px rgba(255,255,255,0.3);
 }
 
 /* ── STATUS DOT ── */
 .status-dot {
-  position: absolute; top: 16px; right: 20px; width: 8px; height: 8px;
-  border-radius: 50%; background: #FF2800; box-shadow: 0 0 6px #FF2800; z-index: 2;
+  /* red START/STOP — on the top edge of the Control Panel Shell */
+  position: absolute; top: 3px; right: 13px; width: 8px; height: 8px;
+  border-radius: 50%; background: #FF2800; box-shadow: 0 0 6px #FF2800; z-index: 60;
   cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
 }
 .status-dot:hover { box-shadow: 0 0 10px #FF2800, 0 0 18px rgba(255,40,0,0.5); }
 .status-dot:active { transform: scale(0.82); }
 .sw-reset-btn {
-  position: absolute; right: -5px; top: 52px; width: 10px; height: 10px;
-  border-radius: 50%; background: #FFF200; box-shadow: 0 0 5px rgba(255,242,0,0.6); z-index: 2;
+  /* yellow RESET — on the right edge of the Control Panel Shell */
+  position: absolute; right: 3px; top: 53px; width: 10px; height: 10px;
+  border-radius: 50%; background: #FFF200; box-shadow: 0 0 5px rgba(255,242,0,0.6); z-index: 60;
   cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
 }
 .sw-reset-btn:hover { box-shadow: 0 0 10px #FFF200, 0 0 18px rgba(255,242,0,0.5); }
@@ -83,24 +103,31 @@ body {
 /* ── SCREEN AREA ── */
 .screen-area {
   background: #0b0b0e; border-radius: 12px; padding: 14px 14px 12px;
-  display: flex; flex-direction: row; align-items: stretch; gap: 0;
+  display: flex; flex-direction: column; gap: 0;
   border: 1px solid rgba(255,255,255,0.055); position: relative;
 }
 .screen-area.hud-on { border-color: rgba(0,255,100,0.3); box-shadow: inset 0 0 20px rgba(0,255,80,0.06); }
 
-/* ── SCREEN MAIN (mode panels host) ── */
+/* ── SCREEN TOP: always-visible row ── */
+.screen-top { display: flex; flex-direction: row; align-items: stretch; gap: 0; }
+
+/* ── SCREEN MAIN: permanent metrics (left) ── */
 .screen-main {
-  flex: 1; min-width: 0; min-height: 155px;
+  flex: 1; min-width: 0;
   display: flex; flex-direction: column;
   padding-right: 12px; border-right: 1px solid rgba(255,255,255,0.065);
 }
+.metrics-pos { display: flex; flex-direction: column; gap: 6px; align-self: flex-start; }
+
+/* ── MULTIGRAPH SECTION: permanent right panel ── */
+.multigraph-section { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
+
+/* ── SCREEN BOTTOM: switchable mode panels ── */
+.screen-bottom { display: none; border-top: 1px solid rgba(255,255,255,0.055); margin-top: 8px; padding-top: 10px; }
+.screen-bottom.has-active { display: flex; flex-direction: row; }
+
 .mode-panel { display: none; flex: 1; }
 .mode-panel.active { display: flex; }
-
-/* ── PANEL: OFF (metrics) ── */
-#panelOff { flex-direction: row; align-items: stretch; gap: 0; }
-.metrics-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.metrics-pos { display: flex; flex-direction: column; gap: 6px; align-self: flex-start; }
 .metric-block { display: flex; flex-direction: column; gap: 3px; }
 .mode-badge {
   display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 3px;
@@ -120,8 +147,7 @@ body {
 .screen-divider { height: 1px; background: rgba(255,255,255,0.055); margin: 3px 0; }
 .info-col {
   display: flex; flex-direction: column; justify-content: center; gap: 4px;
-  padding: 0 10px; border-left: 1px solid rgba(255,255,255,0.065); min-width: 82px;
-  align-self: flex-start; width: fit-content;
+  padding: 0 10px; min-width: 82px; width: fit-content;
 }
 .info-time { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 600; color: #e8e8e0; letter-spacing: 0.5px; line-height: 1; }
 .info-date { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500; color: rgba(232,232,224,0.6); letter-spacing: 1px; }
@@ -348,6 +374,15 @@ body {
 /* ══ POSITIONING SYSTEM ══ */
 body.ctrl-held [data-pos-id] { cursor: crosshair !important; }
 body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !important; outline-offset: 4px; }
+.console-select-tab {
+  display: none; position: absolute; top: 0; left: 0; z-index: 100;
+  padding: 1px 5px; cursor: crosshair; white-space: nowrap; pointer-events: none;
+  font: 600 8px/14px 'Inter Tight','Inter',sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(255,242,0,0.75); background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,242,0,0.28); border-radius: 2px;
+}
+body.ctrl-held .console-select-tab { display: block; pointer-events: auto; }
+body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; border-color: rgba(255,242,0,0.65); }
 [data-pos-id].pos-selected { outline: 2px solid #FFF200 !important; outline-offset: 3px; z-index: 20 !important; position: relative !important; }
 [data-pos-id].pos-selected::before {
   content: attr(data-pos-label);
@@ -458,21 +493,30 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
   <span class="toolbar-label">Ferrari Luce · Control Panel</span>
 </div>
 
-<!-- ── CONSOLE ── -->
+<!-- ── CONTROL PANEL DISPLAY ── -->
 <div class="console" id="console"
-  data-pos-id="console" data-pos-label="Console Shell"
-  data-tip="Console Shell" data-tip-fn="Ctrl+click to select. Drag resize handles to change bounding size (content is clipped, not scaled). Corner radius is configurable when selected.">
+  data-pos-id="console" data-pos-label="Control Panel Display"
+  data-tip="Control Panel Display" data-tip-fn="Ctrl+click to select. Drag resize handles to change bounding size (content is clipped, not scaled). Transparent 5px halo contains the Control Panel Shell.">
+
+  <div class="console-select-tab">Control Panel Display</div>
+
+  <!-- ── CONTROL PANEL SHELL ── -->
+  <div id="cpShell"
+    data-pos-id="cp-shell" data-pos-label="Control Panel Shell"
+    data-tip="Control Panel Shell" data-tip-fn="Ctrl+click to select. Drag resize handles to resize the shell independently. Drag the corner handle (top-right) to adjust corner radius.">
+
+    <!-- Corner radius handle -->
+    <div class="cp-radius-handle" id="cpRadiusHandle"
+      data-tip="Corner Radius" data-tip-fn="Drag left/right to adjust shell corner radius."></div>
+
+    <div class="status-dot" id="swStartStopBtn"
+      data-pos-id="status-dot" data-pos-label="Stopwatch Start/Stop"
+      data-tip="Start / Stop" data-tip-fn="Red button: start/stop the stopwatch. Always active regardless of Multigraph mode."></div>
+
+    <div class="sw-reset-btn" id="swResetBtn"
+      data-tip="Reset Stopwatch" data-tip-fn="Yellow button resets the stopwatch to 00:00.00."></div>
 
   <img src="ferrari_console.jpeg" class="ref-overlay" id="refOverlay" alt="">
-
-  <div class="status-dot" id="swStartStopBtn"
-    data-pos-id="status-dot" data-pos-label="Stopwatch Start/Stop"
-    data-tip="Start / Stop" data-tip-fn="Red button starts and stops the stopwatch. Switch to STOPWATCH mode on the Multigraph to activate."></div>
-
-  <div class="sw-reset-btn" id="swResetBtn"
-    data-tip="Reset Stopwatch" data-tip-fn="Yellow button resets the stopwatch to 00:00.00."></div>
-
-  <div class="console-inner">
   <!-- Screen row -->
   <div class="screen-row">
 
@@ -493,52 +537,53 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
     <!-- Screen area -->
     <div class="screen-area" id="screenArea">
 
-      <!-- ── Screen main: mode panels ── -->
-      <div class="screen-main">
+      <!-- ── TOP: always-visible metrics + multigraph ── -->
+      <div class="screen-top">
 
-        <!-- Panel: Off (driving metrics — default view) -->
-        <div class="mode-panel active" id="panelOff">
-          <div class="metrics-col">
-            <div class="metrics-pos"
-              data-pos-id="metrics-col" data-pos-label="Metrics Column">
-            <div class="metric-block">
-              <div class="mode-badge" id="modeBadge"
-                data-pos-id="mode-badge" data-pos-label="Manettino Badge"
-                data-tip="Manettino — Chassis Mode"
-                data-tip-fn="Click to cycle: ICE → WET → DRY → SPORT → PERFORMANCE. Controls traction, ESC sensitivity, damper stiffness, and steering weight.">
-                MODE: DRY
-              </div>
-              <div class="metric-value" id="speedVal"
-                data-pos-id="speed-value" data-pos-label="Speed Readout">
-                210 <span class="unit">km/h</span>
-              </div>
-              <div class="waveform-wrap"
-                data-pos-id="speed-wave" data-pos-label="Speed Waveform">
-                <canvas id="speedWave" width="200" height="44"></canvas>
-                <div class="waveform-label">km/h<br>0–280</div>
-              </div>
+        <!-- Metrics — permanent, never changes with mode -->
+        <div class="screen-main">
+          <div class="metrics-pos"
+            data-pos-id="metrics-col" data-pos-label="Metrics Column">
+          <div class="metric-block">
+            <div class="mode-badge" id="modeBadge"
+              data-pos-id="mode-badge" data-pos-label="Manettino Badge"
+              data-tip="Manettino — Chassis Mode"
+              data-tip-fn="Click to cycle: ICE → WET → DRY → SPORT → PERFORMANCE. Controls traction, ESC sensitivity, damper stiffness, and steering weight.">
+              MODE: DRY
             </div>
-            <div class="screen-divider"></div>
-            <div class="metric-block">
-              <div class="mode-badge" id="powerBadge"
-                data-pos-id="power-badge" data-pos-label="e-Manettino Badge"
-                data-tip="e-Manettino — Power Mode"
-                data-tip-fn="Click to cycle: RANGE → TOUR → PERFO. Controls powertrain energy delivery, regenerative braking intensity, and throttle mapping.">
-                POWER: TOUR
-              </div>
-              <div class="metric-value" id="powerVal"
-                data-pos-id="power-value" data-pos-label="Power Readout">
-                464 <span class="unit">kW</span>
-              </div>
-              <div class="waveform-wrap"
-                data-pos-id="power-wave" data-pos-label="Power Waveform">
-                <canvas id="powerWave" width="200" height="44"></canvas>
-                <div class="waveform-label">kW<br>0–600</div>
-              </div>
+            <div class="metric-value" id="speedVal"
+              data-pos-id="speed-value" data-pos-label="Speed Readout">
+              210 <span class="unit">km/h</span>
             </div>
-            </div><!-- /metrics-pos -->
-          </div><!-- /metrics-col -->
+            <div class="waveform-wrap"
+              data-pos-id="speed-wave" data-pos-label="Speed Waveform">
+              <canvas id="speedWave" width="200" height="44"></canvas>
+              <div class="waveform-label">km/h<br>0–280</div>
+            </div>
+          </div>
+          <div class="screen-divider"></div>
+          <div class="metric-block">
+            <div class="mode-badge" id="powerBadge"
+              data-pos-id="power-badge" data-pos-label="e-Manettino Badge"
+              data-tip="e-Manettino — Power Mode"
+              data-tip-fn="Click to cycle: RANGE → TOUR → PERFO. Controls powertrain energy delivery, regenerative braking intensity, and throttle mapping.">
+              POWER: TOUR
+            </div>
+            <div class="metric-value" id="powerVal"
+              data-pos-id="power-value" data-pos-label="Power Readout">
+              464 <span class="unit">kW</span>
+            </div>
+            <div class="waveform-wrap"
+              data-pos-id="power-wave" data-pos-label="Power Waveform">
+              <canvas id="powerWave" width="200" height="44"></canvas>
+              <div class="waveform-label">kW<br>0–600</div>
+            </div>
+          </div>
+          </div><!-- /metrics-pos -->
+        </div><!-- /screen-main -->
 
+        <!-- Multigraph section — changes only with CLOCK/STOPWATCH/COMPASS -->
+        <div class="multigraph-section">
           <div class="info-col"
             data-pos-id="info-col" data-pos-label="Info Column">
             <div class="info-time" id="infoTime"
@@ -564,7 +609,22 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
               <div class="info-aqi" id="mgTempC">27° C</div>
             </div>
           </div>
-        </div>
+
+          <div class="multigraph-wrap"
+            data-pos-id="multigraph" data-pos-label="Multigraph">
+            <div class="multigraph-bezel" id="multigraphBezel"
+              data-tip="Multigraph Instrument"
+              data-tip-fn="Tap dial in STOPWATCH mode to start/stop; double-tap to reset. Tap mode label below to cycle CLOCK → STOPWATCH → COMPASS.">
+              <canvas id="clockFace" width="115" height="115"></canvas>
+            </div>
+            <div class="multigraph-mode-label" id="multigraphLabel">CLOCK</div>
+          </div>
+        </div><!-- /multigraph-section -->
+
+      </div><!-- /screen-top -->
+
+      <!-- ── BOTTOM: switchable mode panels (hidden in Off state) ── -->
+      <div class="screen-bottom" id="screenBottom">
 
         <!-- Panel: Climate -->
         <div class="mode-panel" id="panelClimate">
@@ -583,7 +643,6 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
                 </div>
                 <div class="cp-seat-sub">SEAT</div>
               </div>
-
               <div class="cp-zone-center">
                 <div class="cp-fan-label">FAN</div>
                 <div class="cp-fan-dots" id="cpFanDots">
@@ -598,7 +657,6 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
                   <button class="cp-ac-btn" id="cpAutoBtn">AUTO</button>
                 </div>
               </div>
-
               <div class="cp-zone">
                 <div class="cp-zone-label">PASSENGER</div>
                 <button class="cp-temp-adj" data-side="right" data-dir="1">▲</button>
@@ -675,18 +733,7 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
           </div>
         </div>
 
-      </div><!-- /screen-main -->
-
-      <!-- ── Multigraph (always visible) ── -->
-      <div class="multigraph-wrap"
-        data-pos-id="multigraph" data-pos-label="Multigraph">
-        <div class="multigraph-bezel" id="multigraphBezel"
-          data-tip="Multigraph Instrument"
-          data-tip-fn="Tap dial in STOPWATCH mode to start/stop; double-tap to reset. Tap mode label below to cycle CLOCK → STOPWATCH → COMPASS.">
-          <canvas id="clockFace" width="115" height="115"></canvas>
-        </div>
-        <div class="multigraph-mode-label" id="multigraphLabel">CLOCK</div>
-      </div>
+      </div><!-- /screen-bottom -->
 
     </div><!-- /screen-area -->
   </div><!-- /screen-row -->
@@ -842,7 +889,7 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
       data-tip="Aluminum Handle" data-tip-fn="Ergonomic grab handle machined from 6061-T6 aluminium. Assists entry/exit and serves as structural console mount."></div>
   </div>
 
-  </div><!-- /console-inner -->
+  </div><!-- /cpShell -->
 </div><!-- /console -->
 
 <div id="resizeOverlay">
@@ -867,7 +914,7 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
     &nbsp;·&nbsp; <span class="hint-key">⇧</span>+Click to add
   </span>
   <div id="consoleRadiusControl">
-    <label>CORNER RADIUS</label>
+    <label>SHELL RADIUS</label>
     <input type="range" id="consoleRadiusSlider" min="0" max="80" value="30">
     <span id="consoleRadiusVal">30px</span>
   </div>
@@ -909,7 +956,8 @@ const TRACKS = [
 
 // ══ POSITIONABLE ELEMENTS ══
 const POS_ELEMENTS = {
-  'console':       'Console Shell',
+  'console':       'Control Panel Display',
+  'cp-shell':      'Control Panel Shell',
   'status-dot':    'Status Dot',
   'horse-svg':     'Prancing Horse',
   'enzo-badge':    'ENZO Badge',
@@ -992,6 +1040,7 @@ const dom = {
   tempRightEl: document.getElementById('tempRightVal'),
   screenArea:  document.getElementById('screenArea'),
   console:     document.getElementById('console'),
+  cpShell:     document.getElementById('cpShell'),
   domeClimate: document.getElementById('domeClimate'),
   domeSettings:document.getElementById('domeSettings'),
   domeMedia:   document.getElementById('domeMedia'),
@@ -1256,8 +1305,14 @@ function updateModeLeds(){
 function setCpMode(mode){
   s.cpMode = (s.cpMode===mode) ? 'off' : mode;
   document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));
-  const ids={off:'panelOff',climate:'panelClimate',settings:'panelSettings',media:'panelMedia'};
-  document.getElementById(ids[s.cpMode]).classList.add('active');
+  const screenBottom=document.getElementById('screenBottom');
+  if(s.cpMode !== 'off'){
+    const ids={climate:'panelClimate',settings:'panelSettings',media:'panelMedia'};
+    document.getElementById(ids[s.cpMode]).classList.add('active');
+    screenBottom.classList.add('has-active');
+  } else {
+    screenBottom.classList.remove('has-active');
+  }
   updateModeLeds();
   updatePills();
   if(s.cpMode==='settings') updateSettingsPanel();
@@ -1435,7 +1490,7 @@ dom.domeREGEN.addEventListener('click',()=>{ s.regenIdx=(s.regenIdx+1)%4; update
 dom.domeADAS.addEventListener('click',()=>{ s.adasOn=!s.adasOn; updateModeLeds(); updatePills(); if(s.cpMode==='settings') updateSettingsPanel(); });
 
 // Icon buttons
-dom.btnMoon.addEventListener('click',()=>{ s.nightMode=!s.nightMode; dom.btnMoon.classList.toggle('active-moon',s.nightMode); dom.console.classList.toggle('night-mode',s.nightMode); });
+dom.btnMoon.addEventListener('click',()=>{ s.nightMode=!s.nightMode; dom.btnMoon.classList.toggle('active-moon',s.nightMode); dom.cpShell.classList.toggle('night-mode',s.nightMode); });
 dom.btnHex.addEventListener('click',()=>{ s.hazard=!s.hazard; dom.btnHex.classList.toggle('active-hex',s.hazard); });
 dom.btnHUD.addEventListener('click',()=>{ s.hudOn=!s.hudOn; dom.btnHUD.classList.toggle('active-rect',s.hudOn); dom.screenArea.classList.toggle('hud-on',s.hudOn); });
 
@@ -1450,7 +1505,7 @@ window.addEventListener('mousemove',(e)=>{
   applyPosition('volume-knob');
   updatePills();
 });
-window.addEventListener('mouseup',()=>{ knobY=null; resizing=null; });
+window.addEventListener('mouseup',()=>{ knobY=null; resizing=null; radiusDragX=null; });
 
 // Dome press flash
 document.querySelectorAll('.dome-btn').forEach(b=>{
@@ -1565,27 +1620,44 @@ const selectedIds=new Set();
 
 function getPosEl(id){ return document.querySelector(`[data-pos-id="${id}"]`); }
 
-const CONSOLE_NAT_W=650;
+const CONSOLE_NAT_W=660;
 let CONSOLE_NAT_H=0;
+let CP_SHELL_NAT_W=0, CP_SHELL_NAT_H=0;
+const natDims={};
 
 function applyPosition(id){
   const el=getPosEl(id); if(!el) return;
   const {x,y}=positions[id]||{x:0,y:0};
   const {w=1,h=1}=resizes[id]||{};
   if(id==='console'){
-    // Resize by changing actual dimensions so inner content is clipped, not scaled
+    // Display is a fixed outer container — never translates, only resizes
     if(!CONSOLE_NAT_H) CONSOLE_NAT_H=el.getBoundingClientRect().height||600;
-    el.style.transform=x||y?`translate(${x}px,${y}px)`:'';
+    el.style.transform='';
     el.style.width=(CONSOLE_NAT_W*w)+'px';
     el.style.height=h!==1?(CONSOLE_NAT_H*h)+'px':'';
+    updateResizeOverlay(); return;
+  }
+  if(id==='cp-shell'){
+    if(!CP_SHELL_NAT_W){ const r=el.getBoundingClientRect(); CP_SHELL_NAT_W=r.width||650; CP_SHELL_NAT_H=r.height||580; }
+    el.style.transform=x||y?`translate(${x}px,${y}px)`:'';
+    el.style.width=(CP_SHELL_NAT_W*w)+'px';
+    el.style.height=(CP_SHELL_NAT_H*h)+'px';
     updateResizeOverlay(); return;
   }
   const hasScale=w!==1||h!==1;
   if(id==='volume-knob'){
     el.style.transform=`translate(${x}px,${y}px) rotate(${s.knobAngle}deg)`;
   } else {
-    el.style.transformOrigin=hasScale?'0 0':'';
-    el.style.transform=`translate(${x}px,${y}px)`+(hasScale?` scaleX(${w}) scaleY(${h})`:'');
+    el.style.transformOrigin='';
+    el.style.transform=x||y?`translate(${x}px,${y}px)`:'';
+    if(hasScale){
+      if(!natDims[id]){ const r=el.getBoundingClientRect(); natDims[id]={w:r.width||1,h:r.height||1}; }
+      el.style.width=(natDims[id].w*w)+'px';
+      el.style.height=(natDims[id].h*h)+'px';
+    } else {
+      el.style.width='';
+      el.style.height='';
+    }
   }
   updateResizeOverlay();
 }
@@ -1594,17 +1666,32 @@ function selectPosEl(id){ const el=getPosEl(id); if(!el) return; selectedIds.add
 function deselectPosEl(id){ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); selectedIds.delete(id); updatePosHint(); updateResizeOverlay(); }
 function clearSelection(){ selectedIds.forEach(id=>{ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); }); selectedIds.clear(); updatePosHint(); updateResizeOverlay(); }
 let consoleRadius=30;
+function applyShellRadius(){
+  dom.cpShell.style.borderRadius=consoleRadius+'px';
+  dom.cpShell.style.setProperty('--sr', consoleRadius+'px');
+  document.getElementById('consoleRadiusSlider').value=consoleRadius;
+  document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px';
+}
 function updatePosHint(){
   const hint=document.getElementById('posHint'),namesEl=document.getElementById('posHintNames');
   if(selectedIds.size===0){hint.style.display='none';return;}
   hint.style.display='flex'; namesEl.textContent=[...selectedIds].map(id=>POS_ELEMENTS[id]).join(', ');
   const rc=document.getElementById('consoleRadiusControl');
-  rc.style.display=selectedIds.has('console')?'flex':'none';
+  rc.style.display=selectedIds.has('cp-shell')?'flex':'none';
 }
 document.getElementById('consoleRadiusSlider').addEventListener('input',e=>{
   consoleRadius=parseInt(e.target.value);
-  document.getElementById('console').style.borderRadius=consoleRadius+'px';
-  document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px';
+  applyShellRadius();
+});
+
+// Corner radius handle drag
+let radiusDragX=null;
+document.getElementById('cpRadiusHandle').addEventListener('mousedown',(e)=>{ radiusDragX=e.clientX; e.preventDefault(); e.stopPropagation(); });
+window.addEventListener('mousemove',(e)=>{
+  if(radiusDragX===null) return;
+  const dx=e.clientX-radiusDragX; radiusDragX=e.clientX;
+  consoleRadius=Math.min(80,Math.max(0,consoleRadius+Math.round(dx*0.5)));
+  applyShellRadius();
 });
 
 // Capture phase: Ctrl/Shift click
@@ -1626,7 +1713,7 @@ document.addEventListener('keydown',(e)=>{
   const key=e.key.toLowerCase(); if(!['w','a','s','d'].includes(key)) return;
   e.preventDefault();
   const step=e.shiftKey?5:1, dx=key==='a'?-step:key==='d'?step:0, dy=key==='w'?-step:key==='s'?step:0;
-  selectedIds.forEach(id=>{ positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
+  selectedIds.forEach(id=>{ if(id==='console') return; positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
 });
 
 document.addEventListener('keydown',(e)=>{ if(e.ctrlKey||e.metaKey) document.body.classList.add('ctrl-held'); });
@@ -1645,9 +1732,9 @@ function putLayouts(obj){ localStorage.setItem(LS_KEY,JSON.stringify(obj)); }
 function snapshot(){ const snap={}; Object.keys(POS_ELEMENTS).forEach(id=>{ const {w=1,h=1}=resizes[id]||{}; snap[id]={...positions[id],w,h}; }); snap._consoleRadius=consoleRadius; return snap; }
 function applySnapshot(snap){
   Object.keys(POS_ELEMENTS).forEach(id=>{ if(snap&&snap[id]){ const {x=0,y=0,w=1,h=1}=snap[id]; positions[id]={x,y}; resizes[id]={w,h}; applyPosition(id); } });
-  if(snap&&snap._consoleRadius!=null){ consoleRadius=snap._consoleRadius; document.getElementById('console').style.borderRadius=consoleRadius+'px'; document.getElementById('consoleRadiusSlider').value=consoleRadius; document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px'; }
+  if(snap&&snap._consoleRadius!=null){ consoleRadius=snap._consoleRadius; applyShellRadius(); }
 }
-function resetToDefault(){ Object.keys(POS_ELEMENTS).forEach(id=>{positions[id]={x:0,y:0};resizes[id]={w:1,h:1};applyPosition(id);}); consoleRadius=30; document.getElementById('console').style.borderRadius='30px'; document.getElementById('consoleRadiusSlider').value=30; document.getElementById('consoleRadiusVal').textContent='30px'; currentLayoutName='Default'; document.getElementById('currentLayoutLabel').textContent='Default'; syncLayoutToolbar('Default'); closeSaveModal(); }
+function resetToDefault(){ Object.keys(POS_ELEMENTS).forEach(id=>{positions[id]={x:0,y:0};resizes[id]={w:1,h:1};applyPosition(id);}); consoleRadius=30; applyShellRadius(); currentLayoutName='Default'; document.getElementById('currentLayoutLabel').textContent='Default'; syncLayoutToolbar('Default'); closeSaveModal(); }
 function openSaveModal(){ const m=document.getElementById('saveModal'); m.classList.add('open'); const i=document.getElementById('saveNameInput'); i.value=currentLayoutName==='Default'?'':currentLayoutName; document.getElementById('saveError').textContent=''; renderSavedList(); setTimeout(()=>i.focus(),50); }
 function closeSaveModal(){ document.getElementById('saveModal').classList.remove('open'); }
 function renderSavedList(){
@@ -1692,6 +1779,21 @@ document.addEventListener('click',(e)=>{
 });
 
 // ══ INIT ══
+requestAnimationFrame(()=>{
+  // Lock cp-shell natural dimensions before any mode panel opens
+  if(!CP_SHELL_NAT_W){
+    const r=dom.cpShell.getBoundingClientRect();
+    CP_SHELL_NAT_W=r.width||650; CP_SHELL_NAT_H=r.height||580;
+    dom.cpShell.style.width=CP_SHELL_NAT_W+'px';
+    dom.cpShell.style.height=CP_SHELL_NAT_H+'px';
+  }
+  Object.keys(POS_ELEMENTS).forEach(id=>{
+    if(id==='console'||id==='cp-shell'||id==='volume-knob') return;
+    const el=getPosEl(id); if(!el) return;
+    const r=el.getBoundingClientRect();
+    if(r.width||r.height) natDims[id]={w:r.width,h:r.height};
+  });
+});
 applyBadgesClean();
 updateModeLeds();
 updatePills();
