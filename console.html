@@ -6,6 +6,7 @@
 <title>Ferrari Luce — Control Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -38,29 +39,43 @@ body {
   position: relative; overflow: visible; user-select: none;
 }
 #cpShell {
-  /* Control Panel Shell — positionable dark visual container */
-  position: relative; overflow: hidden;
+  /* Control Panel Shell — positionable container; overflow visible so children can escape */
+  position: relative; overflow: visible;
   display: flex; flex-direction: column;
+}
+.shell-content {
+  /* visual dark shell — clips content to rounded rect */
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
   background: #111114; border-radius: 30px;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.055), 0 24px 70px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.07);
+  box-shadow: 0 0 0 4px #0a0a0e, 0 0 0 5px rgba(255,255,255,0.055), 0 24px 70px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 .ref-overlay {
-  position: absolute; top: -12px; left: -25px; width: 700px; height: 700px;
+  position: absolute; top: 0; left: 0; width: 700px; height: 700px;
   pointer-events: none; z-index: 500; opacity: 0.5; transition: opacity 0.3s;
 }
 .ref-overlay.hidden { opacity: 0; }
-#cpShell.night-mode::after {
+.binnacle-ref-overlay {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%);
+  width: 820px; pointer-events: none; z-index: 100;
+  opacity: 0.5; transition: opacity 0.3s; object-fit: contain;
+}
+.binnacle-ref-overlay.hidden { opacity: 0; }
+#cpShell.night-mode .shell-content::after {
   content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.45);
-  pointer-events: none; z-index: 50; border-radius: var(--sr, 30px);
+  pointer-events: none; z-index: 50;
 }
 /* ── CORNER RADIUS HANDLE ── */
 .cp-radius-handle {
   position: absolute; top: 10px; right: 10px;
   width: 10px; height: 10px; border-radius: 50%;
+  display: none;
   background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35);
   cursor: ew-resize; z-index: 60;
   transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
 }
+#cpShell.pos-selected .cp-radius-handle { display: block; }
 .cp-radius-handle:hover {
   background: rgba(255,255,255,0.45); transform: scale(1.4);
   box-shadow: 0 0 6px rgba(255,255,255,0.3);
@@ -69,7 +84,7 @@ body {
 /* ── STATUS DOT ── */
 .status-dot {
   /* red START/STOP — on the top edge of the Control Panel Shell */
-  position: absolute; top: 3px; right: 13px; width: 8px; height: 8px;
+  position: absolute; top: -8px; right: 10px; width: 16px; height: 16px;
   border-radius: 50%; background: #FF2800; box-shadow: 0 0 6px #FF2800; z-index: 60;
   cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
 }
@@ -77,7 +92,7 @@ body {
 .status-dot:active { transform: scale(0.82); }
 .sw-reset-btn {
   /* yellow RESET — on the right edge of the Control Panel Shell */
-  position: absolute; right: 3px; top: 53px; width: 10px; height: 10px;
+  position: absolute; right: -8px; top: 50px; width: 16px; height: 16px;
   border-radius: 50%; background: #FFF200; box-shadow: 0 0 5px rgba(255,242,0,0.6); z-index: 60;
   cursor: pointer; transition: box-shadow 0.15s, transform 0.1s;
 }
@@ -111,23 +126,19 @@ body {
 /* ── SCREEN TOP: always-visible row ── */
 .screen-top { display: flex; flex-direction: row; align-items: stretch; gap: 0; }
 
-/* ── SCREEN MAIN: permanent metrics (left) ── */
-.screen-main {
+/* ── METRICS COLUMN: permanent left panel ── */
+.metrics-pos {
   flex: 1; min-width: 0;
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; gap: 6px; align-self: flex-start;
   padding-right: 12px; border-right: 1px solid rgba(255,255,255,0.065);
 }
-.metrics-pos { display: flex; flex-direction: column; gap: 6px; align-self: flex-start; }
 
 /* ── MULTIGRAPH SECTION: permanent right panel ── */
 .multigraph-section { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
 
-/* ── SCREEN BOTTOM: switchable mode panels ── */
-.screen-bottom { display: none; border-top: 1px solid rgba(255,255,255,0.055); margin-top: 8px; padding-top: 10px; }
-.screen-bottom.has-active { display: flex; flex-direction: row; }
-
-.mode-panel { display: none; flex: 1; }
-.mode-panel.active { display: flex; }
+/* ── MODE PANELS (watermark zone, grid-stacked like multigraph info panels) ── */
+.mode-panel { visibility: hidden; position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; }
+.mode-panel.active { visibility: visible; z-index: 2; }
 .metric-block { display: flex; flex-direction: column; gap: 3px; }
 .mode-badge {
   display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 3px;
@@ -140,8 +151,8 @@ body {
   font-family: 'Rajdhani', sans-serif; font-size: 42px; font-weight: 700;
   color: #e8e8e0; line-height: 1; letter-spacing: 1px; width: fit-content;
 }
-.metric-value .unit { font-size: 13px; font-weight: 400; color: rgba(232,232,224,0.45); margin-left: 3px; letter-spacing: 0.5px; }
-.waveform-wrap { position: relative; height: 44px; margin-top: 2px; width: 200px; }
+.metric-value .unit { font-size: 14px; font-weight: 500; color: rgba(232,232,224,0.80); margin-left: 4px; letter-spacing: 0.5px; vertical-align: baseline; }
+.waveform-wrap { position: relative; height: 44px; margin-top: 2px; width: 100%; }
 .waveform-wrap canvas { width: 100%; height: 100%; display: block; }
 .waveform-label { position: absolute; right: 0; bottom: 0; font-family: 'IBM Plex Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.25); line-height: 1.4; text-align: right; pointer-events: none; }
 .screen-divider { height: 1px; background: rgba(255,255,255,0.055); margin: 3px 0; }
@@ -149,6 +160,8 @@ body {
   display: flex; flex-direction: column; justify-content: center; gap: 4px;
   padding: 0 10px; min-width: 82px; width: fit-content;
 }
+.mg-info-panels { display: grid; grid-template-columns: 1fr; }
+.mg-info-panels > div { grid-column: 1; grid-row: 1; }
 .info-time { font-family: 'Rajdhani', sans-serif; font-size: 20px; font-weight: 600; color: #e8e8e0; letter-spacing: 0.5px; line-height: 1; }
 .info-date { font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500; color: rgba(232,232,224,0.6); letter-spacing: 1px; }
 .info-temp { font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 400; color: #e8e8e0; margin-top: 5px; }
@@ -249,8 +262,18 @@ body {
 /* ── MULTIGRAPH ── */
 .multigraph-wrap {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding-left: 12px; gap: 6px; flex-shrink: 0;
-  align-self: center;
+  padding-left: 12px; gap: 6px; flex-shrink: 0; align-self: center;
+}
+.multigraph-housing {
+  background: #111118;
+  border-radius: 50%; padding: 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 36px rgba(0,0,0,0.9);
+}
+.multigraph-bezel-ring {
+  border-radius: 50%; padding: 4px;
+  background: #0a0a0e;
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.7), inset 0 -1px 3px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.08);
 }
 .mg-sw-time {
   font-family: 'Rajdhani', sans-serif; font-size: 17px; font-weight: 600;
@@ -266,13 +289,11 @@ body {
   color: #FF2800; letter-spacing: 1.5px; vertical-align: super; margin-left: 2px;
 }
 .multigraph-bezel {
-  width: 115px; height: 115px; border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #28282e 0%, #141416 55%, #0e0e12 100%);
-  border: 2px solid rgba(255,255,255,0.13);
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 16px rgba(0,0,0,0.6);
+  width: 115px; height: 115px; border-radius: 50%; background: #2e2e36;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,0,0,0.7);
   cursor: pointer; position: relative; transition: box-shadow 0.3s; overflow: hidden;
 }
-.multigraph-bezel:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.18), inset 0 1px 0 rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.7); }
+.multigraph-bezel:hover { box-shadow: inset 0 2px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.1), 0 0 12px rgba(255,255,255,0.04); }
 .multigraph-bezel canvas { position: absolute; top:0; left:0; width:100%; height:100%; }
 .multigraph-mode-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 8px; font-weight: 600;
@@ -284,9 +305,9 @@ body {
 .multigraph-mode-label.sw-running { color: #FFF200; border-color: rgba(255,242,0,0.3); }
 
 /* ── WATERMARK ZONE ── */
-.watermark-zone { flex: 1; min-height: 130px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-.ferrari-watermark { }
-.ferrari-watermark-img { height: 64px; width: auto; display: block; filter: invert(1); mix-blend-mode: screen; opacity: 0.065; }
+.watermark-zone { flex: 1; min-height: 210px; position: relative; }
+.ferrari-watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 1; }
+.ferrari-watermark-img { height: 64px; width: auto; display: block; filter: invert(1); mix-blend-mode: screen; opacity: 0.18; }
 
 /* ── LOWER SECTION ── */
 .lower { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -299,16 +320,19 @@ body {
 /* ── CLIMATE STRIP ── */
 .climate-strip { display: flex; align-items: center; justify-content: space-between; padding: 0 4px; }
 .climate-group { display: flex; align-items: center; gap: 10px; }
-.seat-icon { cursor: pointer; opacity: 0.4; transition: opacity 0.2s; }
-.seat-icon:hover { opacity: 0.75; }
+.seat-icon { cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.45; transition: opacity 0.2s, filter 0.2s; }
+.seat-icon:hover { opacity: 0.78; }
 .seat-icon.heating-low  { opacity: 0.65; }
 .seat-icon.heating-med  { opacity: 0.85; }
-.seat-icon.heating-high { opacity: 1; filter: drop-shadow(0 0 4px rgba(255,120,0,0.7)); }
-.seat-icon svg { width: 22px; height: 24px; }
+.seat-icon.heating-high { opacity: 1; filter: drop-shadow(0 0 5px rgba(30,111,204,0.4)); }
+.seat-icon svg { width: 20px; height: 22px; flex-shrink: 0; }
+.seat-bars { display: flex; flex-direction: column; gap: 2.5px; }
+.seat-bar { width: 9px; height: 2.5px; border-radius: 1.5px; background: rgba(255,255,255,0.1); transition: background 0.2s, box-shadow 0.2s; }
+.seat-bar.lit { background: #1E6FCC; box-shadow: 0 0 4px rgba(30,111,204,0.8); }
 .fan-icon { cursor: pointer; opacity: 0.4; transition: opacity 0.2s, filter 0.2s; }
 .fan-icon:hover { opacity: 0.7; }
 .fan-icon.active { opacity: 0.9; filter: drop-shadow(0 0 5px rgba(150,200,255,0.7)); }
-.fan-icon svg { width: 22px; height: 22px; }
+.fan-icon i { font-size: 22px; color: white; }
 .temp-ring { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.025); }
 .temp-ring:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.055); }
 .temp-ring:active { transform: scale(0.94); }
@@ -356,8 +380,8 @@ body {
 .volume-knob:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.14); }
 
 /* ── HANDLE ── */
-.handle { display: flex; justify-content: center; padding: 8px 0 16px; }
-.handle-bar {
+.handle { position: absolute; bottom: 0; left: 0; right: 0; display: flex; justify-content: center; padding: 8px 0 16px; pointer-events: none; }
+.handle-bar { pointer-events: auto;
   width: 210px; height: 24px;
   background: linear-gradient(180deg, #686870 0%, #8c8c92 18%, #a0a0a5 40%, #8c8c92 68%, #585860 100%);
   border-radius: 12px;
@@ -374,7 +398,7 @@ body {
 /* ══ POSITIONING SYSTEM ══ */
 body.ctrl-held [data-pos-id] { cursor: crosshair !important; }
 body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !important; outline-offset: 4px; }
-.console-select-tab {
+.console-select-tab, .cp-shell-tab {
   display: none; position: absolute; top: 0; left: 0; z-index: 100;
   padding: 1px 5px; cursor: crosshair; white-space: nowrap; pointer-events: none;
   font: 600 8px/14px 'Inter Tight','Inter',sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
@@ -383,7 +407,10 @@ body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !i
 }
 body.ctrl-held .console-select-tab { display: block; pointer-events: auto; }
 body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; border-color: rgba(255,242,0,0.65); }
+body.ctrl-held .cp-shell-tab { display: block; pointer-events: auto; top: 18px; }
+body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-color: rgba(255,242,0,0.65); }
 [data-pos-id].pos-selected { outline: 2px solid #FFF200 !important; outline-offset: 3px; z-index: 20 !important; position: relative !important; }
+.status-dot.pos-selected, [data-pos-id="sw-reset"].pos-selected { position: absolute !important; }
 [data-pos-id].pos-selected::before {
   content: attr(data-pos-label);
   position: absolute; top: -22px; left: 0;
@@ -406,6 +433,10 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
 #consoleRadiusControl label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px; white-space: nowrap; }
 #consoleRadiusSlider { width: 100px; accent-color: #FFF200; cursor: pointer; }
 #consoleRadiusVal { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #FFF200; min-width: 32px; }
+#fontSizeControl { display: none; align-items: center; gap: 8px; }
+#fontSizeControl label { font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px; white-space: nowrap; }
+#fontSizeSlider { width: 100px; accent-color: #FFF200; cursor: pointer; }
+#fontSizeVal { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #FFF200; min-width: 32px; }
 
 /* ── SAVE MODAL ── */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 9000; backdrop-filter: blur(4px); }
@@ -474,6 +505,145 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
 .rh-s  { bottom: -4px; left: calc(50% - 4px); cursor: s-resize; }
 .rh-sw { bottom: -4px; left: -4px; cursor: sw-resize; }
 .rh-w  { top: calc(50% - 4px); left: -4px; cursor: w-resize; }
+
+/* ── TAB NAVIGATION ── */
+.tab-nav {
+  display: flex; gap: 0; margin-bottom: 16px; align-items: flex-end;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.tab-btn {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  color: rgba(255,255,255,0.28); font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  padding: 5px 20px 9px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  position: relative; top: 1px;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.65); }
+.tab-btn.active { color: #e8e8e0; border-bottom-color: #FF2800; }
+.tab-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
+.tab-panel.active { display: flex; }
+
+/* ── BINNACLE ── */
+.binnacle-wrap {
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  gap: 24px; padding: 32px 0 60px; user-select: none; position: relative;
+}
+.binnacle-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.binnacle-housing {
+  border-radius: 50%; padding: 6px;
+  background: radial-gradient(circle at 38% 30%, #22222a 0%, #111118 60%, #0a0a0e 100%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.045),
+    0 0 0 7px #0d0d12,
+    0 0 0 8px rgba(255,255,255,0.038),
+    0 24px 70px rgba(0,0,0,0.96),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.binnacle-bezel-ring {
+  border-radius: 50%; padding: 5px;
+  background: #0a0a0e;
+  box-shadow: inset 0 3px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07);
+}
+.binnacle-dial-label {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 600;
+  letter-spacing: 2.5px; color: rgba(255,255,255,0.28); text-align: center;
+  padding: 2px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
+  cursor: pointer; transition: color 0.2s, border-color 0.2s;
+}
+.binnacle-dial-label:hover { color: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.2); }
+.binnacle-dial-label.range-mode { color: #A8C4D4; border-color: rgba(168,196,212,0.38); }
+.binnacle-dial-label.tour-mode  { color: #FFF200; border-color: rgba(255,242,0,0.38); }
+.binnacle-dial-label.perfo-mode { color: #FF2800; border-color: rgba(255,40,0,0.38); }
+
+/* ══ PANEL REDESIGN ═══════════════════════════════════════════════════════════ */
+/* Shared tab bar */
+.panel-tabs{display:flex;align-items:center;justify-content:center;gap:2px;padding:5px 0;flex-shrink:0;border-top:1px solid rgba(255,255,255,0.055);}
+.panel-tab{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:600;letter-spacing:1.8px;color:rgba(255,255,255,0.28);padding:3px 14px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;}
+.panel-tab:hover{color:rgba(255,255,255,0.6);}
+.panel-tab.active{color:rgba(255,255,255,0.82);border-color:rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);}
+
+/* ── SETTINGS ── */
+.st-view{display:none;flex:1;min-height:0;}
+.st-view.active{display:flex;}
+.veh-row{display:flex;flex:1;gap:5px;padding:6px 8px 5px;min-height:0;}
+.veh-col{display:flex;flex-direction:column;gap:4px;width:62px;flex-shrink:0;}
+.veh-card{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.075);border-radius:8px;cursor:pointer;gap:3px;padding:4px 3px;transition:background .15s,border-color .15s;}
+.veh-card:hover{background:rgba(255,255,255,0.065);border-color:rgba(255,255,255,0.15);}
+.veh-card.v-on{border-color:rgba(0,220,80,0.45);background:rgba(0,220,80,0.07);}
+.veh-card-lbl{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:600;letter-spacing:0.8px;color:rgba(255,255,255,0.3);}
+.veh-card-val{font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:#e8e8e0;line-height:1;}
+.veh-card-sub{font-family:'Barlow Condensed',sans-serif;font-size:8px;color:rgba(232,232,224,0.4);}
+.veh-schematic{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;}
+.veh-schematic>svg{max-width:100%;max-height:100%;}
+.veh-data{position:absolute;font-family:'Barlow Condensed',sans-serif;font-size:7.5px;line-height:1.6;color:rgba(232,232,224,0.55);pointer-events:none;}
+.veh-data b{font-size:7px;font-weight:600;letter-spacing:.5px;color:rgba(0,220,80,0.8);display:block;}
+.vd-brake{color:rgba(255,60,0,0.78);font-weight:600;}
+.vd-motor{color:rgba(255,180,50,0.8);display:block;}
+.vd-bat{color:rgba(168,196,212,0.75);}
+.vd-tl{top:0;left:0;}.vd-tr{top:0;right:0;text-align:right;}
+.vd-bl{bottom:0;left:0;}.vd-br{bottom:0;right:0;text-align:right;}
+.vd-bc{bottom:0;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap;}
+.st-grid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:8px 12px 5px;min-height:0;}
+.st-row{display:flex;gap:5px;}
+.st-tile{flex:1;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.065);border-radius:7px;padding:6px 8px;cursor:pointer;transition:background .15s,border-color .15s;display:flex;flex-direction:column;gap:2px;}
+.st-tile:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.14);}
+.st-tile-lbl{font-family:'Barlow Condensed',sans-serif;font-size:7px;font-weight:600;letter-spacing:1.5px;color:rgba(255,255,255,0.25);}
+.st-tile-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:.8px;color:rgba(220,220,216,0.82);}
+
+/* ── MEDIA ── */
+.media-row{display:flex;flex:1;gap:5px;padding:6px 8px 5px;min-height:0;}
+.cplay-bar{width:44px;flex-shrink:0;border-radius:8px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;align-items:center;padding:6px 3px 4px;gap:4px;}
+.cplay-time{font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;color:#e8e8e0;line-height:1;}
+.cplay-sig{font-family:'Barlow Condensed',sans-serif;font-size:7px;color:rgba(255,255,255,0.3);letter-spacing:.3px;}
+.cplay-app{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;}
+.ca-maps{background:#3a7bd5;}.ca-music{background:#c72d4b;}.ca-phone{background:#2d9e4f;}.ca-grid{background:rgba(255,255,255,0.1);font-size:9px;color:rgba(255,255,255,0.45);}
+.map-view{flex:1;border-radius:8px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.07);background:linear-gradient(155deg,#1b2f2b 0%,#0f2320 40%,#162b25 70%,#1b3129 100%);min-height:0;}
+.map-view>svg{position:absolute;inset:0;width:100%;height:100%;}
+.map-footer{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(3px);padding:4px 8px;display:flex;gap:5px;align-items:center;justify-content:center;}
+.map-footer span{font-family:'Barlow Condensed',sans-serif;font-size:9px;color:rgba(255,255,255,0.55);}
+.media-right{width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:4px;}
+.media-nav-card{flex-shrink:0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;display:flex;align-items:center;gap:8px;}
+.media-nav-dist{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;color:#e8e8e0;line-height:1;}
+.media-nav-road{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:rgba(232,232,224,0.4);white-space:nowrap;}
+.media-np{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;display:flex;flex-direction:column;gap:5px;min-height:0;overflow:hidden;}
+.media-np-head{display:flex;align-items:center;gap:7px;}
+.media-np-art{width:36px;height:36px;border-radius:5px;flex-shrink:0;background:linear-gradient(135deg,rgba(200,30,30,0.5),rgba(20,20,40,0.8));border:1px solid rgba(255,60,0,0.25);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.media-np-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+.media-np-name{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;color:#e8e8e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.media-np-by{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:rgba(232,232,224,0.38);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.media-np-bar{height:2px;background:rgba(255,255,255,0.1);border-radius:1px;}
+.media-np-fill-el{height:100%;background:#FF2800;border-radius:1px;}
+.media-np-times{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:8px;color:rgba(255,255,255,0.25);}
+.media-np-ctrl{display:flex;align-items:center;justify-content:center;gap:12px;}
+.media-ctrl-btn{background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px;padding:0;transition:color .15s;}
+.media-ctrl-btn:hover{color:#fff;}
+.media-ctrl-btn.mc-play{font-size:18px;}
+
+/* ── CLIMATE ── */
+.cl-body{display:flex;flex-direction:column;flex:1;padding:6px 12px 5px;gap:6px;min-height:0;}
+.cl-top{display:flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;}
+.cl-seat-zone{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.cl-temp{font-family:'Rajdhani',sans-serif;font-size:17px;font-weight:700;line-height:1;cursor:pointer;}
+.cl-temp.driver{color:rgba(255,80,40,0.9);}
+.cl-temp.passenger{color:rgba(100,185,255,0.9);}
+.cl-heat{display:flex;gap:2px;margin-top:1px;cursor:pointer;}
+.cl-temp-adj{background:none;border:none;color:rgba(255,255,255,0.3);cursor:pointer;font-size:9px;padding:0;line-height:1;transition:color .15s;}
+.cl-temp-adj:hover{color:rgba(255,255,255,0.75);}
+.cl-sep{width:1px;height:30px;background:rgba(255,255,255,0.07);flex-shrink:0;}
+.cl-ctrl-row{display:flex;align-items:center;gap:5px;}
+.cl-btn-group{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.cl-btn{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;flex-shrink:0;color:rgba(255,255,255,0.5);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.3px;}
+.cl-btn:hover{background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.2);}
+.cl-btn.active,.cl-btn.synced,.cl-btn.cl-on{border-color:rgba(168,196,212,0.55);background:rgba(168,196,212,0.1);color:#A8C4D4;}
+.cl-btn i{font-size:12px;}
+.cl-btn-lbl{font-family:'Barlow Condensed',sans-serif;font-size:6.5px;font-weight:600;letter-spacing:.8px;color:rgba(255,255,255,0.25);}
+.cl-fan-grp{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.cl-fan-dots-h{display:flex;flex-direction:row;gap:2px;cursor:pointer;}
+.cl-fan-dot-v{width:4px;height:12px;border-radius:2px;background:rgba(255,255,255,0.08);transition:background .2s;}
+.cl-fan-dot-v.lit{background:#A8C4D4;}
+.cl-interior{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
+.cl-interior>svg{max-width:100%;max-height:100%;}
+
 </style>
 </head>
 <body>
@@ -490,8 +660,17 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
   <span class="toolbar-label">LAYOUT:</span>
   <span id="currentLayoutLabel">Default</span>
   <div class="toolbar-divider"></div>
-  <span class="toolbar-label">Ferrari Luce · Control Panel</span>
+  <span class="toolbar-label">Ferrari Luce</span>
 </div>
+
+<!-- ── TAB NAV ── -->
+<div class="tab-nav">
+  <button class="tab-btn active" id="tabBtnCp" onclick="switchTab('cp')">CONTROL PANEL</button>
+  <button class="tab-btn" id="tabBtnBinnacle" onclick="switchTab('binnacle')">BINNACLE</button>
+</div>
+
+<!-- ── TAB: CONTROL PANEL ── -->
+<div id="tab-cp" class="tab-panel active">
 
 <!-- ── CONTROL PANEL DISPLAY ── -->
 <div class="console" id="console"
@@ -499,11 +678,14 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
   data-tip="Control Panel Display" data-tip-fn="Ctrl+click to select. Drag resize handles to change bounding size (content is clipped, not scaled). Transparent 5px halo contains the Control Panel Shell.">
 
   <div class="console-select-tab">Control Panel Display</div>
+  <img src="ferrari_console.jpeg" class="ref-overlay" id="refOverlay" alt="">
 
   <!-- ── CONTROL PANEL SHELL ── -->
   <div id="cpShell"
     data-pos-id="cp-shell" data-pos-label="Control Panel Shell"
-    data-tip="Control Panel Shell" data-tip-fn="Ctrl+click to select. Drag resize handles to resize the shell independently. Drag the corner handle (top-right) to adjust corner radius.">
+    data-tip="Control Panel Shell" data-tip-fn="Ctrl+click the 'Control Panel Shell' tab (visible when Ctrl is held) to select. Drag resize handles to resize the shell independently. Drag the corner handle (top-right) to adjust corner radius.">
+
+    <div class="cp-shell-tab">Control Panel Shell</div>
 
     <!-- Corner radius handle -->
     <div class="cp-radius-handle" id="cpRadiusHandle"
@@ -514,9 +696,10 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
       data-tip="Start / Stop" data-tip-fn="Red button: start/stop the stopwatch. Always active regardless of Multigraph mode."></div>
 
     <div class="sw-reset-btn" id="swResetBtn"
+      data-pos-id="sw-reset" data-pos-label="Reset Stopwatch"
       data-tip="Reset Stopwatch" data-tip-fn="Yellow button resets the stopwatch to 00:00.00."></div>
 
-  <img src="ferrari_console.jpeg" class="ref-overlay" id="refOverlay" alt="">
+  <div class="shell-content">
   <!-- Screen row -->
   <div class="screen-row">
 
@@ -541,7 +724,6 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
       <div class="screen-top">
 
         <!-- Metrics — permanent, never changes with mode -->
-        <div class="screen-main">
           <div class="metrics-pos"
             data-pos-id="metrics-col" data-pos-label="Metrics Column">
           <div class="metric-block">
@@ -580,7 +762,6 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
             </div>
           </div>
           </div><!-- /metrics-pos -->
-        </div><!-- /screen-main -->
 
         <!-- Multigraph section — changes only with CLOCK/STOPWATCH/COMPASS -->
         <div class="multigraph-section">
@@ -590,32 +771,36 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
               data-pos-id="info-time" data-pos-label="Time Display">10:10</div>
             <div class="info-date" id="infoDate"
               data-pos-id="info-date" data-pos-label="Date Display">MON 25</div>
-            <!-- CLOCK mode sub-info -->
-            <div id="mgInfoClock">
-              <div class="info-temp" data-pos-id="info-temp" data-pos-label="Ambient Temp">27°</div>
-              <div class="info-aqi" id="infoAqi" data-pos-id="info-aqi" data-pos-label="Air Quality">AQI: 36</div>
-              <div class="info-heading" id="infoHeading" data-pos-id="info-heading" data-pos-label="Heading">330° NW</div>
-            </div>
-            <!-- STOPWATCH mode sub-info -->
-            <div id="mgInfoStopwatch" style="display:none">
-              <div class="mg-sw-time" id="mgSwTime">00:00<span class="mg-sw-cs">.00</span></div>
-              <div class="info-aqi" id="mgSwKm">0 km</div>
-              <div class="info-aqi" id="mgSwKw">0 kW</div>
-            </div>
-            <!-- COMPASS mode sub-info -->
-            <div id="mgInfoCompass" style="display:none">
-              <div class="mg-bearing" id="mgBearing">330<span class="mg-bearing-dir" id="mgBearingDir">NW</span></div>
-              <div class="info-aqi" id="mgAlt">2,451 FT</div>
-              <div class="info-aqi" id="mgTempC">27° C</div>
+            <!-- Mode sub-info panels — stacked in same grid cell, toggled via visibility -->
+            <div class="mg-info-panels">
+              <div id="mgInfoClock">
+                <div class="info-temp" data-pos-id="info-temp" data-pos-label="Ambient Temp">27°</div>
+                <div class="info-aqi" id="infoAqi" data-pos-id="info-aqi" data-pos-label="Air Quality">AQI: 36</div>
+                <div class="info-heading" id="infoHeading" data-pos-id="info-heading" data-pos-label="Heading">330° NW</div>
+              </div>
+              <div id="mgInfoStopwatch" style="visibility:hidden">
+                <div class="mg-sw-time" id="mgSwTime">00:00<span class="mg-sw-cs">.00</span></div>
+                <div class="info-aqi" id="mgSwKm">0 km</div>
+                <div class="info-aqi" id="mgSwKw">0 kW</div>
+              </div>
+              <div id="mgInfoCompass" style="visibility:hidden">
+                <div class="mg-bearing" id="mgBearing">330<span class="mg-bearing-dir" id="mgBearingDir">NW</span></div>
+                <div class="info-aqi" id="mgAlt">2,451 FT</div>
+                <div class="info-aqi" id="mgTempC">27° C</div>
+              </div>
             </div>
           </div>
 
           <div class="multigraph-wrap"
             data-pos-id="multigraph" data-pos-label="Multigraph">
-            <div class="multigraph-bezel" id="multigraphBezel"
-              data-tip="Multigraph Instrument"
-              data-tip-fn="Tap dial in STOPWATCH mode to start/stop; double-tap to reset. Tap mode label below to cycle CLOCK → STOPWATCH → COMPASS.">
-              <canvas id="clockFace" width="115" height="115"></canvas>
+            <div class="multigraph-housing">
+              <div class="multigraph-bezel-ring">
+                <div class="multigraph-bezel" id="multigraphBezel"
+                  data-tip="Multigraph Instrument"
+                  data-tip-fn="Tap dial in STOPWATCH mode to start/stop; double-tap to reset. Tap mode label below to cycle CLOCK → STOPWATCH → COMPASS.">
+                  <canvas id="clockFace" width="230" height="230"></canvas>
+                </div>
+              </div>
             </div>
             <div class="multigraph-mode-label" id="multigraphLabel">CLOCK</div>
           </div>
@@ -623,125 +808,315 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
 
       </div><!-- /screen-top -->
 
-      <!-- ── BOTTOM: switchable mode panels (hidden in Off state) ── -->
-      <div class="screen-bottom" id="screenBottom">
-
-        <!-- Panel: Climate -->
-        <div class="mode-panel" id="panelClimate">
-          <div class="cp-panel-header"><span class="cp-panel-title">CLIMATE</span></div>
-          <div class="cp-climate">
-            <div class="cp-climate-zones">
-              <div class="cp-zone">
-                <div class="cp-zone-label">DRIVER</div>
-                <button class="cp-temp-adj" data-side="left" data-dir="1">▲</button>
-                <div class="cp-temp-big" id="cpTempL">22°</div>
-                <button class="cp-temp-adj" data-side="left" data-dir="-1">▼</button>
-                <div class="cp-seat-heat" id="cpHeatL" title="Seat heating">
-                  <span class="cp-heat-bar" data-level="1"></span>
-                  <span class="cp-heat-bar" data-level="2"></span>
-                  <span class="cp-heat-bar" data-level="3"></span>
-                </div>
-                <div class="cp-seat-sub">SEAT</div>
-              </div>
-              <div class="cp-zone-center">
-                <div class="cp-fan-label">FAN</div>
-                <div class="cp-fan-dots" id="cpFanDots">
-                  <span class="cp-fan-dot" data-speed="1"></span>
-                  <span class="cp-fan-dot" data-speed="2"></span>
-                  <span class="cp-fan-dot" data-speed="3"></span>
-                  <span class="cp-fan-dot" data-speed="4"></span>
-                </div>
-                <button class="cp-sync-btn" id="cpSyncBtn">SYNC</button>
-                <div class="cp-ac-row">
-                  <button class="cp-ac-btn active" id="cpAcBtn">A/C</button>
-                  <button class="cp-ac-btn" id="cpAutoBtn">AUTO</button>
-                </div>
-              </div>
-              <div class="cp-zone">
-                <div class="cp-zone-label">PASSENGER</div>
-                <button class="cp-temp-adj" data-side="right" data-dir="1">▲</button>
-                <div class="cp-temp-big" id="cpTempR">18°</div>
-                <button class="cp-temp-adj" data-side="right" data-dir="-1">▼</button>
-                <div class="cp-seat-heat" id="cpHeatR" title="Seat heating">
-                  <span class="cp-heat-bar" data-level="1"></span>
-                  <span class="cp-heat-bar" data-level="2"></span>
-                  <span class="cp-heat-bar" data-level="3"></span>
-                </div>
-                <div class="cp-seat-sub">SEAT</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Panel: Settings -->
-        <div class="mode-panel" id="panelSettings">
-          <div class="cp-panel-header"><span class="cp-panel-title">SETTINGS</span></div>
-          <div class="cp-settings">
-            <div class="cp-setting-row">
-              <div class="cp-setting" id="csManet" data-tip="Manettino" data-tip-fn="Click to cycle chassis mode.">
-                <div class="cp-setting-lbl">MANETTINO</div>
-                <div class="cp-setting-val" id="csManetVal">DRY</div>
-              </div>
-              <div class="cp-setting" id="csEManet" data-tip="e-Manettino" data-tip-fn="Click to cycle power mode.">
-                <div class="cp-setting-lbl">e-MANETTINO</div>
-                <div class="cp-setting-val" id="csEManetVal">TOUR</div>
-              </div>
-            </div>
-            <div class="cp-setting-row">
-              <div class="cp-setting" id="csESC" data-tip="ESC Mode" data-tip-fn="Click to cycle ESC sensitivity.">
-                <div class="cp-setting-lbl">ESC</div>
-                <div class="cp-setting-val" id="csESCVal">FULL</div>
-              </div>
-              <div class="cp-setting" id="csSUSP" data-tip="Suspension" data-tip-fn="Click to cycle damper mode.">
-                <div class="cp-setting-lbl">SUSPENSION</div>
-                <div class="cp-setting-val" id="csSUSPVal">COMFORT</div>
-              </div>
-            </div>
-            <div class="cp-setting-row">
-              <div class="cp-setting" id="csRegen" data-tip="Regen Braking" data-tip-fn="Click to cycle regen level.">
-                <div class="cp-setting-lbl">REGEN</div>
-                <div class="cp-setting-val" id="csRegenVal">MED</div>
-              </div>
-              <div class="cp-setting" id="csADAS" data-tip="Driver Assistance" data-tip-fn="Click to toggle ADAS suite.">
-                <div class="cp-setting-lbl">ADAS</div>
-                <div class="cp-setting-val" id="csADASVal">ON</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Panel: Media -->
-        <div class="mode-panel" id="panelMedia">
-          <div class="cp-panel-header"><span class="cp-panel-title">MEDIA</span></div>
-          <div class="cp-media">
-            <div class="cp-media-source" id="cpSource"
-              data-tip="Audio Source" data-tip-fn="Click to cycle: BLUETOOTH → FM → USB.">BLUETOOTH</div>
-            <div class="cp-track-name" id="cpTrack">Maranello Dreams</div>
-            <div class="cp-track-artist" id="cpArtist">Ferrari Sound Labs</div>
-            <div class="cp-progress-bar">
-              <div class="cp-progress-fill" id="cpProgressFill" style="width:37%"></div>
-            </div>
-            <div class="cp-time-row">
-              <span id="cpTimeElapsed">1:24</span>
-              <span id="cpTimeDur">3:47</span>
-            </div>
-            <div class="cp-media-controls">
-              <button class="cp-media-btn" id="cpPrev" data-tip="Previous Track" data-tip-fn="Skip to previous track.">⏮</button>
-              <button class="cp-media-btn cp-play-btn" id="cpPlay" data-tip="Play / Pause" data-tip-fn="Toggle audio playback.">⏸</button>
-              <button class="cp-media-btn" id="cpNext" data-tip="Next Track" data-tip-fn="Skip to next track.">⏭</button>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /screen-bottom -->
-
     </div><!-- /screen-area -->
   </div><!-- /screen-row -->
 
-  <!-- Watermark zone -->
+  <!-- Watermark / Panel zone — stacked like multigraph info panels; watermark shows in OFF state -->
   <div class="watermark-zone">
-    <div class="ferrari-watermark"
+    <div class="ferrari-watermark" id="ferrariWatermark"
       data-pos-id="watermark-text" data-pos-label="Ferrari Watermark"><img src="ferrari_text.png" class="ferrari-watermark-img" alt="Ferrari"></div>
+
+    <!-- Panel: Climate -->
+    <div class="mode-panel" id="panelClimate">
+      <div class="cl-body">
+        <!-- Top: seat zones + controls -->
+        <div class="cl-top">
+          <!-- Driver zone -->
+          <div class="cl-seat-zone">
+            <button class="cp-temp-adj cl-temp-adj" data-side="left" data-dir="1">▲</button>
+            <div class="cl-temp driver" id="cpTempL">22°</div>
+            <button class="cp-temp-adj cl-temp-adj" data-side="left" data-dir="-1">▼</button>
+            <div class="cp-seat-heat cl-heat" id="cpHeatL">
+              <span class="cp-heat-bar" data-level="1"></span>
+              <span class="cp-heat-bar" data-level="2"></span>
+              <span class="cp-heat-bar" data-level="3"></span>
+            </div>
+          </div>
+          <div class="cl-sep"></div>
+          <!-- Center controls -->
+          <div class="cl-ctrl-row">
+            <div class="cl-btn-group">
+              <button class="cl-btn" id="cpSyncBtn"><i class="fa-solid fa-arrows-rotate"></i></button>
+              <span class="cl-btn-lbl">SYNC</span>
+            </div>
+            <div class="cl-btn-group">
+              <button class="cl-btn"><i class="fa-solid fa-wind"></i></button>
+              <span class="cl-btn-lbl">RECIRC</span>
+            </div>
+            <div class="cl-btn-group">
+              <button class="cl-btn" id="cpAutoBtn"><i class="fa-solid fa-power-off"></i></button>
+              <span class="cl-btn-lbl">AUTO</span>
+            </div>
+            <div class="cl-btn-group">
+              <button class="cl-btn" id="cpAcBtn">AC</button>
+              <span class="cl-btn-lbl">A/C</span>
+            </div>
+            <div class="cl-btn-group">
+              <button class="cl-btn"><i class="fa-solid fa-lock"></i></button>
+              <span class="cl-btn-lbl">LOCK</span>
+            </div>
+            <div class="cl-sep"></div>
+            <div class="cl-fan-grp">
+              <div class="cl-fan-dots-h cp-fan-dots" id="cpFanDots">
+                <span class="cl-fan-dot-v cp-fan-dot" data-speed="1"></span>
+                <span class="cl-fan-dot-v cp-fan-dot" data-speed="2"></span>
+                <span class="cl-fan-dot-v cp-fan-dot" data-speed="3"></span>
+                <span class="cl-fan-dot-v cp-fan-dot" data-speed="4"></span>
+              </div>
+              <span class="cl-btn-lbl">FAN</span>
+            </div>
+          </div>
+          <div class="cl-sep"></div>
+          <!-- Passenger zone -->
+          <div class="cl-seat-zone">
+            <button class="cp-temp-adj cl-temp-adj" data-side="right" data-dir="1">▲</button>
+            <div class="cl-temp passenger" id="cpTempR">18°</div>
+            <button class="cp-temp-adj cl-temp-adj" data-side="right" data-dir="-1">▼</button>
+            <div class="cp-seat-heat cl-heat" id="cpHeatR">
+              <span class="cp-heat-bar" data-level="1"></span>
+              <span class="cp-heat-bar" data-level="2"></span>
+              <span class="cp-heat-bar" data-level="3"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Interior SVG -->
+        <div class="cl-interior">
+          <svg viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Floor -->
+            <rect x="8" y="4" width="284" height="92" rx="18" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+            <!-- Dashboard -->
+            <rect x="8" y="4" width="284" height="22" rx="14" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+            <rect x="38" y="8" width="44" height="12" rx="3" fill="rgba(255,255,255,0.05)"/>
+            <rect x="218" y="8" width="44" height="12" rx="3" fill="rgba(255,255,255,0.05)"/>
+            <rect x="94" y="8" width="112" height="12" rx="3" fill="rgba(255,255,255,0.04)"/>
+            <!-- Driver glow ring (red) -->
+            <ellipse cx="55" cy="64" rx="43" ry="37" fill="rgba(255,50,20,0.07)" stroke="rgba(255,60,20,0.38)" stroke-width="5"/>
+            <ellipse cx="55" cy="64" rx="43" ry="37" fill="none" stroke="rgba(255,40,10,0.12)" stroke-width="14"/>
+            <!-- Driver seat -->
+            <rect x="22" y="31" width="58" height="50" rx="8" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.11)" stroke-width="1"/>
+            <rect x="22" y="66" width="58" height="17" rx="5" fill="rgba(255,255,255,0.05)"/>
+            <rect x="31" y="24" width="40" height="13" rx="6.5" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <!-- Steering wheel -->
+            <circle cx="52" cy="47" r="16" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="2.5"/>
+            <circle cx="52" cy="47" r="5" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+            <line x1="52" y1="33" x2="52" y2="42" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+            <line x1="38" y1="47" x2="47" y2="47" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+            <line x1="57" y1="47" x2="66" y2="47" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+            <circle cx="52" cy="34" r="1.8" fill="rgba(255,220,0,0.75)"/>
+            <!-- Center console -->
+            <rect x="94" y="30" width="112" height="60" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+            <rect x="108" y="40" width="84" height="18" rx="4" fill="rgba(255,255,255,0.04)"/>
+            <circle cx="134" cy="70" r="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
+            <circle cx="166" cy="70" r="6" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.09)" stroke-width="1"/>
+            <!-- Passenger glow ring (blue) -->
+            <ellipse cx="245" cy="64" rx="43" ry="37" fill="rgba(80,160,255,0.06)" stroke="rgba(100,175,255,0.38)" stroke-width="5"/>
+            <ellipse cx="245" cy="64" rx="43" ry="37" fill="none" stroke="rgba(90,165,255,0.11)" stroke-width="14"/>
+            <!-- Passenger seat -->
+            <rect x="220" y="31" width="58" height="50" rx="8" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.11)" stroke-width="1"/>
+            <rect x="220" y="66" width="58" height="17" rx="5" fill="rgba(255,255,255,0.05)"/>
+            <rect x="229" y="24" width="40" height="13" rx="6.5" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+      <div class="panel-tabs">
+        <div class="panel-tab active">FRONT</div>
+        <div class="panel-tab">REAR</div>
+      </div>
+    </div>
+
+    <!-- Panel: Settings -->
+    <div class="mode-panel" id="panelSettings">
+      <!-- CONTROLS sub-view: vehicle telemetry schematic -->
+      <div class="st-view active" data-view="controls">
+        <div class="veh-row">
+          <!-- Left sidebar -->
+          <div class="veh-col">
+            <div class="veh-card">
+              <i class="fa-solid fa-bolt" style="font-size:15px;color:rgba(255,230,0,0.55)"></i>
+              <div class="veh-card-lbl">CHARGE</div>
+            </div>
+            <div class="veh-card v-on">
+              <div class="veh-card-val">80%</div>
+              <div class="veh-card-sub">420 KM</div>
+              <div class="veh-card-lbl">LIMIT</div>
+            </div>
+            <div class="veh-card">
+              <i class="fa-solid fa-camera" style="font-size:14px;opacity:0.42"></i>
+              <div class="veh-card-lbl">CAMERA</div>
+            </div>
+          </div>
+          <!-- Center: car schematic -->
+          <div class="veh-schematic">
+            <svg viewBox="0 0 200 110" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Body -->
+              <rect x="44" y="7" width="112" height="96" rx="22" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+              <!-- Windshield -->
+              <path d="M54,7 L146,7 L138,26 L62,26 Z" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <!-- Rear window -->
+              <path d="M54,103 L146,103 L138,84 L62,84 Z" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <!-- Battery pack -->
+              <rect x="68" y="43" width="64" height="24" rx="5" fill="rgba(168,196,212,0.07)" stroke="rgba(168,196,212,0.3)" stroke-width="1"/>
+              <!-- Wheels -->
+              <rect x="13" y="9" width="31" height="38" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <rect x="156" y="9" width="31" height="38" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <rect x="13" y="63" width="31" height="38" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <rect x="156" y="63" width="31" height="38" rx="5" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.22)" stroke-width="1.5"/>
+              <!-- Brake discs -->
+              <circle cx="29" cy="28" r="8" fill="none" stroke="rgba(255,60,0,0.42)" stroke-width="1.5"/>
+              <circle cx="171" cy="28" r="8" fill="none" stroke="rgba(255,60,0,0.42)" stroke-width="1.5"/>
+              <circle cx="29" cy="82" r="8" fill="none" stroke="rgba(255,60,0,0.42)" stroke-width="1.5"/>
+              <circle cx="171" cy="82" r="8" fill="none" stroke="rgba(255,60,0,0.42)" stroke-width="1.5"/>
+              <!-- Axles -->
+              <line x1="44" y1="28" x2="57" y2="28" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+              <line x1="143" y1="28" x2="156" y2="28" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+              <line x1="44" y1="82" x2="57" y2="82" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+              <line x1="143" y1="82" x2="156" y2="82" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+              <!-- Motor indicators -->
+              <circle cx="63" cy="28" r="5" fill="rgba(255,180,50,0.5)" stroke="rgba(255,190,60,0.8)" stroke-width="0.75"/>
+              <circle cx="137" cy="28" r="5" fill="rgba(255,180,50,0.5)" stroke="rgba(255,190,60,0.8)" stroke-width="0.75"/>
+              <circle cx="63" cy="82" r="5" fill="rgba(255,180,50,0.5)" stroke="rgba(255,190,60,0.8)" stroke-width="0.75"/>
+              <circle cx="137" cy="82" r="5" fill="rgba(255,180,50,0.5)" stroke="rgba(255,190,60,0.8)" stroke-width="0.75"/>
+              <!-- Battery label -->
+              <text x="100" y="58" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="7" fill="rgba(168,196,212,0.65)" letter-spacing="0.5">BATTERY</text>
+            </svg>
+            <!-- Corner data overlays -->
+            <div class="veh-data vd-tl"><b>TYRE</b>36°C · 2.4 BAR<br><span class="vd-brake">BRAKE</span><span class="vd-motor">MOTOR 90°C</span></div>
+            <div class="veh-data vd-tr"><b>TYRE</b>36°C · 2.4 BAR<br><span class="vd-brake">BRAKE</span><span class="vd-motor">MOTOR 110°C</span></div>
+            <div class="veh-data vd-bl"><b>TYRE</b>36°C · 2.4 BAR<br><span class="vd-brake">BRAKE</span><span class="vd-motor">MOTOR 90°C</span></div>
+            <div class="veh-data vd-br"><b>TYRE</b>36°C · 2.4 BAR<br><span class="vd-brake">BRAKE</span><span class="vd-motor">MOTOR 110°C</span></div>
+            <div class="veh-data vd-bc"><span class="vd-bat">BATTERY · 30°C</span></div>
+          </div>
+          <!-- Right sidebar -->
+          <div class="veh-col">
+            <div class="veh-card">
+              <span style="font-family:'Barlow Condensed';font-size:14px;font-weight:700;color:rgba(255,255,255,0.42)">P<span style="font-size:8px;vertical-align:super">▲</span></span>
+              <div class="veh-card-lbl">SENSORS</div>
+            </div>
+            <div class="veh-card">
+              <i class="fa-solid fa-arrows-up-down" style="font-size:13px;opacity:0.42"></i>
+              <div class="veh-card-lbl">LIFTER</div>
+            </div>
+            <div class="veh-card">
+              <i class="fa-solid fa-circle-info" style="font-size:13px;opacity:0.42"></i>
+              <div class="veh-card-lbl">INFO</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- SETTINGS sub-view: vehicle parameters grid -->
+      <div class="st-view" data-view="settings">
+        <div class="st-grid">
+          <div class="st-row">
+            <div class="st-tile" id="csManet" data-tip="Manettino" data-tip-fn="Click to cycle chassis mode.">
+              <div class="st-tile-lbl">MANETTINO</div><div class="st-tile-val" id="csManetVal">DRY</div>
+            </div>
+            <div class="st-tile" id="csEManet" data-tip="e-Manettino" data-tip-fn="Click to cycle power mode.">
+              <div class="st-tile-lbl">e-MANETTINO</div><div class="st-tile-val" id="csEManetVal">TOUR</div>
+            </div>
+          </div>
+          <div class="st-row">
+            <div class="st-tile" id="csESC" data-tip="ESC Mode" data-tip-fn="Click to cycle ESC sensitivity.">
+              <div class="st-tile-lbl">ESC</div><div class="st-tile-val" id="csESCVal">FULL</div>
+            </div>
+            <div class="st-tile" id="csSUSP" data-tip="Suspension" data-tip-fn="Click to cycle damper mode.">
+              <div class="st-tile-lbl">SUSPENSION</div><div class="st-tile-val" id="csSUSPVal">COMFORT</div>
+            </div>
+          </div>
+          <div class="st-row">
+            <div class="st-tile" id="csRegen" data-tip="Regen Braking" data-tip-fn="Click to cycle regen level.">
+              <div class="st-tile-lbl">REGEN</div><div class="st-tile-val" id="csRegenVal">MED</div>
+            </div>
+            <div class="st-tile" id="csADAS" data-tip="Driver Assistance" data-tip-fn="Click to toggle ADAS suite.">
+              <div class="st-tile-lbl">ADAS</div><div class="st-tile-val" id="csADASVal">ON</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-tabs" id="stTabs">
+        <div class="panel-tab active" onclick="switchStView('controls',this)">CONTROLS</div>
+        <div class="panel-tab" onclick="switchStView('settings',this)">SETTINGS</div>
+      </div>
+    </div>
+
+    <!-- Panel: Media -->
+    <div class="mode-panel" id="panelMedia">
+      <div class="media-row">
+        <!-- CarPlay sidebar -->
+        <div class="cplay-bar">
+          <div class="cplay-time">10:10</div>
+          <div class="cplay-sig">▲▲▲ 5G</div>
+          <div class="cplay-app ca-maps">🗺</div>
+          <div class="cplay-app ca-music">♪</div>
+          <div class="cplay-app ca-phone">📞</div>
+          <div class="cplay-app ca-grid">⋯</div>
+        </div>
+        <!-- Map view -->
+        <div class="map-view">
+          <svg viewBox="0 0 180 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Road network -->
+            <line x1="0" y1="60" x2="180" y2="60" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+            <line x1="90" y1="0" x2="90" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
+            <line x1="35" y1="0" x2="35" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="3"/>
+            <line x1="145" y1="0" x2="145" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="3"/>
+            <line x1="0" y1="30" x2="180" y2="30" stroke="rgba(255,255,255,0.04)" stroke-width="3"/>
+            <line x1="0" y1="90" x2="180" y2="90" stroke="rgba(255,255,255,0.04)" stroke-width="3"/>
+            <!-- Coastal road curve -->
+            <path d="M90,0 Q82,25 90,60 Q98,95 90,120" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none"/>
+            <!-- Active route highlight -->
+            <path d="M90,0 Q86,30 90,60" stroke="rgba(77,158,247,0.9)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <!-- Destination dot -->
+            <circle cx="90" cy="60" r="12" fill="rgba(77,158,247,0.18)"/>
+            <circle cx="90" cy="60" r="5" fill="rgba(77,158,247,1)" stroke="white" stroke-width="1.5"/>
+            <!-- Road badge -->
+            <rect x="65" y="24" width="50" height="15" rx="3" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.18)" stroke-width="0.5"/>
+            <text x="90" y="35" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="9" font-weight="600" fill="rgba(255,255,255,0.7)">CA-1</text>
+          </svg>
+          <div class="map-footer">
+            <span>10:30 arrival</span>
+            <span style="color:rgba(255,255,255,0.22)">·</span>
+            <span>20 min</span>
+            <span style="color:rgba(255,255,255,0.22)">·</span>
+            <span>47 km</span>
+          </div>
+        </div>
+        <!-- Right column: nav + now playing -->
+        <div class="media-right">
+          <!-- Navigation card -->
+          <div class="media-nav-card">
+            <span style="font-size:20px">↗</span>
+            <div>
+              <div class="media-nav-dist">1.5 km</div>
+              <div class="media-nav-road">Bear Valley Rd</div>
+            </div>
+          </div>
+          <!-- Now playing card -->
+          <div class="media-np">
+            <div class="media-np-head">
+              <div class="media-np-art">🎵</div>
+              <div class="media-np-meta">
+                <div class="media-np-name" id="cpTrack">Maranello Dreams</div>
+                <div class="media-np-by" id="cpArtist">Ferrari Sound Labs</div>
+              </div>
+            </div>
+            <div class="media-np-bar"><div class="media-np-fill-el" id="cpProgressFill" style="width:37%"></div></div>
+            <div class="media-np-times">
+              <span id="cpTimeElapsed">1:24</span>
+              <span id="cpTimeDur">3:47</span>
+            </div>
+            <div class="media-np-ctrl">
+              <button class="media-ctrl-btn" id="cpPrev">⏮</button>
+              <button class="media-ctrl-btn mc-play" id="cpPlay">⏸</button>
+              <button class="media-ctrl-btn" id="cpNext">⏭</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Source / tab bar -->
+      <div class="panel-tabs">
+        <div class="panel-tab active" id="cpSource" data-tip="Audio Source" data-tip-fn="Click to cycle: BLUETOOTH → FM → USB." style="cursor:pointer">BLUETOOTH</div>
+        <div class="panel-tab">RADIO</div>
+      </div>
+    </div>
   </div>
 
   <!-- Lower section -->
@@ -764,12 +1139,17 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
         <div class="seat-icon" id="seatLeft"
           data-pos-id="seat-left" data-pos-label="Left Seat Icon"
           data-tip="Left Seat Heating" data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
-            <path d="M8 5 C8 5 7 9 8 13 C8.5 15 10 16 11 17 L11 21"/>
-            <path d="M7 21 L15 21"/>
-            <path d="M15 15 L18 15 C19 15 20 16 20 17 L20 21"/>
-            <circle cx="10" cy="3.5" r="1.5"/>
+          <svg viewBox="0 0 24 24" fill="white">
+            <rect x="2" y="1" width="7" height="5" rx="2" opacity="0.95"/>
+            <rect x="2" y="5" width="8.5" height="14" rx="1" opacity="0.88"/>
+            <rect x="2" y="17.5" width="20" height="5.5" rx="1.5" opacity="0.82"/>
+            <rect x="19" y="18" width="3" height="5" rx="1" opacity="0.72"/>
           </svg>
+          <div class="seat-bars">
+            <span class="seat-bar" data-level="3"></span>
+            <span class="seat-bar" data-level="2"></span>
+            <span class="seat-bar" data-level="1"></span>
+          </div>
         </div>
         <div class="temp-ring" id="tempLeft"
           data-pos-id="temp-left" data-pos-label="Left Temp Ring"
@@ -779,13 +1159,7 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
         <div class="fan-icon" id="fanIcon"
           data-pos-id="fan-icon" data-pos-label="Fan Icon"
           data-tip="Climate Fan / A/C" data-tip-fn="Click to cycle fan speed: OFF → LOW → MED → HIGH.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
-            <circle cx="12" cy="12" r="2"/>
-            <path d="M12 10 C11.5 8 11.5 5 13 4 C14.5 3 16 4.5 14.5 6.5 C13.5 7.8 12 10 12 10Z" fill="rgba(255,255,255,0.25)"/>
-            <path d="M14 12 C16 11.5 19 11.5 20 13 C21 14.5 19.5 16 17.5 14.5 C16.2 13.5 14 12 14 12Z" fill="rgba(255,255,255,0.25)"/>
-            <path d="M12 14 C12.5 16 12.5 19 11 20 C9.5 21 8 19.5 9.5 17.5 C10.5 16.2 12 14 12 14Z" fill="rgba(255,255,255,0.25)"/>
-            <path d="M10 12 C8 12.5 5 12.5 4 11 C3 9.5 4.5 8 6.5 9.5 C7.8 10.5 10 12 10 12Z" fill="rgba(255,255,255,0.25)"/>
-          </svg>
+          <i class="fa-solid fa-fan"></i>
         </div>
       </div>
       <div style="flex:1"></div>
@@ -798,11 +1172,16 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
         <div class="seat-icon" id="seatRight"
           data-pos-id="seat-right" data-pos-label="Right Seat Icon"
           data-tip="Right Seat Heating" data-tip-fn="Click to cycle: OFF → LOW → MED → HIGH.">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.4" stroke-linecap="round">
-            <path d="M16 5 C16 5 17 9 16 13 C15.5 15 14 16 13 17 L13 21"/>
-            <path d="M9 21 L17 21"/>
-            <path d="M9 15 L6 15 C5 15 4 16 4 17 L4 21"/>
-            <circle cx="14" cy="3.5" r="1.5"/>
+          <div class="seat-bars">
+            <span class="seat-bar" data-level="3"></span>
+            <span class="seat-bar" data-level="2"></span>
+            <span class="seat-bar" data-level="1"></span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="white">
+            <rect x="15" y="1" width="7" height="5" rx="2" opacity="0.95"/>
+            <rect x="13.5" y="5" width="8.5" height="14" rx="1" opacity="0.88"/>
+            <rect x="2" y="17.5" width="20" height="5.5" rx="1.5" opacity="0.82"/>
+            <rect x="2" y="18" width="3" height="5" rx="1" opacity="0.72"/>
           </svg>
         </div>
       </div>
@@ -881,6 +1260,7 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
     </div>
 
   </div><!-- /lower -->
+  </div><!-- /shell-content -->
 
   <!-- Handle -->
   <div class="handle">
@@ -891,6 +1271,53 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
 
   </div><!-- /cpShell -->
 </div><!-- /console -->
+
+</div><!-- /tab-cp -->
+
+<!-- ── TAB: BINNACLE ── -->
+<div id="tab-binnacle" class="tab-panel">
+  <div class="binnacle-wrap">
+
+    <img src="luce_binnacle.jpg" class="binnacle-ref-overlay hidden" id="binnacleOverlay" alt="">
+
+    <!-- Power Dial (e-Manettino) -->
+    <div class="binnacle-col">
+      <div class="binnacle-housing">
+        <div class="binnacle-bezel-ring">
+          <canvas id="pdCanvas" width="200" height="200"
+            style="border-radius:50%;display:block;cursor:pointer;"
+            data-tip="Power Dial" data-tip-fn="Click to cycle e-Manettino: RANGE → TOUR → PERFO. Controls powertrain energy delivery and throttle mapping."></canvas>
+        </div>
+      </div>
+      <div class="binnacle-dial-label tour-mode" id="pdLabel">POWER — TOUR</div>
+    </div>
+
+    <!-- Central Dial (speed / power) -->
+    <div class="binnacle-col">
+      <div class="binnacle-housing">
+        <div class="binnacle-bezel-ring">
+          <canvas id="cdCanvas" width="280" height="280"
+            style="border-radius:50%;display:block;"
+            data-tip="Central Dial" data-tip-fn="Main instrument showing speed, power output, and drive mode arc."></canvas>
+        </div>
+      </div>
+      <div class="binnacle-dial-label" id="cdLabel" style="letter-spacing:1.5px;font-size:8px;color:rgba(232,232,224,0.45);">VELOCITY · POWER</div>
+    </div>
+
+    <!-- Driver Dial (multifunction) -->
+    <div class="binnacle-col">
+      <div class="binnacle-housing">
+        <div class="binnacle-bezel-ring">
+          <canvas id="ddCanvas" width="200" height="200"
+            style="border-radius:50%;display:block;cursor:pointer;"
+            data-tip="Driver Dial" data-tip-fn="Click to cycle: G METER → VEHICLE STATUS → BATTERY → TRIP → DYNAMICS → TIRES."></canvas>
+        </div>
+      </div>
+      <div class="binnacle-dial-label" id="ddLabel">G METER</div>
+    </div>
+
+  </div>
+</div><!-- /tab-binnacle -->
 
 <div id="resizeOverlay">
   <div class="resize-handle rh-nw" data-rh="nw"></div>
@@ -912,11 +1339,17 @@ body.ctrl-held .console.pos-selected .console-select-tab { color: #FFF200; borde
     &nbsp;·&nbsp; <span class="hint-key">⇧</span>+WASD = ×5
     &nbsp;·&nbsp; <span class="hint-key">Ctrl</span>+Click to toggle
     &nbsp;·&nbsp; <span class="hint-key">⇧</span>+Click to add
+    &nbsp;·&nbsp; <span class="hint-key">↑↓</span> align vertical &nbsp;·&nbsp; <span class="hint-key">←→</span> align horizontal
   </span>
   <div id="consoleRadiusControl">
     <label>SHELL RADIUS</label>
-    <input type="range" id="consoleRadiusSlider" min="0" max="80" value="30">
+    <input type="range" id="consoleRadiusSlider" min="0" max="100" value="30">
     <span id="consoleRadiusVal">30px</span>
+  </div>
+  <div id="fontSizeControl">
+    <label>FONT SIZE</label>
+    <input type="range" id="fontSizeSlider" min="6" max="80" value="12">
+    <span id="fontSizeVal">12px</span>
   </div>
   <span class="hint-clear" onclick="clearSelection()">CLEAR SELECTION</span>
 </div>
@@ -958,7 +1391,8 @@ const TRACKS = [
 const POS_ELEMENTS = {
   'console':       'Control Panel Display',
   'cp-shell':      'Control Panel Shell',
-  'status-dot':    'Status Dot',
+  'status-dot':    'Stopwatch Start/Stop',
+  'sw-reset':      'Reset Stopwatch',
   'horse-svg':     'Prancing Horse',
   'enzo-badge':    'ENZO Badge',
   'metrics-col':   'Metrics Column',
@@ -1041,6 +1475,7 @@ const dom = {
   screenArea:  document.getElementById('screenArea'),
   console:     document.getElementById('console'),
   cpShell:     document.getElementById('cpShell'),
+  shellContent:document.querySelector('.shell-content'),
   domeClimate: document.getElementById('domeClimate'),
   domeSettings:document.getElementById('domeSettings'),
   domeMedia:   document.getElementById('domeMedia'),
@@ -1101,36 +1536,51 @@ function drawWave(ctx,buf,color,minV,maxV){
 
 // ══ CLOCK ══
 function drawClock(){
-  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-2;
+  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-1;
   ctxClock.clearRect(0,0,W,H);
-  const now=new Date(),sec=now.getSeconds()+now.getMilliseconds()/1000,min=now.getMinutes()+sec/60,hr=(now.getHours()%12)+min/60;
-  // Deep black face
-  const g=ctxClock.createRadialGradient(cx-r*.15,cy-r*.18,0,cx,cy,r);
-  g.addColorStop(0,'#1c1c22'); g.addColorStop(1,'#080810');
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
-  // Tick ring — minute marks with pinkish hue, hour marks brighter
+  const now=new Date(),sec=now.getSeconds()+now.getMilliseconds()/1000,
+        min=now.getMinutes()+sec/60,hr=(now.getHours()%12)+min/60;
+  // Outer dark frame
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle='#09090d'; ctxClock.fill();
+  const ringR=r*0.84;
+  // Silver chapter ring (annulus)
+  const rg=ctxClock.createLinearGradient(cx-r,cy,cx+r,cy);
+  rg.addColorStop(0,'#818186'); rg.addColorStop(0.35,'#dcdce2'); rg.addColorStop(0.65,'#c0c0c6'); rg.addColorStop(1,'#6a6a70');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctxClock.arc(cx,cy,ringR,0,Math.PI*2,true);
+  ctxClock.fillStyle=rg; ctxClock.fill();
+  // Tick marks on ring (dark on silver)
   for(let i=0;i<60;i++){
-    const a=(i/60)*Math.PI*2-Math.PI/2,maj=i%5===0,ro=r-1,ri=ro-(maj?7:3.5);
+    const a=(i/60)*Math.PI*2-Math.PI/2,maj=i%5===0;
+    const ro=r-1.5,ri=maj?ringR+(r-ringR)*.44:ringR+(r-ringR)*.16;
     ctxClock.beginPath(); ctxClock.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctxClock.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    ctxClock.strokeStyle=maj?'rgba(255,255,255,0.82)':'rgba(220,160,160,0.38)'; ctxClock.lineWidth=maj?1.4:0.65; ctxClock.stroke();
+    ctxClock.strokeStyle=maj?'rgba(14,14,20,0.88)':'rgba(44,44,55,0.45)'; ctxClock.lineWidth=maj?3.2:1.4; ctxClock.stroke();
   }
-  // All 12 numerals
-  const nr=r-16;
-  ctxClock.font=`600 ${Math.round(r*.155)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(255,255,255,0.82)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  // Deep black glossy face
+  const fg=ctxClock.createRadialGradient(cx-ringR*.22,cy-ringR*.28,0,cx,cy,ringR);
+  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,ringR,0,Math.PI*2); ctxClock.fillStyle=fg; ctxClock.fill();
+  // Numerals
+  const nr=ringR-r*.14;
+  ctxClock.font=`500 ${Math.round(ringR*.21)}px Barlow Condensed,sans-serif`;
+  ctxClock.fillStyle='rgba(255,255,255,0.92)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
   for(let n=1;n<=12;n++){ const a=(n/12)*Math.PI*2-Math.PI/2; ctxClock.fillText(n,cx+nr*Math.cos(a),cy+nr*Math.sin(a)); }
-  // Hands
-  hand(cx,cy,(hr/12)*Math.PI*2-Math.PI/2,r*.44,3.5,'rgba(255,255,255,0.92)');
-  hand(cx,cy,(min/60)*Math.PI*2-Math.PI/2,r*.68,2.2,'rgba(255,255,255,0.88)');
+  // Hour hand — short, wide
+  clockHand(cx,cy,(hr/12)*Math.PI*2-Math.PI/2,ringR*.45,7.6,0,'rgba(255,255,255,0.95)');
+  // Minute hand — long, thinner
+  clockHand(cx,cy,(min/60)*Math.PI*2-Math.PI/2,ringR*.74,4.4,0,'rgba(255,255,255,0.90)');
+  // Second hand with counterweight tail
   const sa=(sec/60)*Math.PI*2-Math.PI/2;
-  hand(cx,cy,sa,r*.79,1,'#FF2800');
-  hand(cx,cy,sa+Math.PI,r*.21,1.8,'#FF2800');
-  // Hub
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,3.5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,1.4,0,Math.PI*2); ctxClock.fillStyle='#ddd'; ctxClock.fill();
+  ctxClock.save(); ctxClock.translate(cx,cy); ctxClock.rotate(sa);
+  ctxClock.beginPath(); ctxClock.moveTo(0,-ringR*.22); ctxClock.lineTo(0,ringR*.80);
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2.2; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.restore();
+  // Center hub
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,9,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,4,0,Math.PI*2); ctxClock.fillStyle='#cccccc'; ctxClock.fill();
 }
-function hand(cx,cy,angle,len,w,color){
+function clockHand(cx,cy,angle,len,w,tail,color){
   ctxClock.save(); ctxClock.translate(cx,cy); ctxClock.rotate(angle);
-  ctxClock.beginPath(); ctxClock.moveTo(0,0); ctxClock.lineTo(len,0);
+  ctxClock.beginPath(); ctxClock.moveTo(-tail,0); ctxClock.lineTo(len,0);
   ctxClock.strokeStyle=color; ctxClock.lineWidth=w; ctxClock.lineCap='round'; ctxClock.stroke();
   ctxClock.restore();
 }
@@ -1144,106 +1594,137 @@ function swToggle(){
 }
 function swReset(){ s.swRunning=false; s.swElapsed=0; s.swStart=null; dom.multigraphLabel.classList.remove('sw-running'); }
 function drawStopwatch(){
-  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-2;
+  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-1;
   ctxClock.clearRect(0,0,W,H);
-  const ms=swGetMs(), mainFrac=(ms/1000%60)/60, elapsedMin=Math.floor(ms/60000), subSecFrac=(ms%1000)/1000;
-  // Ferrari yellow face
-  const g=ctxClock.createRadialGradient(cx-r*.18,cy-r*.22,0,cx,cy,r);
-  g.addColorStop(0,'#FFFC9A'); g.addColorStop(0.55,'#FFF200'); g.addColorStop(1,'#e8d900');
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
-  // Outer tick scale 0-60s
-  for(let i=0;i<60;i++){
-    const a=(i/60)*Math.PI*2-Math.PI/2,maj=i%5===0,ro=r-1,ri=ro-(maj?7:3.5);
+  const ms=swGetMs(),mainFrac=(ms/1000%60)/60,elapsedMin=Math.floor(ms/60000),subSecFrac=(ms%1000)/1000;
+  // Dark outer frame
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle='#09090d'; ctxClock.fill();
+  const faceR=r-1;
+  // Bright yellow face
+  const g=ctxClock.createRadialGradient(cx-faceR*.15,cy-faceR*.18,0,cx,cy,faceR);
+  g.addColorStop(0,'#FFFD96'); g.addColorStop(0.45,'#FFF200'); g.addColorStop(0.85,'#f5e600'); g.addColorStop(1,'#e8d800');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,faceR,0,Math.PI*2); ctxClock.fillStyle=g; ctxClock.fill();
+  // Dense outer tick marks (120 per revolution — major every 5s, medium every 2.5s)
+  for(let i=0;i<120;i++){
+    const a=(i/120)*Math.PI*2-Math.PI/2,maj=i%10===0,med=i%5===0;
+    const ro=faceR-0.5,ri=maj?faceR-faceR*.16:med?faceR-faceR*.10:faceR-faceR*.06;
     ctxClock.beginPath(); ctxClock.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctxClock.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    ctxClock.strokeStyle=maj?'rgba(0,0,0,0.65)':'rgba(0,0,0,0.28)'; ctxClock.lineWidth=maj?1.2:0.6; ctxClock.stroke();
+    ctxClock.strokeStyle=maj?'rgba(0,0,0,0.72)':med?'rgba(0,0,0,0.48)':'rgba(0,0,0,0.22)';
+    ctxClock.lineWidth=maj?2.8:med?1.8:1.0; ctxClock.stroke();
   }
-  // Scale numbers every 5s (60 at top)
-  const numR=r-15; ctxClock.font=`600 ${Math.round(r*.135)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(0,0,0,0.75)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  // Scale numbers every 5s
+  const numR=faceR-faceR*.19;
+  ctxClock.font=`600 ${Math.round(faceR*.135)}px Barlow Condensed,sans-serif`;
+  ctxClock.fillStyle='rgba(0,0,0,0.80)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
   for(let i=0;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctxClock.fillText(i===0?60:i*5,cx+numR*Math.cos(a),cy+numR*Math.sin(a)); }
   // Sub-dials
-  const sdR=Math.round(r*.27), sdOx=Math.round(r*.31), sdOy=Math.round(r*.17);
+  const sdR=Math.round(faceR*.28),sdOx=Math.round(faceR*.31),sdOy=Math.round(faceR*.08);
   [[cx-sdOx,cy+sdOy,0],[cx+sdOx,cy+sdOy,1]].forEach(([scx,scy,idx])=>{
-    ctxClock.beginPath(); ctxClock.arc(scx,scy,sdR,0,Math.PI*2); ctxClock.fillStyle='#111'; ctxClock.fill();
+    const sg=ctxClock.createRadialGradient(scx-sdR*.2,scy-sdR*.25,0,scx,scy,sdR);
+    sg.addColorStop(0,'#1c1c20'); sg.addColorStop(1,'#0a0a0e');
+    ctxClock.beginPath(); ctxClock.arc(scx,scy,sdR,0,Math.PI*2); ctxClock.fillStyle=sg; ctxClock.fill();
+    ctxClock.beginPath(); ctxClock.arc(scx,scy,sdR,0,Math.PI*2);
+    ctxClock.strokeStyle='rgba(255,255,255,0.12)'; ctxClock.lineWidth=1.5; ctxClock.stroke();
     // Sub ticks
-    for(let i=0;i<12;i++){
-      const a=(i/12)*Math.PI*2-Math.PI/2,smaj=i%3===0,sro=sdR-1,sri=sro-(smaj?4:2);
+    for(let i=0;i<60;i++){
+      const a=(i/60)*Math.PI*2-Math.PI/2,smaj=i%5===0,sro=sdR-1,sri=sro-(smaj?sdR*.22:sdR*.10);
       ctxClock.beginPath(); ctxClock.moveTo(scx+sro*Math.cos(a),scy+sro*Math.sin(a)); ctxClock.lineTo(scx+sri*Math.cos(a),scy+sri*Math.sin(a));
-      ctxClock.strokeStyle='rgba(255,255,255,0.35)'; ctxClock.lineWidth=0.7; ctxClock.stroke();
+      ctxClock.strokeStyle=smaj?'rgba(255,255,255,0.45)':'rgba(255,255,255,0.18)'; ctxClock.lineWidth=smaj?1.8:1.0; ctxClock.stroke();
     }
     // Sub labels
-    ctxClock.font=`500 ${Math.round(sdR*.36)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(255,255,255,0.6)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
-    const lr=sdR-5;
+    ctxClock.font=`400 ${Math.round(sdR*.32)}px Barlow Condensed,sans-serif`;
+    ctxClock.fillStyle='rgba(255,255,255,0.65)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+    const lr=sdR-sdR*.28;
     if(idx===0){ [[12,0],[9,270],[6,180],[3,90]].forEach(([n,d])=>{ const a=d*Math.PI/180-Math.PI/2; ctxClock.fillText(n,scx+lr*Math.cos(a),scy+lr*Math.sin(a)); }); }
     else        { [[60,0],[10,60],[20,120],[30,180],[40,240],[50,300]].forEach(([n,d])=>{ const a=d*Math.PI/180-Math.PI/2; ctxClock.fillText(n,scx+lr*Math.cos(a),scy+lr*Math.sin(a)); }); }
     // Sub hand
-    const hfrac = idx===0 ? (elapsedMin%30)/30 : subSecFrac;
+    const hfrac=idx===0?(elapsedMin%30)/30:subSecFrac;
     const ha=hfrac*Math.PI*2-Math.PI/2;
-    ctxClock.beginPath(); ctxClock.moveTo(scx,scy); ctxClock.lineTo(scx+(sdR-3)*Math.cos(ha),scy+(sdR-3)*Math.sin(ha));
-    ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=1; ctxClock.lineCap='round'; ctxClock.stroke();
-    ctxClock.beginPath(); ctxClock.arc(scx,scy,2,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+    ctxClock.beginPath(); ctxClock.moveTo(scx,scy); ctxClock.lineTo(scx+(sdR-2)*Math.cos(ha),scy+(sdR-2)*Math.sin(ha));
+    ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2.4; ctxClock.lineCap='round'; ctxClock.stroke();
+    ctxClock.beginPath(); ctxClock.arc(scx,scy,5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
   });
-  // Main sweep hand
+  // Main sweep hand with counterweight
   const ma=mainFrac*Math.PI*2-Math.PI/2;
-  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx+r*.8*Math.cos(ma),cy+r*.8*Math.sin(ma));
-  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=1.5; ctxClock.lineCap='round'; ctxClock.stroke();
-  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx+r*.18*Math.cos(ma+Math.PI),cy+r*.18*Math.sin(ma+Math.PI));
-  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2.2; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.save(); ctxClock.translate(cx,cy); ctxClock.rotate(ma);
+  ctxClock.beginPath(); ctxClock.moveTo(0,-faceR*.18); ctxClock.lineTo(0,faceR*.82);
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=3.6; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.restore();
   // Center hub
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,4.5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,1.8,0,Math.PI*2); ctxClock.fillStyle='#222'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,11,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,4.5,0,Math.PI*2); ctxClock.fillStyle='#1a1a1a'; ctxClock.fill();
 }
 
 // ══ COMPASS ══
 let cBearing=330,cTarget=330,cVel=0;
 function drawCompass(){
-  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-2;
+  const W=dom.clockFace.width,H=dom.clockFace.height,cx=W/2,cy=H/2,r=W/2-1;
   ctxClock.clearRect(0,0,W,H);
   if(Math.random()<0.008) cTarget+=(Math.random()-.5)*25;
   cVel=cVel*0.92+(cTarget-cBearing)*0.04; cBearing+=cVel;
   s.bearing=((cBearing%360)+360)%360;
   updateHeading();
-  // Dark bezel ring
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle='#141416'; ctxClock.fill();
-  // Clip to inner face
+  const innerR=r*0.44, outerR=r-2, ringW=outerR-innerR;
+  // Dark outer frame
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,r,0,Math.PI*2); ctxClock.fillStyle='#09090d'; ctxClock.fill();
+  // ── Rotating outer card: white ring with N/E/S/W and degree numbers in black ──
   ctxClock.save();
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r-2,0,Math.PI*2); ctxClock.clip();
-  // Rotate card with bearing
-  ctxClock.save();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,outerR,0,Math.PI*2); ctxClock.clip();
   ctxClock.translate(cx,cy); ctxClock.rotate(-(s.bearing*Math.PI/180));
-  // White compass card
-  ctxClock.beginPath(); ctxClock.arc(0,0,r-2,0,Math.PI*2); ctxClock.fillStyle='#ccccc4'; ctxClock.fill();
-  // Red north sector (wedge ±22° around N)
-  const iR=r*.41;
-  ctxClock.beginPath(); ctxClock.moveTo(iR*Math.cos(-Math.PI/2-Math.PI/8.2),iR*Math.sin(-Math.PI/2-Math.PI/8.2));
-  ctxClock.arc(0,0,r-2,-Math.PI/2-Math.PI/8.2,-Math.PI/2+Math.PI/8.2);
-  ctxClock.arc(0,0,iR,-Math.PI/2+Math.PI/8.2,-Math.PI/2-Math.PI/8.2,true);
-  ctxClock.closePath(); ctxClock.fillStyle='rgba(208,36,20,0.32)'; ctxClock.fill();
-  // Degree ticks (every 10°, 36 total)
-  for(let i=0;i<36;i++){
-    const a=(i/36)*Math.PI*2-Math.PI/2,ev30=i%3===0,ro=r-3,ri=ro-(ev30?8:4);
+  ctxClock.beginPath(); ctxClock.arc(0,0,outerR,0,Math.PI*2); ctxClock.fillStyle='#e8e8e4'; ctxClock.fill();
+  // Fine ticks (72 = every 5°; major at 30°, medium at 10°)
+  for(let i=0;i<72;i++){
+    const a=(i/72)*Math.PI*2-Math.PI/2,maj=i%6===0,med=i%2===0;
+    const ro=outerR-1.5,ri=maj?outerR-ringW*.30:med?outerR-ringW*.17:outerR-ringW*.09;
     ctxClock.beginPath(); ctxClock.moveTo(ro*Math.cos(a),ro*Math.sin(a)); ctxClock.lineTo(ri*Math.cos(a),ri*Math.sin(a));
-    ctxClock.strokeStyle='rgba(0,0,0,0.58)'; ctxClock.lineWidth=ev30?1.1:0.6; ctxClock.stroke();
+    ctxClock.strokeStyle='rgba(0,0,0,0.62)'; ctxClock.lineWidth=maj?2.0:med?1.2:0.7; ctxClock.stroke();
   }
-  // Degree numbers every 30° (skip 0/360, N label fills that)
-  const dNumR=r-17; ctxClock.font=`400 ${Math.round(r*.11)}px Barlow Condensed,sans-serif`; ctxClock.fillStyle='rgba(0,0,0,0.58)'; ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
-  for(let i=1;i<12;i++){ const a=(i/12)*Math.PI*2-Math.PI/2; ctxClock.fillText(i*30,dNumR*Math.cos(a),dNumR*Math.sin(a)); }
-  // N/E/S/W
-  const cR=r-25; ctxClock.font=`700 ${Math.round(r*.19)}px Barlow Condensed,sans-serif`;
-  [['N',0,'rgba(10,10,10,0.92)'],['E',90,'rgba(20,20,20,0.72)'],['S',180,'rgba(20,20,20,0.72)'],['W',270,'rgba(20,20,20,0.72)']].forEach(([l,d,c])=>{
-    const a=d*Math.PI/180-Math.PI/2; ctxClock.fillStyle=c; ctxClock.fillText(l,cR*Math.cos(a),cR*Math.sin(a));
+  const labelR=innerR+ringW*0.50;
+  ctxClock.textAlign='center'; ctxClock.textBaseline='middle';
+  // Degree numbers every 30° (skip cardinals)
+  ctxClock.font=`400 ${Math.round(r*.09)}px Barlow Condensed,sans-serif`;
+  ctxClock.fillStyle='rgba(0,0,0,0.65)';
+  [30,60,120,150,210,240,300,330].forEach(deg=>{
+    const a=deg*Math.PI/180-Math.PI/2; ctxClock.fillText(deg,labelR*Math.cos(a),labelR*Math.sin(a));
   });
-  ctxClock.restore(); // un-rotate
-  // Fixed dark inner circle
-  const ig=ctxClock.createRadialGradient(cx-r*.1,cy-r*.1,0,cx,cy,r*.42);
-  ig.addColorStop(0,'#242428'); ig.addColorStop(1,'#101012');
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,r*.42,0,Math.PI*2); ctxClock.fillStyle=ig; ctxClock.fill();
-  ctxClock.restore(); // un-clip
-  // Fixed needle (points to current heading)
-  const nl=r*.52;
-  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy-nl); ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=2; ctxClock.lineCap='round'; ctxClock.stroke();
-  ctxClock.beginPath(); ctxClock.moveTo(cx,cy); ctxClock.lineTo(cx,cy+nl*.55); ctxClock.strokeStyle='rgba(210,210,210,0.72)'; ctxClock.lineWidth=1.5; ctxClock.lineCap='round'; ctxClock.stroke();
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,4,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
-  ctxClock.beginPath(); ctxClock.arc(cx,cy,1.5,0,Math.PI*2); ctxClock.fillStyle='#ddd'; ctxClock.fill();
+  // Cardinal letters in bold black
+  ctxClock.font=`700 ${Math.round(r*.12)}px Barlow Condensed,sans-serif`;
+  ctxClock.fillStyle='rgba(0,0,0,0.92)';
+  [['N',0],['E',90],['S',180],['W',270]].forEach(([l,deg])=>{
+    const a=deg*Math.PI/180-Math.PI/2; ctxClock.fillText(l,labelR*Math.cos(a),labelR*Math.sin(a));
+  });
+  ctxClock.restore(); // un-clip + un-rotate
+  // ── Fixed inner black disc ──
+  const ig=ctxClock.createRadialGradient(cx-innerR*.14,cy-innerR*.17,0,cx,cy,innerR);
+  ig.addColorStop(0,'#1e1e26'); ig.addColorStop(0.65,'#121218'); ig.addColorStop(1,'#08080e');
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,innerR,0,Math.PI*2); ctxClock.fillStyle=ig; ctxClock.fill();
+  // ── Red sector: heading (12-o'clock) to N direction, shortest arc ──
+  let nOff=(((-s.bearing)%360)+360)%360; // CW degrees from heading to N
+  if(nOff>180) nOff-=360; // convert to -180..180
+  const nOffRad=nOff*Math.PI/180;
+  if(Math.abs(nOffRad)>0.02){
+    const headAngle=-Math.PI/2, northAngle=headAngle+nOffRad;
+    ctxClock.beginPath(); ctxClock.moveTo(cx,cy);
+    ctxClock.arc(cx,cy,innerR*.90,headAngle,northAngle,nOffRad<0);
+    ctxClock.closePath(); ctxClock.fillStyle='rgba(200,28,15,0.50)'; ctxClock.fill();
+  }
+  // ── Two-tone needle (screen space, rotates to point at N): red tips, grey body ──
+  const needleAngle=-Math.PI/2+nOffRad; // N direction in screen space
+  const tailAngle=needleAngle+Math.PI;
+  const ntip=innerR*.90,ntail=innerR*.26;
+  const tipX=cx+ntip*Math.cos(needleAngle),tipY=cy+ntip*Math.sin(needleAngle);
+  const tailX=cx+ntail*Math.cos(tailAngle),tailY=cy+ntail*Math.sin(tailAngle);
+  const mfX=cx+ntip*.52*Math.cos(needleAngle),mfY=cy+ntip*.52*Math.sin(needleAngle);
+  const mtX=cx+ntail*.52*Math.cos(tailAngle),mtY=cy+ntail*.52*Math.sin(tailAngle);
+  ctxClock.beginPath(); ctxClock.moveTo(mfX,mfY); ctxClock.lineTo(tipX,tipY);
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=4.4; ctxClock.lineCap='round'; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.moveTo(mfX,mfY); ctxClock.lineTo(mtX,mtY);
+  ctxClock.strokeStyle='rgba(185,185,192,0.95)'; ctxClock.lineWidth=4.4; ctxClock.lineCap='butt'; ctxClock.stroke();
+  ctxClock.beginPath(); ctxClock.moveTo(mtX,mtY); ctxClock.lineTo(tailX,tailY);
+  ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=4.4; ctxClock.lineCap='round'; ctxClock.stroke();
+  // ── Center hub (fixed) ──
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,9,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
+  ctxClock.beginPath(); ctxClock.arc(cx,cy,4,0,Math.PI*2); ctxClock.fillStyle='#e0e0e0'; ctxClock.fill();
 }
 
 // ══ TIME / HEADING ══
@@ -1263,9 +1744,9 @@ function updateHeading(){
 }
 function updateMgInfo(){
   const mode=s.multigraph;
-  document.getElementById('mgInfoClock').style.display=mode==='CLOCK'?'':'none';
-  document.getElementById('mgInfoStopwatch').style.display=mode==='STOPWATCH'?'':'none';
-  document.getElementById('mgInfoCompass').style.display=mode==='COMPASS'?'':'none';
+  document.getElementById('mgInfoClock').style.visibility=mode==='CLOCK'?'':'hidden';
+  document.getElementById('mgInfoStopwatch').style.visibility=mode==='STOPWATCH'?'':'hidden';
+  document.getElementById('mgInfoCompass').style.visibility=mode==='COMPASS'?'':'hidden';
   if(mode==='STOPWATCH'){
     const ms=swGetMs(),m=Math.floor(ms/60000),sc=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);
     document.getElementById('mgSwTime').innerHTML=`${String(m).padStart(2,'0')}:${String(sc).padStart(2,'0')}<span class="mg-sw-cs">.${String(cs).padStart(2,'0')}</span>`;
@@ -1302,16 +1783,22 @@ function updateModeLeds(){
 }
 
 // ══ CP MODE SWITCHING ══
+function switchStView(view, tabEl) {
+  document.querySelectorAll('#panelSettings .st-view').forEach(v => v.classList.remove('active'));
+  document.querySelector('#panelSettings .st-view[data-view="' + view + '"]').classList.add('active');
+  document.querySelectorAll('#stTabs .panel-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+}
 function setCpMode(mode){
   s.cpMode = (s.cpMode===mode) ? 'off' : mode;
   document.querySelectorAll('.mode-panel').forEach(p=>p.classList.remove('active'));
-  const screenBottom=document.getElementById('screenBottom');
+  const wm = document.getElementById('ferrariWatermark');
   if(s.cpMode !== 'off'){
     const ids={climate:'panelClimate',settings:'panelSettings',media:'panelMedia'};
     document.getElementById(ids[s.cpMode]).classList.add('active');
-    screenBottom.classList.add('has-active');
+    wm.style.visibility = 'hidden';
   } else {
-    screenBottom.classList.remove('has-active');
+    wm.style.visibility = '';
   }
   updateModeLeds();
   updatePills();
@@ -1345,6 +1832,11 @@ function updateClimatePanel(){
 function updateHeatBars(containerId,level){
   document.querySelectorAll('#'+containerId+' .cp-heat-bar').forEach(b=>{
     b.classList.toggle('lit', parseInt(b.dataset.level)<=level);
+  });
+}
+function updateSeatBars(seatEl,level){
+  seatEl.querySelectorAll('.seat-bar').forEach(b=>{
+    b.classList.toggle('lit', level>0 && parseInt(b.dataset.level)<=level);
   });
 }
 function updateFanDots(){
@@ -1396,6 +1888,7 @@ function loop(){
   else drawCompass();
   updateMgInfo();
   updateMedia();
+  updateBinnacle();
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
@@ -1454,6 +1947,7 @@ function attachSeat(el,side){
     else               s.seatHeatR=(s.seatHeatR+1)%4;
     const idx=side==='left'?s.seatHeatL:s.seatHeatR;
     el.className='seat-icon '+['','heating-low','heating-med','heating-high'][idx];
+    updateSeatBars(el,idx);
     if(s.cpMode==='climate') updateClimatePanel();
   });
 }
@@ -1461,8 +1955,8 @@ attachSeat(dom.seatLeft,'left');
 attachSeat(dom.seatRight,'right');
 
 // Seat heat (climate panel)
-document.getElementById('cpHeatL').addEventListener('click',()=>{ s.seatHeatL=(s.seatHeatL+1)%4; dom.seatLeft.className='seat-icon '+['','heating-low','heating-med','heating-high'][s.seatHeatL]; updateHeatBars('cpHeatL',s.seatHeatL); });
-document.getElementById('cpHeatR').addEventListener('click',()=>{ s.seatHeatR=(s.seatHeatR+1)%4; dom.seatRight.className='seat-icon '+['','heating-low','heating-med','heating-high'][s.seatHeatR]; updateHeatBars('cpHeatR',s.seatHeatR); });
+document.getElementById('cpHeatL').addEventListener('click',()=>{ s.seatHeatL=(s.seatHeatL+1)%4; dom.seatLeft.className='seat-icon '+['','heating-low','heating-med','heating-high'][s.seatHeatL]; updateSeatBars(dom.seatLeft,s.seatHeatL); updateHeatBars('cpHeatL',s.seatHeatL); });
+document.getElementById('cpHeatR').addEventListener('click',()=>{ s.seatHeatR=(s.seatHeatR+1)%4; dom.seatRight.className='seat-icon '+['','heating-low','heating-med','heating-high'][s.seatHeatR]; updateSeatBars(dom.seatRight,s.seatHeatR); updateHeatBars('cpHeatR',s.seatHeatR); });
 
 // A/C, Auto, Sync
 document.getElementById('cpAcBtn').addEventListener('click',()=>{ s.cpAcOn=!s.cpAcOn; document.getElementById('cpAcBtn').classList.toggle('active',s.cpAcOn); });
@@ -1603,10 +2097,18 @@ function hideTip(){ tipEl.style.display='none'; }
 function posTip(e){ tipEl.style.left=Math.min(e.clientX+14,window.innerWidth-245)+'px'; tipEl.style.top=Math.max(e.clientY-54,8)+'px'; }
 
 // ══ OVERLAY TOGGLE ══
+function activeTab(){ return document.getElementById('tab-binnacle').classList.contains('active')?'binnacle':'cp'; }
 function toggleOverlay(){
-  const img=document.getElementById('refOverlay'),btn=document.getElementById('overlayToggle');
-  img.classList.toggle('hidden'); const on=!img.classList.contains('hidden');
-  btn.textContent='OVERLAY: '+(on?'ON':'OFF'); btn.classList.toggle('active',on);
+  const btn=document.getElementById('overlayToggle');
+  if(activeTab()==='binnacle'){
+    const img=document.getElementById('binnacleOverlay');
+    img.classList.toggle('hidden'); const on=!img.classList.contains('hidden');
+    btn.textContent='OVERLAY: '+(on?'ON':'OFF'); btn.classList.toggle('active',on);
+  } else {
+    const img=document.getElementById('refOverlay');
+    img.classList.toggle('hidden'); const on=!img.classList.contains('hidden');
+    btn.textContent='OVERLAY: '+(on?'ON':'OFF'); btn.classList.toggle('active',on);
+  }
 }
 
 // ══════════════════════════════════════════════════════
@@ -1617,6 +2119,16 @@ Object.keys(POS_ELEMENTS).forEach(id=>{ positions[id]={x:0,y:0}; });
 const resizes={};
 Object.keys(POS_ELEMENTS).forEach(id=>{ resizes[id]={w:1,h:1}; });
 const selectedIds=new Set();
+
+const FONT_SIZE_IDS=new Set([
+  'mode-badge','power-badge','speed-value','power-value',
+  'info-time','info-date','info-temp','info-aqi','info-heading','enzo-badge'
+]);
+const fontSizes={};
+function applyFontSize(id,px){
+  const el=getPosEl(id); if(!el) return;
+  fontSizes[id]=px; el.style.fontSize=px+'px';
+}
 
 function getPosEl(id){ return document.querySelector(`[data-pos-id="${id}"]`); }
 
@@ -1658,6 +2170,10 @@ function applyPosition(id){
       el.style.width='';
       el.style.height='';
     }
+    if(id==='watermark-text'){
+      const img=el.querySelector('img');
+      if(img){ img.style.width=hasScale?'100%':''; img.style.height=hasScale?'100%':''; img.style.objectFit=hasScale?'contain':''; }
+    }
   }
   updateResizeOverlay();
 }
@@ -1667,7 +2183,7 @@ function deselectPosEl(id){ const el=getPosEl(id); if(el) el.classList.remove('p
 function clearSelection(){ selectedIds.forEach(id=>{ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); }); selectedIds.clear(); updatePosHint(); updateResizeOverlay(); }
 let consoleRadius=30;
 function applyShellRadius(){
-  dom.cpShell.style.borderRadius=consoleRadius+'px';
+  dom.shellContent.style.borderRadius=consoleRadius+'px';
   dom.cpShell.style.setProperty('--sr', consoleRadius+'px');
   document.getElementById('consoleRadiusSlider').value=consoleRadius;
   document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px';
@@ -1678,10 +2194,25 @@ function updatePosHint(){
   hint.style.display='flex'; namesEl.textContent=[...selectedIds].map(id=>POS_ELEMENTS[id]).join(', ');
   const rc=document.getElementById('consoleRadiusControl');
   rc.style.display=selectedIds.has('cp-shell')?'flex':'none';
+  const fc=document.getElementById('fontSizeControl');
+  const fsIds=[...selectedIds].filter(id=>FONT_SIZE_IDS.has(id));
+  if(fsIds.length>0){
+    fc.style.display='flex';
+    const px=fontSizes[fsIds[0]]||12;
+    document.getElementById('fontSizeSlider').value=px;
+    document.getElementById('fontSizeVal').textContent=Math.round(px)+'px';
+  } else {
+    fc.style.display='none';
+  }
 }
 document.getElementById('consoleRadiusSlider').addEventListener('input',e=>{
   consoleRadius=parseInt(e.target.value);
   applyShellRadius();
+});
+document.getElementById('fontSizeSlider').addEventListener('input',e=>{
+  const px=parseInt(e.target.value);
+  document.getElementById('fontSizeVal').textContent=px+'px';
+  [...selectedIds].filter(id=>FONT_SIZE_IDS.has(id)).forEach(id=>applyFontSize(id,px));
 });
 
 // Corner radius handle drag
@@ -1690,7 +2221,7 @@ document.getElementById('cpRadiusHandle').addEventListener('mousedown',(e)=>{ ra
 window.addEventListener('mousemove',(e)=>{
   if(radiusDragX===null) return;
   const dx=e.clientX-radiusDragX; radiusDragX=e.clientX;
-  consoleRadius=Math.min(80,Math.max(0,consoleRadius+Math.round(dx*0.5)));
+  consoleRadius=Math.min(100,Math.max(0,consoleRadius+Math.round(dx*0.5)));
   applyShellRadius();
 });
 
@@ -1716,6 +2247,29 @@ document.addEventListener('keydown',(e)=>{
   selectedIds.forEach(id=>{ if(id==='console') return; positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
 });
 
+// Arrow-key alignment (2+ elements selected)
+document.addEventListener('keydown',(e)=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if(selectedIds.size<2) return;
+  const key=e.key; if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)) return;
+  e.preventDefault();
+  const ids=[...selectedIds].filter(id=>id!=='console');
+  if(ids.length<2) return;
+  const rects={};
+  ids.forEach(id=>{ const el=getPosEl(id); if(el) rects[id]=el.getBoundingClientRect(); });
+  const valid=ids.filter(id=>rects[id]);
+  if(valid.length<2) return;
+  if(key==='ArrowUp'||key==='ArrowDown'){
+    // Align vertical centers
+    const cy=valid.reduce((s,id)=>s+rects[id].top+rects[id].height/2,0)/valid.length;
+    valid.forEach(id=>{ positions[id].y=Math.round(positions[id].y+(cy-rects[id].top-rects[id].height/2)); applyPosition(id); });
+  } else {
+    // Align horizontal centers
+    const cx=valid.reduce((s,id)=>s+rects[id].left+rects[id].width/2,0)/valid.length;
+    valid.forEach(id=>{ positions[id].x=Math.round(positions[id].x+(cx-rects[id].left-rects[id].width/2)); applyPosition(id); });
+  }
+});
+
 document.addEventListener('keydown',(e)=>{ if(e.ctrlKey||e.metaKey) document.body.classList.add('ctrl-held'); });
 document.addEventListener('keyup',  (e)=>{ if(!e.ctrlKey&&!e.metaKey) document.body.classList.remove('ctrl-held'); });
 window.addEventListener('blur',()=>document.body.classList.remove('ctrl-held'));
@@ -1729,12 +2283,19 @@ let currentLayoutName='Default';
 let activeLayoutName='Default';
 function getLayouts(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch{return{};} }
 function putLayouts(obj){ localStorage.setItem(LS_KEY,JSON.stringify(obj)); }
-function snapshot(){ const snap={}; Object.keys(POS_ELEMENTS).forEach(id=>{ const {w=1,h=1}=resizes[id]||{}; snap[id]={...positions[id],w,h}; }); snap._consoleRadius=consoleRadius; return snap; }
+function snapshot(){ const snap={}; Object.keys(POS_ELEMENTS).forEach(id=>{ const {w=1,h=1}=resizes[id]||{}; snap[id]={...positions[id],w,h}; }); snap._consoleRadius=consoleRadius; snap._fontSizes={...fontSizes}; return snap; }
 function applySnapshot(snap){
   Object.keys(POS_ELEMENTS).forEach(id=>{ if(snap&&snap[id]){ const {x=0,y=0,w=1,h=1}=snap[id]; positions[id]={x,y}; resizes[id]={w,h}; applyPosition(id); } });
   if(snap&&snap._consoleRadius!=null){ consoleRadius=snap._consoleRadius; applyShellRadius(); }
+  if(snap&&snap._fontSizes){ Object.entries(snap._fontSizes).forEach(([id,px])=>applyFontSize(id,px)); }
 }
-function resetToDefault(){ Object.keys(POS_ELEMENTS).forEach(id=>{positions[id]={x:0,y:0};resizes[id]={w:1,h:1};applyPosition(id);}); consoleRadius=30; applyShellRadius(); currentLayoutName='Default'; document.getElementById('currentLayoutLabel').textContent='Default'; syncLayoutToolbar('Default'); closeSaveModal(); }
+function resetToDefault(){
+  Object.keys(POS_ELEMENTS).forEach(id=>{positions[id]={x:0,y:0};resizes[id]={w:1,h:1};applyPosition(id);});
+  consoleRadius=30; applyShellRadius();
+  FONT_SIZE_IDS.forEach(id=>{ const el=getPosEl(id); if(el) el.style.fontSize=''; });
+  FONT_SIZE_IDS.forEach(id=>{ const el=getPosEl(id); if(!el) return; const fs=parseFloat(getComputedStyle(el).fontSize); if(fs) fontSizes[id]=fs; });
+  currentLayoutName='Default'; document.getElementById('currentLayoutLabel').textContent='Default'; syncLayoutToolbar('Default'); closeSaveModal();
+}
 function openSaveModal(){ const m=document.getElementById('saveModal'); m.classList.add('open'); const i=document.getElementById('saveNameInput'); i.value=currentLayoutName==='Default'?'':currentLayoutName; document.getElementById('saveError').textContent=''; renderSavedList(); setTimeout(()=>i.focus(),50); }
 function closeSaveModal(){ document.getElementById('saveModal').classList.remove('open'); }
 function renderSavedList(){
@@ -1793,6 +2354,11 @@ requestAnimationFrame(()=>{
     const r=el.getBoundingClientRect();
     if(r.width||r.height) natDims[id]={w:r.width,h:r.height};
   });
+  FONT_SIZE_IDS.forEach(id=>{
+    const el=getPosEl(id); if(!el) return;
+    const fs=parseFloat(getComputedStyle(el).fontSize);
+    if(fs) fontSizes[id]=fs;
+  });
 });
 applyBadgesClean();
 updateModeLeds();
@@ -1802,6 +2368,419 @@ updateHeading();
 dom.tempLeftEl.textContent=s.tempLeft+'°';
 dom.tempRightEl.textContent=s.tempRight+'°';
 document.getElementById('overlayToggle').classList.add('active');
+
+// ══════════════════════════════════════════════════════
+// TAB SYSTEM
+// ══════════════════════════════════════════════════════
+function switchTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const btnId = tab==='cp' ? 'tabBtnCp' : 'tabBtnBinnacle';
+  document.getElementById(btnId).classList.add('active');
+  // Hide positioning hint and resize overlay when switching away from CP
+  if(tab!=='cp'){ clearSelection(); }
+}
+
+// ══════════════════════════════════════════════════════
+// BINNACLE
+// ══════════════════════════════════════════════════════
+const DRIVER_MODES=['G METER','VEHICLE STATUS','BATTERY','TRIP','DYNAMICS','TIRES'];
+let driverModeIdx=0;
+
+// G-meter physics
+let gX=0,gY=0,gXT=0,gYT=0;
+
+// Rounded rect helper (safe cross-browser)
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+// ── POWER DIAL ──────────────────────────────────────
+function drawPowerDial(){
+  const cv=document.getElementById('pdCanvas'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=W/2-2;
+  ctx.clearRect(0,0,W,H);
+  const ringR=r*0.86;
+
+  // Outer dark frame
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
+
+  // Silver chapter ring (annulus)
+  const rg=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+  rg.addColorStop(0,'#71717a'); rg.addColorStop(0.35,'#d8d8de'); rg.addColorStop(0.65,'#b8b8be'); rg.addColorStop(1,'#5a5a62');
+  ctx.beginPath(); ctx.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctx.arc(cx,cy,ringR,0,Math.PI*2,true);
+  ctx.fillStyle=rg; ctx.fill();
+
+  // Tick marks on ring
+  const startA=Math.PI*0.75, totalA=Math.PI*1.5;
+  for(let i=0;i<=36;i++){
+    const a=startA+(i/36)*totalA, maj=i%6===0;
+    const ro=r-1.5, ri=maj?ringR+(r-ringR)*.42:ringR+(r-ringR)*.14;
+    ctx.beginPath(); ctx.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    ctx.strokeStyle=maj?'rgba(14,14,20,0.9)':'rgba(44,44,55,0.5)';
+    ctx.lineWidth=maj?2.8:1.2; ctx.stroke();
+  }
+
+  // Dark glossy face
+  const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
+  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
+  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
+
+  // Three mode arc segments (RANGE / TOUR / PERFO)
+  const segA=totalA/3;
+  const mColors=['#A8C4D4','#FFF200','#FF2800'];
+  const mNames=['RNG','TOUR','PRF'];
+  const cur=s.eIdx;
+  const arcR=ringR-9;
+  for(let i=0;i<3;i++){
+    const a0=startA+i*segA+0.06, a1=startA+(i+1)*segA-0.06;
+    ctx.beginPath(); ctx.arc(cx,cy,arcR,a0,a1); ctx.arc(cx,cy,arcR-11,a1,a0,true); ctx.closePath();
+    if(i===cur){ ctx.shadowColor=mColors[i]; ctx.shadowBlur=14; }
+    ctx.fillStyle=i===cur?mColors[i]:hexToRgba(mColors[i],0.18);
+    ctx.fill(); ctx.shadowBlur=0;
+  }
+
+  // Mode abbreviations on segments
+  const lblR=arcR-18;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let i=0;i<3;i++){
+    const midA=startA+(i+0.5)*segA;
+    ctx.font=`600 ${Math.round(r*.098)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle=i===cur?mColors[i]:'rgba(255,255,255,0.28)';
+    ctx.fillText(mNames[i],cx+lblR*Math.cos(midA),cy+lblR*Math.sin(midA));
+  }
+
+  // Needle pointing at active segment
+  const needleA=startA+(cur+0.5)*segA;
+  const modeColor=EMODE_COLOR[E_MANET[cur]];
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+(arcR-14)*Math.cos(needleA),cy+(arcR-14)*Math.sin(needleA));
+  ctx.strokeStyle=modeColor; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.stroke();
+
+  // Center hub
+  ctx.beginPath(); ctx.arc(cx,cy,8,0,Math.PI*2); ctx.fillStyle=modeColor; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,3.5,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
+
+  // Mode name
+  ctx.font=`700 ${Math.round(r*.145)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle=modeColor; ctx.shadowColor=modeColor; ctx.shadowBlur=9;
+  ctx.fillText(E_MANET[cur],cx,cy-10); ctx.shadowBlur=0;
+  ctx.font=`400 ${Math.round(r*.085)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,0.30)';
+  ctx.fillText('e-MANETTINO',cx,cy+13);
+
+  // Update label
+  const lbl=document.getElementById('pdLabel');
+  if(lbl){ lbl.textContent='POWER — '+E_MANET[cur]; lbl.className='binnacle-dial-label '+E_MANET[cur].toLowerCase()+'-mode'; }
+}
+
+// ── CENTRAL DIAL ─────────────────────────────────────
+function drawCentralDial(){
+  const cv=document.getElementById('cdCanvas'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=W/2-2;
+  ctx.clearRect(0,0,W,H);
+  const ringR=r*0.85;
+
+  // Outer dark frame
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
+
+  // Silver chapter ring
+  const rg=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+  rg.addColorStop(0,'#71717a'); rg.addColorStop(0.35,'#d8d8de'); rg.addColorStop(0.65,'#b8b8be'); rg.addColorStop(1,'#5a5a62');
+  ctx.beginPath(); ctx.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctx.arc(cx,cy,ringR,0,Math.PI*2,true);
+  ctx.fillStyle=rg; ctx.fill();
+
+  // Tick marks
+  for(let i=0;i<=60;i++){
+    const a=(i/60)*Math.PI*2-Math.PI/2, maj=i%5===0;
+    const ro=r-1.5, ri=maj?ringR+(r-ringR)*.44:ringR+(r-ringR)*.16;
+    ctx.beginPath(); ctx.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    ctx.strokeStyle=maj?'rgba(14,14,20,0.88)':'rgba(44,44,55,0.45)';
+    ctx.lineWidth=maj?3.2:1.2; ctx.stroke();
+  }
+
+  // Dark glossy face
+  const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
+  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
+  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
+
+  // Speed arc track + fill
+  const startA=Math.PI*0.75, totalA=Math.PI*1.5;
+  const spd=Math.max(0,s.speed||0), frac=Math.min(1,spd/300);
+  const arcR=ringR-10;
+  const modeColor=EMODE_COLOR[E_MANET[s.eIdx]];
+
+  // Track (dim)
+  ctx.beginPath(); ctx.arc(cx,cy,arcR,startA,startA+totalA);
+  ctx.strokeStyle='rgba(255,255,255,0.055)'; ctx.lineWidth=9; ctx.lineCap='butt'; ctx.stroke();
+
+  // Active fill
+  if(frac>0.005){
+    ctx.beginPath(); ctx.arc(cx,cy,arcR,startA,startA+frac*totalA);
+    ctx.strokeStyle=modeColor; ctx.lineWidth=9; ctx.lineCap='round';
+    ctx.shadowColor=modeColor; ctx.shadowBlur=12; ctx.stroke(); ctx.shadowBlur=0;
+  }
+
+  // Speed numerals
+  const numR=arcR-16;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  [0,60,120,180,240,300].forEach(v=>{
+    const a=startA+(v/300)*totalA;
+    ctx.font=`400 ${Math.round(r*.072)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle=v<=spd?hexToRgba(modeColor,0.9):'rgba(255,255,255,0.25)';
+    ctx.fillText(v,cx+numR*Math.cos(a),cy+numR*Math.sin(a));
+  });
+
+  // Large speed readout
+  ctx.font=`700 ${Math.round(r*.33)}px Rajdhani,sans-serif`;
+  ctx.fillStyle='#e8e8e0'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(Math.round(spd),cx,cy-14);
+
+  ctx.font=`500 ${Math.round(r*.092)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(232,232,224,0.45)';
+  ctx.fillText('km/h',cx,cy+26);
+
+  // Power readout
+  const pwr=Math.max(0,s.power||0);
+  ctx.font=`600 ${Math.round(r*.088)}px Rajdhani,sans-serif`;
+  ctx.fillStyle=modeColor; ctx.shadowColor=modeColor; ctx.shadowBlur=6;
+  ctx.fillText(Math.round(pwr)+' kW',cx,cy+52); ctx.shadowBlur=0;
+
+  // Needle
+  const needleA=startA+frac*totalA;
+  ctx.beginPath(); ctx.moveTo(cx,cy);
+  const nl=ringR*0.90;
+  ctx.lineTo(cx+nl*Math.cos(needleA),cy+nl*Math.sin(needleA));
+  ctx.strokeStyle='rgba(255,40,0,0.9)'; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,10,0,Math.PI*2); ctx.fillStyle='#FF2800'; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,4.5,0,Math.PI*2); ctx.fillStyle='#ddd'; ctx.fill();
+}
+
+// ── DRIVER DIAL ──────────────────────────────────────
+function drawDriverDial(){
+  const cv=document.getElementById('ddCanvas'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=W/2-2;
+  ctx.clearRect(0,0,W,H);
+  const ringR=r*0.86;
+
+  // Outer dark frame
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
+
+  // Silver chapter ring
+  const rg=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
+  rg.addColorStop(0,'#71717a'); rg.addColorStop(0.35,'#d8d8de'); rg.addColorStop(0.65,'#b8b8be'); rg.addColorStop(1,'#5a5a62');
+  ctx.beginPath(); ctx.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctx.arc(cx,cy,ringR,0,Math.PI*2,true);
+  ctx.fillStyle=rg; ctx.fill();
+
+  // Tick marks (6 major = 6 modes)
+  for(let i=0;i<36;i++){
+    const a=(i/36)*Math.PI*2-Math.PI/2, maj=i%6===0;
+    const ro=r-1.5, ri=maj?ringR+(r-ringR)*.44:ringR+(r-ringR)*.14;
+    ctx.beginPath(); ctx.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
+    ctx.strokeStyle=maj?'rgba(14,14,20,0.9)':'rgba(44,44,55,0.45)';
+    ctx.lineWidth=maj?2.8:1.2; ctx.stroke();
+  }
+  // Highlight active major tick
+  const majA=(driverModeIdx/6)*Math.PI*2-Math.PI/2;
+  ctx.beginPath(); ctx.moveTo(cx+(r-1.5)*Math.cos(majA),cy+(r-1.5)*Math.sin(majA));
+  ctx.lineTo(cx+(ringR+(r-ringR)*.44)*Math.cos(majA),cy+(ringR+(r-ringR)*.44)*Math.sin(majA));
+  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=2.8; ctx.stroke();
+
+  // Dark glossy face
+  const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
+  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
+  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
+
+  // Inner clip for content
+  ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,ringR-1,0,Math.PI*2); ctx.clip();
+
+  const mode=DRIVER_MODES[driverModeIdx];
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  if(mode==='G METER')         ddGMeter(ctx,cx,cy,ringR);
+  else if(mode==='VEHICLE STATUS') ddVehicleStatus(ctx,cx,cy,ringR);
+  else if(mode==='BATTERY')    ddBattery(ctx,cx,cy,ringR);
+  else if(mode==='TRIP')       ddTrip(ctx,cx,cy,ringR);
+  else if(mode==='DYNAMICS')   ddDynamics(ctx,cx,cy,ringR);
+  else if(mode==='TIRES')      ddTires(ctx,cx,cy,ringR);
+
+  ctx.restore();
+
+  // Mode label at bottom of face
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font=`600 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,0.50)';
+  ctx.fillText(mode,cx,cy+ringR*0.78);
+
+  // Update label pill
+  const lbl=document.getElementById('ddLabel');
+  if(lbl) lbl.textContent=mode;
+}
+
+function ddGMeter(ctx,cx,cy,r){
+  const gr=r*0.60;
+  // Grid circles
+  [.33,.66,1].forEach(f=>{
+    ctx.beginPath(); ctx.arc(cx,cy,gr*f,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1; ctx.stroke();
+  });
+  // Crosshair
+  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(cx-gr,cy); ctx.lineTo(cx+gr,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,cy-gr); ctx.lineTo(cx,cy+gr); ctx.stroke();
+  // Labels
+  ctx.font=`400 ${Math.round(r*.12)}px IBM Plex Mono,monospace`;
+  ctx.fillStyle='rgba(255,255,255,0.20)';
+  ctx.fillText('1g',cx+gr*.72,cy-r*.06);
+  // Simulate
+  gXT+=(Math.random()-.5)*.07; gYT+=(Math.random()-.5)*.05;
+  gXT=Math.max(-1,Math.min(1,gXT*.96)); gYT=Math.max(-1,Math.min(1,gYT*.96));
+  gX+=(gXT-gX)*.14; gY+=(gYT-gY)*.14;
+  const dx=cx+gX*gr, dy=cy+gY*gr;
+  // Trail glow
+  ctx.beginPath(); ctx.arc(dx,dy,9,0,Math.PI*2); ctx.fillStyle='rgba(255,40,0,0.12)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx,dy,5,0,Math.PI*2); ctx.fillStyle='rgba(255,40,0,0.45)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx,dy,3,0,Math.PI*2);
+  ctx.fillStyle='#FF2800'; ctx.shadowColor='#FF2800'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
+}
+
+function ddVehicleStatus(ctx,cx,cy,r){
+  const rows=[
+    ['MOTOR', 'OK', '#4caf50'],
+    ['BATTERY','OK','#4caf50'],
+    ['COOLING','OK','#4caf50'],
+    ['ADAS', s.adasOn?'ON':'OFF', s.adasOn?'#A8C4D4':'rgba(255,255,255,0.25)'],
+    ['ESC', ESC_STATES[s.escIdx], '#e8e8e0'],
+  ];
+  const lh=r*.25, y0=cy-lh*2;
+  rows.forEach(([lbl,val,col],i)=>{
+    const y=y0+i*lh;
+    ctx.font=`400 ${Math.round(r*.10)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.textAlign='left';
+    ctx.fillText(lbl,cx-r*.55,y);
+    ctx.font=`600 ${Math.round(r*.10)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle=col; ctx.textAlign='right';
+    ctx.fillText(val,cx+r*.52,y);
+  });
+  ctx.textAlign='center';
+}
+
+function ddBattery(ctx,cx,cy,r){
+  const chg=0.74;
+  const startA=Math.PI*.75, totA=Math.PI*1.5, arcR=r*.66;
+  ctx.beginPath(); ctx.arc(cx,cy,arcR,startA,startA+totA);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=10; ctx.lineCap='round'; ctx.stroke();
+  const col=chg>.5?'#4caf50':chg>.2?'#ffb400':'#FF2800';
+  ctx.beginPath(); ctx.arc(cx,cy,arcR,startA,startA+chg*totA);
+  ctx.strokeStyle=col; ctx.lineWidth=10; ctx.lineCap='round';
+  ctx.shadowColor=col; ctx.shadowBlur=8; ctx.stroke(); ctx.shadowBlur=0;
+  // Percentage
+  ctx.font=`700 ${Math.round(r*.30)}px Rajdhani,sans-serif`;
+  ctx.fillStyle='#e8e8e0'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(Math.round(chg*100)+'%',cx,cy-10);
+  ctx.font=`400 ${Math.round(r*.10)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,0.38)';
+  ctx.fillText('CHARGE',cx,cy+18);
+  ctx.font=`500 ${Math.round(r*.095)}px IBM Plex Mono,monospace`;
+  ctx.fillStyle=col;
+  ctx.fillText('~'+Math.round(chg*480)+' km',cx,cy+37);
+}
+
+function ddTrip(ctx,cx,cy,r){
+  const rows=[
+    ['TRIP A','124.7 km'],
+    ['TOTAL','3,841 km'],
+    ['EFFICIENCY','24.1 kWh/100'],
+    ['TIME','1:24:07'],
+  ];
+  const lh=r*.265, y0=cy-lh*1.5;
+  rows.forEach(([lbl,val],i)=>{
+    const y=y0+i*lh;
+    ctx.font=`400 ${Math.round(r*.098)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.textAlign='left';
+    ctx.fillText(lbl,cx-r*.56,y);
+    ctx.font=`500 ${Math.round(r*.10)}px IBM Plex Mono,monospace`;
+    ctx.fillStyle='rgba(232,232,224,0.88)'; ctx.textAlign='right';
+    ctx.fillText(val,cx+r*.56,y);
+  });
+  ctx.textAlign='center';
+}
+
+function ddDynamics(ctx,cx,cy,r){
+  const mName=MANETTINO[s.mIdx];
+  const rows=[
+    ['MANETTINO', mName, MODE_COLOR[mName]],
+    ['SUSPENSION', SUSP_STATES[s.suspIdx], '#e8e8e0'],
+    ['REGEN', REGEN_STATES[s.regenIdx], '#e8e8e0'],
+    ['ESC', ESC_STATES[s.escIdx], '#e8e8e0'],
+  ];
+  const lh=r*.268, y0=cy-lh*1.5;
+  rows.forEach(([lbl,val,col],i)=>{
+    const y=y0+i*lh;
+    ctx.font=`400 ${Math.round(r*.098)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.textAlign='left';
+    ctx.fillText(lbl,cx-r*.56,y);
+    ctx.font=`600 ${Math.round(r*.10)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle=col; ctx.textAlign='right';
+    ctx.fillText(val,cx+r*.52,y);
+  });
+  ctx.textAlign='center';
+}
+
+function ddTires(ctx,cx,cy,r){
+  // Car body outline
+  const bw=r*.20, bh=r*.52;
+  ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.lineWidth=1.5;
+  rrect(ctx,cx-bw/2,cy-bh/2,bw,bh,4); ctx.stroke();
+  // Four tires
+  const tires=[
+    {lbl:'FL',psi:32.1,x:cx-r*.40,y:cy-r*.28},
+    {lbl:'FR',psi:32.4,x:cx+r*.40,y:cy-r*.28},
+    {lbl:'RL',psi:34.2,x:cx-r*.40,y:cy+r*.26},
+    {lbl:'RR',psi:34.0,x:cx+r*.40,y:cy+r*.26},
+  ];
+  const tw=r*.19, th=r*.28;
+  tires.forEach(({lbl,psi,x,y})=>{
+    const ok=psi>30&&psi<38, col=ok?'#4caf50':'#FF2800';
+    ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.fillStyle=hexToRgba(col,0.1);
+    rrect(ctx,x-tw/2,y-th/2,tw,th,3); ctx.fill(); ctx.stroke();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font=`400 ${Math.round(r*.09)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText(lbl,x,y-r*.06);
+    ctx.font=`600 ${Math.round(r*.11)}px IBM Plex Mono,monospace`;
+    ctx.fillStyle=col; ctx.fillText(psi.toFixed(1),x,y+r*.07);
+  });
+}
+
+// ── BINNACLE UPDATE ──────────────────────────────────
+function updateBinnacle(){
+  if(!document.getElementById('tab-binnacle').classList.contains('active')) return;
+  drawPowerDial();
+  drawCentralDial();
+  drawDriverDial();
+}
+
+// ── BINNACLE INTERACTIONS ────────────────────────────
+document.getElementById('pdCanvas').addEventListener('click',()=>{
+  s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean();
+});
+document.getElementById('pdLabel').addEventListener('click',()=>{
+  s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean();
+});
+document.getElementById('ddCanvas').addEventListener('click',()=>{
+  driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length;
+});
+document.getElementById('ddLabel').addEventListener('click',()=>{
+  driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length;
+});
 </script>
 </body>
 </html>
