@@ -118,13 +118,10 @@ body {
 /* ── SCREEN AREA ── */
 .screen-area {
   background: #0b0b0e; border-radius: 12px; padding: 14px 14px 12px;
-  display: flex; flex-direction: column; gap: 0;
+  display: flex; flex-direction: row; align-items: flex-start; gap: 0;
   border: 1px solid rgba(255,255,255,0.055); position: relative;
 }
 .screen-area.hud-on { border-color: rgba(0,255,100,0.3); box-shadow: inset 0 0 20px rgba(0,255,80,0.06); }
-
-/* ── SCREEN TOP: always-visible row ── */
-.screen-top { display: flex; flex-direction: row; align-items: stretch; gap: 0; }
 
 /* ── METRICS COLUMN: permanent left panel ── */
 .metrics-pos {
@@ -134,7 +131,7 @@ body {
 }
 
 /* ── MULTIGRAPH SECTION: permanent right panel ── */
-.multigraph-section { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
+.multigraph-section { position: absolute; right: 14px; top: 14px; display: flex; flex-direction: row; align-items: center; flex-shrink: 0; }
 
 /* ── MODE PANELS (watermark zone, grid-stacked like multigraph info panels) ── */
 .mode-panel { visibility: hidden; position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; }
@@ -305,9 +302,10 @@ body {
 .multigraph-mode-label.sw-running { color: #FFF200; border-color: rgba(255,242,0,0.3); }
 
 /* ── WATERMARK ZONE ── */
-.watermark-zone { flex: 1; min-height: 210px; position: relative; }
-.ferrari-watermark { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 1; }
-.ferrari-watermark-img { height: 64px; width: auto; display: block; filter: invert(1); mix-blend-mode: screen; opacity: 0.18; }
+.watermark-zone { flex: 1; min-height: 210px; position: relative; display: flex; align-items: center; justify-content: center; }
+.ferrari-watermark { pointer-events: none; mix-blend-mode: screen; }
+body.ctrl-held .ferrari-watermark { pointer-events: auto; }
+.ferrari-watermark-img { height: 64px; width: auto; display: block; filter: invert(1); opacity: 0.18; }
 
 /* ── LOWER SECTION ── */
 .lower { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 14px; }
@@ -509,17 +507,22 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 /* ── TAB NAVIGATION ── */
 .tab-nav {
   display: flex; gap: 0; margin-bottom: 16px; align-items: flex-end;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06); position: relative;
 }
 .tab-btn {
   background: none; border: none; border-bottom: 2px solid transparent;
   color: rgba(255,255,255,0.28); font-family: 'Barlow Condensed', sans-serif;
   font-size: 11px; font-weight: 600; letter-spacing: 2px;
-  padding: 5px 20px 9px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  padding: 5px 20px 9px; cursor: pointer; transition: color 0.2s;
   position: relative; top: 1px;
 }
 .tab-btn:hover { color: rgba(255,255,255,0.65); }
-.tab-btn.active { color: #e8e8e0; border-bottom-color: #FF2800; }
+.tab-btn.active { color: #e8e8e0; }
+.tab-indicator {
+  position: absolute; bottom: -1px; left: 0; width: 0; height: 2px;
+  background: #FF2800;
+  transition: left 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1);
+}
 .tab-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
 .tab-panel.active { display: flex; }
 
@@ -644,6 +647,58 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 .cl-interior{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
 .cl-interior>svg{max-width:100%;max-height:100%;}
 
+
+/* ── ELEMENTS PANEL ── */
+#elemPanel {
+  position: fixed; left: -224px; top: 0; height: 100vh; width: 224px;
+  background: rgba(6,6,9,0.97); border-right: 1px solid rgba(255,255,255,0.09);
+  z-index: 7000; display: flex; flex-direction: column;
+  backdrop-filter: blur(10px);
+  transition: left 0.24s cubic-bezier(0.22,1,0.36,1);
+}
+#elemPanel.open { left: 0; }
+.ep-hd {
+  padding: 14px 14px 10px; flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ep-title {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 600;
+  letter-spacing: 2.5px; color: rgba(255,255,255,0.3);
+}
+.ep-close {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 13px;
+  color: rgba(255,255,255,0.25); cursor: pointer; line-height: 1;
+  transition: color 0.15s; padding: 2px 4px;
+}
+.ep-close:hover { color: rgba(255,255,255,0.65); }
+.ep-list {
+  flex: 1; overflow-y: auto; padding: 4px 0 12px;
+  scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+.ep-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 5px 14px; cursor: pointer;
+  transition: background 0.1s;
+}
+.ep-item:hover { background: rgba(255,255,255,0.035); }
+.ep-item input[type="checkbox"] {
+  flex-shrink: 0; width: 11px; height: 11px;
+  accent-color: #FFF200; cursor: pointer; margin: 0;
+}
+.ep-lbl {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: 0.4px; color: rgba(200,200,196,0.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; user-select: none;
+}
+.ep-item.ep-sel .ep-lbl { color: #FFF200; }
+.ep-none {
+  padding: 18px 14px;
+  font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+  color: rgba(255,255,255,0.22); letter-spacing: 0.5px;
+}
+
 </style>
 </head>
 <body>
@@ -651,6 +706,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 <!-- ── TOOLBAR ── -->
 <div class="toolbar">
   <button class="toolbar-btn active" id="overlayToggle" onclick="toggleOverlay()">OVERLAY: ON</button>
+  <button class="toolbar-btn" id="elemPanelToggle" onclick="toggleElemPanel()">ELEMENTS</button>
   <button class="toolbar-btn" id="saveBtn" onclick="openSaveModal()">SAVE LAYOUT</button>
   <div class="layout-selector-wrap" id="layoutSelectorWrap">
     <button class="toolbar-btn" id="layoutSelectorBtn" onclick="toggleLayoutDropdown()">▾ <span id="layoutSelectorLabel">DEFAULT</span></button>
@@ -667,6 +723,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 <div class="tab-nav">
   <button class="tab-btn active" id="tabBtnCp" onclick="switchTab('cp')">CONTROL PANEL</button>
   <button class="tab-btn" id="tabBtnBinnacle" onclick="switchTab('binnacle')">BINNACLE</button>
+  <div class="tab-indicator" id="tabIndicator"></div>
 </div>
 
 <!-- ── TAB: CONTROL PANEL ── -->
@@ -720,10 +777,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
     <!-- Screen area -->
     <div class="screen-area" id="screenArea">
 
-      <!-- ── TOP: always-visible metrics + multigraph ── -->
-      <div class="screen-top">
-
-        <!-- Metrics — permanent, never changes with mode -->
+      <!-- Metrics — permanent, never changes with mode -->
           <div class="metrics-pos"
             data-pos-id="metrics-col" data-pos-label="Metrics Column">
           <div class="metric-block">
@@ -806,15 +860,11 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
           </div>
         </div><!-- /multigraph-section -->
 
-      </div><!-- /screen-top -->
-
     </div><!-- /screen-area -->
   </div><!-- /screen-row -->
 
   <!-- Watermark / Panel zone — stacked like multigraph info panels; watermark shows in OFF state -->
   <div class="watermark-zone">
-    <div class="ferrari-watermark" id="ferrariWatermark"
-      data-pos-id="watermark-text" data-pos-label="Ferrari Watermark"><img src="ferrari_text.png" class="ferrari-watermark-img" alt="Ferrari"></div>
 
     <!-- Panel: Climate -->
     <div class="mode-panel" id="panelClimate">
@@ -1117,6 +1167,8 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
         <div class="panel-tab">RADIO</div>
       </div>
     </div>
+    <div class="ferrari-watermark" id="ferrariWatermark"
+      data-pos-id="watermark-text" data-pos-label="Ferrari Watermark"><img src="ferrari_text.png" class="ferrari-watermark-img" alt="Ferrari"></div>
   </div>
 
   <!-- Lower section -->
@@ -1343,7 +1395,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
   </span>
   <div id="consoleRadiusControl">
     <label>SHELL RADIUS</label>
-    <input type="range" id="consoleRadiusSlider" min="0" max="100" value="30">
+    <input type="range" id="consoleRadiusSlider" min="0" max="150" value="30">
     <span id="consoleRadiusVal">30px</span>
   </div>
   <div id="fontSizeControl">
@@ -1645,7 +1697,7 @@ function drawStopwatch(){
     ctxClock.beginPath(); ctxClock.arc(scx,scy,5,0,Math.PI*2); ctxClock.fillStyle='#FF2800'; ctxClock.fill();
   });
   // Main sweep hand with counterweight
-  const ma=mainFrac*Math.PI*2-Math.PI/2;
+  const ma=mainFrac*Math.PI*2-Math.PI;
   ctxClock.save(); ctxClock.translate(cx,cy); ctxClock.rotate(ma);
   ctxClock.beginPath(); ctxClock.moveTo(0,-faceR*.18); ctxClock.lineTo(0,faceR*.82);
   ctxClock.strokeStyle='#FF2800'; ctxClock.lineWidth=3.6; ctxClock.lineCap='round'; ctxClock.stroke();
@@ -1797,8 +1849,10 @@ function setCpMode(mode){
     const ids={climate:'panelClimate',settings:'panelSettings',media:'panelMedia'};
     document.getElementById(ids[s.cpMode]).classList.add('active');
     wm.style.visibility = 'hidden';
+    wm.style.pointerEvents = 'none';
   } else {
     wm.style.visibility = '';
+    wm.style.pointerEvents = '';
   }
   updateModeLeds();
   updatePills();
@@ -2164,9 +2218,11 @@ function applyPosition(id){
     el.style.transform=x||y?`translate(${x}px,${y}px)`:'';
     if(hasScale){
       if(!natDims[id]){ const r=el.getBoundingClientRect(); natDims[id]={w:r.width||1,h:r.height||1}; }
+      if(id==='metrics-col') el.style.flex='none';
       el.style.width=(natDims[id].w*w)+'px';
       el.style.height=(natDims[id].h*h)+'px';
     } else {
+      if(id==='metrics-col') el.style.flex='';
       el.style.width='';
       el.style.height='';
     }
@@ -2178,9 +2234,9 @@ function applyPosition(id){
   updateResizeOverlay();
 }
 
-function selectPosEl(id){ const el=getPosEl(id); if(!el) return; selectedIds.add(id); el.classList.add('pos-selected'); updatePosHint(); updateResizeOverlay(); }
-function deselectPosEl(id){ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); selectedIds.delete(id); updatePosHint(); updateResizeOverlay(); }
-function clearSelection(){ selectedIds.forEach(id=>{ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); }); selectedIds.clear(); updatePosHint(); updateResizeOverlay(); }
+function selectPosEl(id){ const el=getPosEl(id); if(!el) return; selectedIds.add(id); el.classList.add('pos-selected'); updatePosHint(); updateResizeOverlay(); syncElemPanel(); }
+function deselectPosEl(id){ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); selectedIds.delete(id); updatePosHint(); updateResizeOverlay(); syncElemPanel(); }
+function clearSelection(){ selectedIds.forEach(id=>{ const el=getPosEl(id); if(el) el.classList.remove('pos-selected'); }); selectedIds.clear(); updatePosHint(); updateResizeOverlay(); syncElemPanel(); }
 let consoleRadius=30;
 function applyShellRadius(){
   dom.shellContent.style.borderRadius=consoleRadius+'px';
@@ -2221,7 +2277,7 @@ document.getElementById('cpRadiusHandle').addEventListener('mousedown',(e)=>{ ra
 window.addEventListener('mousemove',(e)=>{
   if(radiusDragX===null) return;
   const dx=e.clientX-radiusDragX; radiusDragX=e.clientX;
-  consoleRadius=Math.min(100,Math.max(0,consoleRadius+Math.round(dx*0.5)));
+  consoleRadius=Math.min(150,Math.max(0,consoleRadius+Math.round(dx*0.5)));
   applyShellRadius();
 });
 
@@ -2239,7 +2295,7 @@ document.addEventListener('click',(e)=>{
 
 // WASD movement
 document.addEventListener('keydown',(e)=>{
-  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+  if((e.target.tagName==='INPUT'&&e.target.type!=='checkbox')||e.target.tagName==='TEXTAREA') return;
   if(selectedIds.size===0) return;
   const key=e.key.toLowerCase(); if(!['w','a','s','d'].includes(key)) return;
   e.preventDefault();
@@ -2368,6 +2424,7 @@ updateHeading();
 dom.tempLeftEl.textContent=s.tempLeft+'°';
 dom.tempRightEl.textContent=s.tempRight+'°';
 document.getElementById('overlayToggle').classList.add('active');
+updateTabIndicator(true);
 
 // ══════════════════════════════════════════════════════
 // TAB SYSTEM
@@ -2378,8 +2435,14 @@ function switchTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   const btnId = tab==='cp' ? 'tabBtnCp' : 'tabBtnBinnacle';
   document.getElementById(btnId).classList.add('active');
-  // Hide positioning hint and resize overlay when switching away from CP
   if(tab!=='cp'){ clearSelection(); }
+  if(elemPanelOpen) renderElemPanel();
+  updateTabIndicator();
+  // Sync overlay button to the newly active tab's overlay state
+  const btn=document.getElementById('overlayToggle');
+  const ovId=tab==='binnacle'?'binnacleOverlay':'refOverlay';
+  const on=!document.getElementById(ovId).classList.contains('hidden');
+  btn.textContent='OVERLAY: '+(on?'ON':'OFF'); btn.classList.toggle('active',on);
 }
 
 // ══════════════════════════════════════════════════════
@@ -2487,81 +2550,115 @@ function drawCentralDial(){
   const ctx=cv.getContext('2d');
   const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=W/2-2;
   ctx.clearRect(0,0,W,H);
-  const ringR=r*0.85;
 
-  // Outer dark frame
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
+  const D=d=>d*Math.PI/180;
+  const spd=Math.max(0,s.speed||0);
 
-  // Silver chapter ring
-  const rg=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
-  rg.addColorStop(0,'#71717a'); rg.addColorStop(0.35,'#d8d8de'); rg.addColorStop(0.65,'#b8b8be'); rg.addColorStop(1,'#5a5a62');
-  ctx.beginPath(); ctx.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctx.arc(cx,cy,ringR,0,Math.PI*2,true);
-  ctx.fillStyle=rg; ctx.fill();
+  // Dark face
+  const bg=ctx.createRadialGradient(cx,cy*.85,0,cx,cy,r);
+  bg.addColorStop(0,'#161619'); bg.addColorStop(1,'#04040a');
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=bg; ctx.fill();
 
-  // Tick marks
-  for(let i=0;i<=60;i++){
-    const a=(i/60)*Math.PI*2-Math.PI/2, maj=i%5===0;
-    const ro=r-1.5, ri=maj?ringR+(r-ringR)*.44:ringR+(r-ringR)*.16;
-    ctx.beginPath(); ctx.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    ctx.strokeStyle=maj?'rgba(14,14,20,0.88)':'rgba(44,44,55,0.45)';
-    ctx.lineWidth=maj?3.2:1.2; ctx.stroke();
+  // ── Single continuous arc 0→320 km/h, 130°→410° (no gap) ──
+  // Yellow 0-160, white 160-320; tick every 2 km/h for dense ruler look
+  const AS=D(130), ASPAN=D(280);
+  const TOUTR=r-2;
+
+  for(let v=0;v<=320;v+=2){
+    const a=AS+(v/320)*ASPAN;
+    const isMaj=v%40===0, isMed=v%10===0;
+    const tl=isMaj?r*.13:isMed?r*.08:r*.045;
+    const lw=isMaj?1.8:isMed?1.1:.65;
+    const col=v<=160?'#FFF200':'rgba(215,215,215,0.88)';
+    ctx.beginPath();
+    ctx.moveTo(cx+TOUTR*Math.cos(a),cy+TOUTR*Math.sin(a));
+    ctx.lineTo(cx+(TOUTR-tl)*Math.cos(a),cy+(TOUTR-tl)*Math.sin(a));
+    ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.stroke();
   }
 
-  // Dark glossy face
-  const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
-  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
-  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
-
-  // Speed arc track + fill
-  const startA=Math.PI*0.75, totalA=Math.PI*1.5;
-  const spd=Math.max(0,s.speed||0), frac=Math.min(1,spd/300);
-  const arcR=ringR-10;
-  const modeColor=EMODE_COLOR[E_MANET[s.eIdx]];
-
-  // Track (dim)
-  ctx.beginPath(); ctx.arc(cx,cy,arcR,startA,startA+totalA);
-  ctx.strokeStyle='rgba(255,255,255,0.055)'; ctx.lineWidth=9; ctx.lineCap='butt'; ctx.stroke();
-
-  // Active fill
-  if(frac>0.005){
-    ctx.beginPath(); ctx.arc(cx,cy,arcR,startA,startA+frac*totalA);
-    ctx.strokeStyle=modeColor; ctx.lineWidth=9; ctx.lineCap='round';
-    ctx.shadowColor=modeColor; ctx.shadowBlur=12; ctx.stroke(); ctx.shadowBlur=0;
-  }
-
-  // Speed numerals
-  const numR=arcR-16;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  [0,60,120,180,240,300].forEach(v=>{
-    const a=startA+(v/300)*totalA;
-    ctx.font=`400 ${Math.round(r*.072)}px Barlow Condensed,sans-serif`;
-    ctx.fillStyle=v<=spd?hexToRgba(modeColor,0.9):'rgba(255,255,255,0.25)';
-    ctx.fillText(v,cx+numR*Math.cos(a),cy+numR*Math.sin(a));
+  // Speed labels — larger font, pulled inside tick ring
+  const lblR=TOUTR-r*.26;
+  [0,40,80,120,160,200,240,280,320].forEach(v=>{
+    const a=AS+(v/320)*ASPAN;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font=`600 ${Math.round(r*.118)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle=v<=160?'#FFF200':'rgba(215,215,215,0.88)';
+    ctx.fillText(v,cx+lblR*Math.cos(a),cy+lblR*Math.sin(a));
   });
 
-  // Large speed readout
-  ctx.font=`700 ${Math.round(r*.33)}px Rajdhani,sans-serif`;
-  ctx.fillStyle='#e8e8e0'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(Math.round(spd),cx,cy-14);
+  // ── Orange needle — drawn first; inner disc covers its hub ──
+  const needleA=AS+(Math.min(320,spd)/320)*ASPAN;
+  const nl=r-8;
+  ctx.save();
+  ctx.translate(cx,cy); ctx.rotate(needleA);
+  ctx.beginPath();
+  ctx.moveTo(-r*.05,-3); ctx.lineTo(nl,0); ctx.lineTo(-r*.05,3);
+  ctx.closePath();
+  ctx.fillStyle='#FF8C00'; ctx.shadowColor='#FF8C00'; ctx.shadowBlur=12; ctx.fill();
+  ctx.restore(); ctx.shadowBlur=0;
 
-  ctx.font=`500 ${Math.round(r*.092)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.45)';
-  ctx.fillText('km/h',cx,cy+26);
+  // ── Inner disc (covers needle hub; needle only visible in annular ring) ──
+  const innerR=r*.56;
+  const ig=ctx.createRadialGradient(cx,cy-innerR*.2,0,cx,cy,innerR);
+  ig.addColorStop(0,'#1d1d22'); ig.addColorStop(0.65,'#101014'); ig.addColorStop(1,'#060609');
+  ctx.beginPath(); ctx.arc(cx,cy,innerR,0,Math.PI*2); ctx.fillStyle=ig; ctx.fill();
+  // Housing ring — visual anchor for needle pivot
+  ctx.beginPath(); ctx.arc(cx,cy,innerR,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1.5; ctx.stroke();
 
-  // Power readout
-  const pwr=Math.max(0,s.power||0);
-  ctx.font=`600 ${Math.round(r*.088)}px Rajdhani,sans-serif`;
-  ctx.fillStyle=modeColor; ctx.shadowColor=modeColor; ctx.shadowBlur=6;
-  ctx.fillText(Math.round(pwr)+' kW',cx,cy+52); ctx.shadowBlur=0;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
 
-  // Needle
-  const needleA=startA+frac*totalA;
-  ctx.beginPath(); ctx.moveTo(cx,cy);
-  const nl=ringR*0.90;
-  ctx.lineTo(cx+nl*Math.cos(needleA),cy+nl*Math.sin(needleA));
-  ctx.strokeStyle='rgba(255,40,0,0.9)'; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.stroke();
-  ctx.beginPath(); ctx.arc(cx,cy,10,0,Math.PI*2); ctx.fillStyle='#FF2800'; ctx.fill();
-  ctx.beginPath(); ctx.arc(cx,cy,4.5,0,Math.PI*2); ctx.fillStyle='#ddd'; ctx.fill();
+  // Speed number
+  ctx.font=`700 ${Math.round(r*.38)}px Rajdhani,sans-serif`;
+  ctx.fillStyle='#eaeae2';
+  ctx.fillText(Math.round(spd),cx,cy-r*.12);
+
+  // km/h
+  ctx.font=`500 ${Math.round(r*.078)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(200,200,200,0.50)';
+  ctx.fillText('km/h',cx,cy+r*.14);
+
+  // 408 km range — below km/h
+  ctx.font=`600 ${Math.round(r*.070)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='#4ade80';
+  ctx.fillText('408 km',cx,cy+r*.28);
+
+  // ── E/F arc gauge at bottom of inner disc ──
+  // E at 7 o'clock (130°), F at 5 o'clock (50°), arc crosses through 6 o'clock (bottom)
+  const GR=innerR*.90;
+  const GA=D(130), GB=D(50);   // decreasing angle = counter-clockwise through bottom
+  const socFrac=0.50, gN=24;
+  for(let i=0;i<=gN;i++){
+    const frac=i/gN;
+    const a=GA+frac*(GB-GA);   // 130° → 50° (through 90°)
+    const filled=frac<=socFrac, isLow=frac<0.12;
+    const isMaj=i===0||i===gN||i===Math.round(gN*.5);
+    const tl=isMaj?r*.075:r*.048;
+    ctx.beginPath();
+    ctx.moveTo(cx+GR*Math.cos(a),cy+GR*Math.sin(a));
+    ctx.lineTo(cx+(GR-tl)*Math.cos(a),cy+(GR-tl)*Math.sin(a));
+    ctx.strokeStyle=filled
+      ?(isLow?'#ef4444':'#4ade80')
+      :(isLow?'rgba(239,68,68,0.18)':'rgba(255,255,255,0.10)');
+    ctx.lineWidth=2.2; ctx.stroke();
+  }
+  // E / F labels outside the gauge arc
+  const gLblR=GR+r*.06;
+  ctx.font=`600 ${Math.round(r*.065)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(190,190,190,0.65)';
+  ctx.fillText('E',cx+gLblR*Math.cos(GA),cy+gLblR*Math.sin(GA));
+  ctx.fillText('F',cx+gLblR*Math.cos(GB),cy+gLblR*Math.sin(GB));
+
+  // Hub cap
+  ctx.beginPath(); ctx.arc(cx,cy,r*.05,0,Math.PI*2); ctx.fillStyle='#1a1a1f'; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,r*.025,0,Math.PI*2); ctx.fillStyle='#b8b8b8'; ctx.fill();
+
+  // Gloss highlight (upper-right)
+  const gls=ctx.createRadialGradient(cx+r*.2,cy-r*.28,0,cx+r*.15,cy-r*.22,r*.75);
+  gls.addColorStop(0,'rgba(255,255,255,0.08)');
+  gls.addColorStop(0.5,'rgba(255,255,255,0.03)');
+  gls.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=gls; ctx.fill();
 }
 
 // ── DRIVER DIAL ──────────────────────────────────────
@@ -2626,30 +2723,118 @@ function drawDriverDial(){
 }
 
 function ddGMeter(ctx,cx,cy,r){
-  const gr=r*0.60;
-  // Grid circles
-  [.33,.66,1].forEach(f=>{
-    ctx.beginPath(); ctx.arc(cx,cy,gr*f,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1; ctx.stroke();
-  });
-  // Crosshair
-  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(cx-gr,cy); ctx.lineTo(cx+gr,cy); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx,cy-gr); ctx.lineTo(cx,cy+gr); ctx.stroke();
-  // Labels
-  ctx.font=`400 ${Math.round(r*.12)}px IBM Plex Mono,monospace`;
-  ctx.fillStyle='rgba(255,255,255,0.20)';
-  ctx.fillText('1g',cx+gr*.72,cy-r*.06);
-  // Simulate
-  gXT+=(Math.random()-.5)*.07; gYT+=(Math.random()-.5)*.05;
-  gXT=Math.max(-1,Math.min(1,gXT*.96)); gYT=Math.max(-1,Math.min(1,gYT*.96));
-  gX+=(gXT-gX)*.14; gY+=(gYT-gY)*.14;
+  const gr=r*0.73;    // 1 g in pixels
+  const g5=gr*0.5;    // 0.5 g in pixels
+  const N=40;         // ticks per arm
+  const lsep=r*0.22;  // half-gap — two h-lines at cy±lsep, two v-lines at cx±lsep
+
+  // ── lens glass highlight ──────────────────────────────
+  const gls=ctx.createLinearGradient(cx-r,cy-r,cx+r*.2,cy+r*.15);
+  gls.addColorStop(0,'rgba(255,255,255,0.09)');
+  gls.addColorStop(0.45,'rgba(255,255,255,0.04)');
+  gls.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=gls; ctx.fill();
+
+  // ── tick color helper ─────────────────────────────────
+  function tickColor(frac){
+    if(frac<0.44)     return ['#FFF200',0.85];
+    if(frac<0.57)     return ['#FF4800',1.1];
+    return ['rgba(215,215,215,0.78)',0.85];
+  }
+
+  // ── draw one arm of tick marks ────────────────────────
+  // (axisCoord, perpCoord, axisDir, perpDir, orientation)
+  // orientation 'h': axisCoord=x, perpCoord=y — ticks are vertical dashes
+  // orientation 'v': axisCoord=y, perpCoord=x — ticks are horizontal dashes
+  function arm(perpLine, axisOrigin, axisDir, orientation){
+    for(let i=1;i<=N;i++){
+      const frac=i/N;
+      const axPos=axisOrigin+axisDir*frac*gr;
+      const [col,lw]=tickColor(frac);
+      const isHalf=Math.abs(frac-0.5)<0.018, isQtr=Math.abs(frac-0.25)<0.018||Math.abs(frac-0.75)<0.018;
+      const tl=isHalf?4.5:isQtr?3:1.8;
+      ctx.strokeStyle=col; ctx.lineWidth=lw;
+      ctx.beginPath();
+      if(orientation==='h'){
+        // horizontal line at y=perpLine: vertical tick dash
+        ctx.moveTo(axPos,perpLine-tl); ctx.lineTo(axPos,perpLine+tl);
+      } else {
+        // vertical line at x=perpLine: horizontal tick dash
+        ctx.moveTo(perpLine-tl,axPos); ctx.lineTo(perpLine+tl,axPos);
+      }
+      ctx.stroke();
+    }
+  }
+
+  // TWO horizontal lines (at cy-lsep and cy+lsep), each with left and right arms
+  arm(cy-lsep, cx, +1, 'h'); arm(cy-lsep, cx, -1, 'h');
+  arm(cy+lsep, cx, +1, 'h'); arm(cy+lsep, cx, -1, 'h');
+
+  // TWO vertical lines (at cx-lsep and cx+lsep), each with up and down arms
+  arm(cx-lsep, cy, +1, 'v'); arm(cx-lsep, cy, -1, 'v');
+  arm(cx+lsep, cy, +1, 'v'); arm(cx+lsep, cy, -1, 'v');
+
+  // ── center crosshair ─────────────────────────────────
+  const cs=3.5;
+  ctx.strokeStyle='rgba(255,255,255,0.40)'; ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.moveTo(cx-cs,cy); ctx.lineTo(cx+cs,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,cy-cs); ctx.lineTo(cx,cy+cs); ctx.stroke();
+
+  // ── label helpers ─────────────────────────────────────
+  ctx.textBaseline='middle'; ctx.textAlign='center';
+  const ns=Math.round(r*.128), ds=Math.round(r*.068);
+
+  function flanked(num,x,y,col){
+    ctx.font=`400 ${ds}px Barlow Condensed,sans-serif`; ctx.fillStyle=col;
+    ctx.fillText('—',x-ns*.58,y);
+    ctx.font=`600 ${ns}px Barlow Condensed,sans-serif`;
+    ctx.fillText(num,x,y);
+    ctx.font=`400 ${ds}px Barlow Condensed,sans-serif`;
+    ctx.fillText('—',x+ns*.58,y);
+  }
+  function half(x,y,col){
+    ctx.font=`600 ${ns}px Barlow Condensed,sans-serif`; ctx.fillStyle=col;
+    ctx.fillText('0',x,y);
+    ctx.font=`600 ${Math.round(ns*.62)}px Barlow Condensed,sans-serif`;
+    ctx.fillText('5',x+ns*.44,y-ns*.28);
+  }
+
+  // ── axis labels ───────────────────────────────────────
+  // Labels float in the GAP between the two parallel lines (at cy or cx)
+  const YLO='#FFF200', YWH='rgba(230,230,230,0.88)';
+  const pad=r*.10; // label offset beyond gr
+
+  // Horizontal axis labels (between the two h-lines, so at y=cy)
+  flanked('1',cx-gr-pad,cy,YWH);
+  half(cx-g5,cy,YLO);
+  flanked('0',cx,cy,YLO);
+  half(cx+g5,cy,YLO);
+  flanked('1',cx+gr+pad,cy,YWH);
+
+  // Vertical axis labels (between the two v-lines, so at x=cx)
+  // Skip origin — already drawn above
+  flanked('1',cx,cy-gr-pad,YWH);
+  half(cx,cy-g5,YLO);
+  flanked('0',cx,cy,YLO); // origin — sits in the open centre gap
+  half(cx,cy+g5,YLO);
+  flanked('1',cx,cy+gr+pad,YWH);
+
+  // ── "G FORCE" label (upper-left quadrant) ────────────
+  const gx=cx-g5*.90, gy=cy-g5*.50;
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.font=`600 ${Math.round(r*.105)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(240,240,240,0.88)'; ctx.fillText('G FORCE',gx,gy);
+
+  // ── G-force simulation & moving dot ──────────────────
+  gXT+=(Math.random()-.5)*.06; gYT+=(Math.random()-.5)*.04;
+  gXT=Math.max(-1,Math.min(1,gXT*.965)); gYT=Math.max(-1,Math.min(1,gYT*.965));
+  gX+=(gXT-gX)*.13; gY+=(gYT-gY)*.13;
   const dx=cx+gX*gr, dy=cy+gY*gr;
-  // Trail glow
-  ctx.beginPath(); ctx.arc(dx,dy,9,0,Math.PI*2); ctx.fillStyle='rgba(255,40,0,0.12)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(dx,dy,5,0,Math.PI*2); ctx.fillStyle='rgba(255,40,0,0.45)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(dx,dy,3,0,Math.PI*2);
-  ctx.fillStyle='#FF2800'; ctx.shadowColor='#FF2800'; ctx.shadowBlur=10; ctx.fill(); ctx.shadowBlur=0;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.beginPath(); ctx.arc(dx,dy,8,0,Math.PI*2); ctx.fillStyle='rgba(255,60,0,0.13)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx,dy,4.5,0,Math.PI*2); ctx.fillStyle='rgba(255,60,0,0.48)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(dx,dy,2.8,0,Math.PI*2);
+  ctx.fillStyle='#FF3A00'; ctx.shadowColor='#FF3A00'; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
 }
 
 function ddVehicleStatus(ctx,cx,cy,r){
@@ -2781,6 +2966,79 @@ document.getElementById('ddCanvas').addEventListener('click',()=>{
 document.getElementById('ddLabel').addEventListener('click',()=>{
   driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length;
 });
+
+// ══ ELEMENTS PANEL ══
+let elemPanelOpen = false;
+
+function toggleElemPanel() {
+  elemPanelOpen = !elemPanelOpen;
+  document.getElementById('elemPanel').classList.toggle('open', elemPanelOpen);
+  document.getElementById('elemPanelToggle').classList.toggle('active', elemPanelOpen);
+  if (elemPanelOpen) renderElemPanel();
+}
+
+function renderElemPanel() {
+  const list = document.getElementById('epList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (activeTab() !== 'cp') {
+    list.innerHTML = '<div class="ep-none">No selectable elements on this tab.</div>';
+    return;
+  }
+  Object.entries(POS_ELEMENTS).forEach(([id, label]) => {
+    const item = document.createElement('label');
+    item.className = 'ep-item' + (selectedIds.has(id) ? ' ep-sel' : '');
+    item.dataset.epId = id;
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = selectedIds.has(id);
+    cb.addEventListener('change', (e) => {
+      e.stopPropagation();
+      if (cb.checked) selectPosEl(id);
+      else deselectPosEl(id);
+    });
+    const lbl = document.createElement('span');
+    lbl.className = 'ep-lbl';
+    lbl.textContent = label;
+    item.appendChild(cb);
+    item.appendChild(lbl);
+    list.appendChild(item);
+  });
+}
+
+function syncElemPanel() {
+  if (!elemPanelOpen) return;
+  document.querySelectorAll('#epList .ep-item').forEach(item => {
+    const id = item.dataset.epId;
+    const cb = item.querySelector('input[type="checkbox"]');
+    const sel = selectedIds.has(id);
+    if (cb) cb.checked = sel;
+    item.classList.toggle('ep-sel', sel);
+  });
+}
+
+
+function updateTabIndicator(instant) {
+  const nav = document.querySelector('.tab-nav');
+  const active = nav ? nav.querySelector('.tab-btn.active') : null;
+  const ind = document.getElementById('tabIndicator');
+  if (!ind || !active) return;
+  const navRect = nav.getBoundingClientRect();
+  const btnRect = active.getBoundingClientRect();
+  if (instant) ind.style.transition = 'none';
+  ind.style.left  = (btnRect.left - navRect.left) + 'px';
+  ind.style.width = btnRect.width + 'px';
+  if (instant) requestAnimationFrame(() => { ind.style.transition = ''; });
+}
+
 </script>
+
+<div id="elemPanel">
+  <div class="ep-hd">
+    <span class="ep-title">SELECTABLE ELEMENTS</span>
+    <span class="ep-close" onclick="toggleElemPanel()">✕</span>
+  </div>
+  <div class="ep-list" id="epList"></div>
+</div>
 </body>
 </html>
