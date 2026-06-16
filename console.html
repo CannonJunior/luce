@@ -526,6 +526,48 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 .tab-panel { display: none; flex-direction: column; align-items: center; width: 100%; }
 .tab-panel.active { display: flex; }
 
+/* ── STEERING WHEEL TAB ── */
+.sw-wrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px 16px 28px; user-select: none; gap: 14px; width: 100%;
+}
+.sw-svg { width: 100%; max-width: 560px; height: auto; display: block; }
+.sw-status-strip {
+  display: flex; gap: 0; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.032); border-radius: 8px;
+  padding: 8px 24px; border: 1px solid rgba(255,255,255,0.06);
+  width: 100%; max-width: 500px;
+}
+.sw-sep { width: 1px; height: 26px; background: rgba(255,255,255,0.08); margin: 0 20px; }
+.sw-status-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.sw-status-lbl {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 8px;
+  font-weight: 600; letter-spacing: 2px; color: rgba(255,255,255,0.28); text-transform: uppercase;
+}
+.sw-status-val {
+  font-family: 'Barlow Condensed', sans-serif; font-size: 15px;
+  font-weight: 700; letter-spacing: 1px; color: #e8e8e0;
+}
+.sw-status-val.ice   { color: #A8C4D4; }
+.sw-status-val.wet   { color: #B8D0E0; }
+.sw-status-val.dry   { color: #4caf50; }
+.sw-status-val.sport { color: #E87722; }
+.sw-status-val.performance { color: #FF2800; }
+.sw-status-val.range { color: #A8C4D4; }
+.sw-status-val.tour  { color: #FFF200; }
+.sw-status-val.perfo { color: #FF2800; }
+.sw-status-val.wiper-off { color: rgba(255,255,255,0.35); }
+.sw-status-val.wiper-on  { color: #4caf50; }
+/* Turn signal indicators in binnacle header */
+.binn-turn-l, .binn-turn-r {
+  font-size: 18px; color: #FF8C00; opacity: 0; pointer-events: none;
+}
+.binn-turn-l.active { opacity: 1; animation: swTurnBlink 0.55s ease-in-out infinite; }
+.binn-turn-r.active { opacity: 1; animation: swTurnBlink 0.55s ease-in-out infinite; }
+@keyframes swTurnBlink {
+  0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; }
+}
+
 /* ── BINNACLE ── */
 .binnacle-wrap {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -533,7 +575,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 }
 .binnacle-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .binnacle-housing {
-  border-radius: 50%; padding: 6px;
+  border-radius: 50%; padding: 3px;
   background: radial-gradient(circle at 38% 30%, #22222a 0%, #111118 60%, #0a0a0e 100%);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.045),
@@ -543,14 +585,14 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
     inset 0 1px 0 rgba(255,255,255,0.07);
 }
 .binnacle-bezel-ring {
-  border-radius: 50%; padding: 5px;
+  border-radius: 50%; padding: 2px;
   background: #0a0a0e;
   box-shadow: inset 0 3px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07);
 }
 .binnacle-dial-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 600;
   letter-spacing: 2.5px; color: rgba(255,255,255,0.28); text-align: center;
-  padding: 2px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
+  padding: 2px 12px; border: 1px solid rgba(255,255,255,0.07); border-radius: 2px;
   cursor: pointer; transition: color 0.2s, border-color 0.2s;
 }
 .binnacle-dial-label:hover { color: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.2); }
@@ -562,6 +604,17 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 .binnacle-dial-label.dry-mode   { color: #4caf50; border-color: rgba(76,175,80,0.38); }
 .binnacle-dial-label.sport-mode { color: #E87722; border-color: rgba(232,119,34,0.38); }
 .binnacle-dial-label.performance-mode { color: #FF2800; border-color: rgba(255,40,0,0.38); }
+
+/* Suspension widget (next to ddLabel) */
+.binn-dd-row { display: flex; align-items: center; gap: 7px; justify-content: center; }
+.binn-susp-widget { display: flex; align-items: center; gap: 4px; }
+.binn-susp-icon { display: block; opacity: 0.55; flex-shrink: 0; }
+.binn-susp-bars { display: flex; align-items: flex-end; gap: 2px; height: 13px; }
+.binn-susp-bar { width: 4px; border: 1px solid rgba(255,255,255,0.18); border-radius: 1px; background: transparent; transition: background 0.22s, border-color 0.22s; }
+.binn-susp-bar:nth-child(1) { height: 7px; }
+.binn-susp-bar:nth-child(2) { height: 10px; }
+.binn-susp-bar:nth-child(3) { height: 13px; }
+.binn-susp-bar.lit { background: currentColor; border-color: currentColor; }
 
 /* Binnacle header: time / temp */
 .binnacle-header {
@@ -580,18 +633,37 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 /* Three-dial row */
 .binnacle-dials { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 24px; }
 
-/* PRND gear selector */
-.binn-prnd { display: flex; gap: 4px; align-items: center; margin-top: 6px; }
+/* PRND gear selector — upside-down L (Γ): R top-left, P top-right, N mid-left, D bottom-left */
+.binn-prnd {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto auto;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.prnd-gear[data-gear="R"] { grid-column: 1; grid-row: 1; }
+.prnd-gear[data-gear="P"] { grid-column: 2; grid-row: 1; }
+.prnd-gear[data-gear="N"] { grid-column: 1; grid-row: 2; }
+.prnd-gear[data-gear="D"] { grid-column: 1; grid-row: 3; }
 .prnd-gear {
   font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700;
-  letter-spacing: 1.5px; color: rgba(255,255,255,0.18); padding: 2px 7px;
-  border: 1px solid transparent; border-radius: 4px; cursor: pointer;
-  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  letter-spacing: 1px; color: rgba(255,255,255,0.25);
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid transparent; border-radius: 50%; cursor: pointer;
+  transform: scale(1);
+  transition: color 0.22s ease, background 0.22s ease, border-color 0.22s ease,
+              transform 0.30s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s ease;
 }
-.prnd-gear:hover { color: rgba(255,255,255,0.45); }
+.prnd-gear:hover { color: rgba(255,255,255,0.5); }
 .prnd-gear.active {
-  color: rgba(232,232,224,0.90); border-color: rgba(232,232,224,0.28);
-  background: rgba(232,232,224,0.055);
+  color: #1a1a1a;
+  background: #d4d4d4;
+  border-color: #888888;
+  transform: scale(1.18);
+  box-shadow: 0 0 8px rgba(200,200,200,0.25);
 }
 
 /* Driver Dial mode dots (external, top-right of housing) */
@@ -751,6 +823,28 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
   color: rgba(255,255,255,0.22); letter-spacing: 0.5px;
 }
 
+/* ── BINNACLE ELEMENT SELECTION ── */
+[data-binn-id] { border-radius: 8px; transition: box-shadow 0.18s; outline: 1px solid transparent; }
+[data-binn-id].binn-sel { outline: 2px solid #FFF200 !important; outline-offset: 3px; box-shadow: 0 0 18px rgba(255,242,0,0.12); position: relative !important; z-index: 20 !important; }
+[data-binn-id].binn-sel::before { content: attr(data-binn-label); position: absolute; top: -22px; left: 0; font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 400; letter-spacing: 0.5px; color: #FFF200; background: rgba(0,0,0,0.85); padding: 2px 5px; border-radius: 3px; white-space: nowrap; pointer-events: none; z-index: 100; }
+body.ctrl-held [data-binn-id] { cursor: crosshair !important; }
+body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !important; outline-offset: 4px; }
+#binnConfig { display: none; align-items: center; gap: 8px; }
+#binnHint {
+  position: fixed; bottom: 0; left: 0; right: 0; background: rgba(6,6,8,0.96);
+  border-top: 1px solid rgba(255,242,0,0.2); padding: 8px 20px;
+  display: none; align-items: center; gap: 12px; z-index: 8000;
+  font-family: 'Barlow Condensed', sans-serif;
+}
+#binnHint .bh-label { font-size: 12px; font-weight: 600; color: #FFF200; letter-spacing: 0.5px; white-space: nowrap; }
+#binnHint .bh-mode { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.65); letter-spacing: 0.3px; white-space: nowrap; }
+#binnHint .bh-sep { color: rgba(255,255,255,0.18); font-size: 14px; }
+.bh-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); border-radius: 4px; padding: 3px 10px; cursor: pointer; transition: color 0.15s, background 0.15s; }
+.bh-btn:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.12); }
+.bh-btn.bh-active { color: #FFF200; background: rgba(255,242,0,0.1); border-color: rgba(255,242,0,0.3); }
+#binnHint .bh-clear { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.3); cursor: pointer; letter-spacing: 0.5px; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; transition: color 0.2s, border-color 0.2s; }
+#binnHint .bh-clear:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.3); }
+
 </style>
 </head>
 <body>
@@ -775,6 +869,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 <div class="tab-nav">
   <button class="tab-btn active" id="tabBtnCp" onclick="switchTab('cp')">CONTROL PANEL</button>
   <button class="tab-btn" id="tabBtnBinnacle" onclick="switchTab('binnacle')">BINNACLE</button>
+  <button class="tab-btn" id="tabBtnSW" onclick="switchTab('sw')">STEERING WHEEL</button>
   <div class="tab-indicator" id="tabIndicator"></div>
 </div>
 
@@ -1403,15 +1498,17 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 
     <!-- Header: time / ambient temp -->
     <div class="binnacle-header">
-      <div class="binn-time" id="binnTime">10:10</div>
-      <div class="binn-temp" id="binnTemp">27°C</div>
+      <div class="binn-turn-l" id="binnTurnL">◄</div>
+      <div class="binn-time" id="binnTime" data-binn-id="binn-time">10:10</div>
+      <div class="binn-temp" id="binnTemp" data-binn-id="binn-temp">27°C</div>
+      <div class="binn-turn-r" id="binnTurnR">►</div>
     </div>
 
     <!-- Three dials -->
     <div class="binnacle-dials">
 
       <!-- Power Dial (e-Manettino) -->
-      <div class="binnacle-col">
+      <div class="binnacle-col" data-binn-id="binn-power-dial">
         <div class="binnacle-housing">
           <div class="binnacle-bezel-ring">
             <canvas id="pdCanvas" width="200" height="200"
@@ -1419,11 +1516,11 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
               data-tip="Power Dial" data-tip-fn="Click to cycle e-Manettino: RANGE → TOUR → PERFO. Controls powertrain energy delivery and throttle mapping."></canvas>
           </div>
         </div>
-        <div class="binnacle-dial-label tour-mode" id="pdLabel">POWER — TOUR</div>
+        <div class="binnacle-dial-label tour-mode" id="pdLabel" data-binn-id="binn-pd-label">TOUR</div>
       </div>
 
       <!-- Central Dial (speed / power) + PRND selector -->
-      <div class="binnacle-col">
+      <div class="binnacle-col" data-binn-id="binn-central-dial">
         <div class="binnacle-housing">
           <div class="binnacle-bezel-ring">
             <canvas id="cdCanvas" width="280" height="280"
@@ -1433,7 +1530,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
         </div>
         <div class="binnacle-dial-label" id="cdLabel" style="display:none;"></div>
         <!-- Gear / PRND selector -->
-        <div class="binn-prnd" id="binnPrnd">
+        <div class="binn-prnd" id="binnPrnd" data-binn-id="binn-prnd">
           <span class="prnd-gear" data-gear="P">P</span>
           <span class="prnd-gear" data-gear="R">R</span>
           <span class="prnd-gear" data-gear="N">N</span>
@@ -1443,7 +1540,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 
       <!-- Driver Dial (multifunction) -->
       <div class="binnacle-col">
-        <div class="dd-outer">
+        <div class="dd-outer" data-binn-id="binn-driver-dial">
           <div class="binnacle-housing">
             <div class="binnacle-bezel-ring">
               <canvas id="ddCanvas" width="200" height="200"
@@ -1461,13 +1558,367 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
             <span class="dd-dot"        style="left:109.1px;top:-70.6px"></span>
           </div>
         </div>
-        <div class="binnacle-dial-label" id="ddLabel">G METER</div>
+        <div class="binn-dd-row">
+          <div class="binnacle-dial-label dry-mode" id="ddLabel" data-binn-id="binn-dd-label">DRY</div>
+          <div class="binn-susp-widget" id="suspWidget">
+            <svg class="binn-susp-icon" viewBox="0 0 8 16" width="8" height="16" xmlns="http://www.w3.org/2000/svg">
+              <line x1="4" y1="0" x2="4" y2="2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <polyline points="1.5,2 6.5,3.8 1.5,5.6 6.5,7.4 1.5,9.2 6.5,11 1.5,12.8" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <line x1="4" y1="12.8" x2="4" y2="16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <div class="binn-susp-bars" id="suspBars">
+              <div class="binn-susp-bar lit"></div>
+              <div class="binn-susp-bar"></div>
+              <div class="binn-susp-bar"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div><!-- /binnacle-dials -->
 
   </div>
 </div><!-- /tab-binnacle -->
+
+<!-- ── TAB: STEERING WHEEL ── -->
+<div id="tab-sw" class="tab-panel">
+  <div class="sw-wrap">
+
+    <svg class="sw-svg" viewBox="0 0 560 520" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Radial background glow -->
+    <radialGradient id="swBg" cx="50%" cy="48%" r="42%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.018)"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+    </radialGradient>
+    <!-- Hub dome: dark with subtle highlight -->
+    <radialGradient id="hubGrad" cx="40%" cy="34%" r="64%">
+      <stop offset="0%" stop-color="#20202A"/>
+      <stop offset="55%" stop-color="#101016"/>
+      <stop offset="100%" stop-color="#08080C"/>
+    </radialGradient>
+    <!-- Hub rim glow -->
+    <radialGradient id="hubRimGlow" cx="35%" cy="28%" r="70%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.16)"/>
+      <stop offset="65%" stop-color="rgba(255,255,255,0.03)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+    <!-- e-Manettino knob: silver chrome dome -->
+    <radialGradient id="eManGrad" cx="34%" cy="27%" r="68%">
+      <stop offset="0%"   stop-color="#E6E2DA"/>
+      <stop offset="38%"  stop-color="#C6C2BA"/>
+      <stop offset="72%"  stop-color="#9C9890"/>
+      <stop offset="100%" stop-color="#76726C"/>
+    </radialGradient>
+    <!-- Manettino knob: deep red dome -->
+    <radialGradient id="manGrad" cx="34%" cy="27%" r="68%">
+      <stop offset="0%"   stop-color="#FF5533"/>
+      <stop offset="42%"  stop-color="#DD1100"/>
+      <stop offset="78%"  stop-color="#991100"/>
+      <stop offset="100%" stop-color="#661100"/>
+    </radialGradient>
+    <!-- Badge gloss clip -->
+    <clipPath id="badgeClip">
+      <circle cx="280" cy="255" r="46"/>
+    </clipPath>
+    <!-- Pod clip: left -->
+    <clipPath id="podClipL">
+      <path d="M 122,282 L 220,282 C 232,298 234,360 216,398 C 204,420 178,424 162,412 C 136,396 115,362 116,320 C 117,292 120,282 122,282 Z"/>
+    </clipPath>
+    <!-- Pod clip: right -->
+    <clipPath id="podClipR">
+      <path d="M 438,282 L 340,282 C 328,298 326,360 344,398 C 356,420 382,424 398,412 C 424,396 445,362 444,320 C 443,292 440,282 438,282 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="560" height="520" fill="url(#swBg)" rx="20"/>
+
+  <!-- ══════════════════════════════════════════
+       FRAME — champagne aluminium #C8C2B4
+       Draw order: upper spokes → crossbar → bottom spoke
+       Hub covers center junction.
+       ══════════════════════════════════════════ -->
+
+  <!-- Upper-left spoke: from crossbar-top-left (252,237) to 10:30 rim (132,107) -->
+  <line x1="252" y1="237" x2="132" y2="107" stroke="#C8C2B4" stroke-width="26" stroke-linecap="round"/>
+  <!-- Chamfer highlight on upper edge -->
+  <line x1="252" y1="237" x2="132" y2="107" stroke="rgba(255,252,246,0.26)" stroke-width="6" stroke-linecap="round"/>
+  <!-- Chamfer shadow on lower edge -->
+  <line x1="252" y1="237" x2="132" y2="107" stroke="rgba(0,0,0,0.18)" stroke-width="4" stroke-linecap="round"
+        transform="translate(4,4)"/>
+
+  <!-- Upper-right spoke: (308,237) to 1:30 rim (429,107) -->
+  <line x1="308" y1="237" x2="429" y2="107" stroke="#C8C2B4" stroke-width="26" stroke-linecap="round"/>
+  <line x1="308" y1="237" x2="429" y2="107" stroke="rgba(255,252,246,0.26)" stroke-width="6" stroke-linecap="round"/>
+  <line x1="308" y1="237" x2="429" y2="107" stroke="rgba(0,0,0,0.18)" stroke-width="4" stroke-linecap="round"
+        transform="translate(-4,4)"/>
+
+  <!-- Horizontal crossbar: 9 o'clock to 3 o'clock through hub center -->
+  <rect x="63" y="236" width="434" height="38" rx="19" fill="#C8C2B4"/>
+  <!-- Crossbar top highlight -->
+  <rect x="74" y="237" width="412" height="7" rx="3.5" fill="rgba(255,252,246,0.28)"/>
+  <!-- Crossbar bottom shadow -->
+  <rect x="74" y="265" width="412" height="5" rx="2.5" fill="rgba(0,0,0,0.20)"/>
+
+  <!-- Bottom spoke: tapered from hub bottom (280,335) to 6 o'clock rim (280,465) -->
+  <path d="M 264,335 L 296,335 L 290,465 L 270,465 Z" fill="#C8C2B4"/>
+  <!-- Bottom spoke rounded hub cap -->
+  <ellipse cx="280" cy="335" rx="16" ry="7" fill="#C8C2B4"/>
+  <!-- Bottom spoke rim cap -->
+  <ellipse cx="280" cy="465" rx="10" ry="5" fill="#C8C2B4"/>
+  <!-- Bottom spoke highlight stripe -->
+  <path d="M 277,336 L 283,336 L 281,464 L 279,464 Z" fill="rgba(255,252,246,0.22)"/>
+  <!-- Bottom spoke side shadow -->
+  <path d="M 264,336 L 269,336 L 270,464 L 265,464 Z" fill="rgba(0,0,0,0.14)"/>
+
+  <!-- ══════════════════════════════════════════
+       RIM — very dark, multi-layer for depth
+       cx=280 cy=255 r=210 stroke=36
+       ══════════════════════════════════════════ -->
+  <!-- Outer ambient -->
+  <circle cx="280" cy="255" r="210" fill="none" stroke="#25242C" stroke-width="44" opacity="0.55"/>
+  <!-- Main rim body -->
+  <circle cx="280" cy="255" r="210" fill="none" stroke="#18181E" stroke-width="36"/>
+  <!-- Inner edge shadow -->
+  <circle cx="280" cy="255" r="193" fill="none" stroke="rgba(0,0,0,0.45)" stroke-width="4"/>
+  <!-- Outer edge micro-highlight -->
+  <circle cx="280" cy="255" r="228" fill="none" stroke="rgba(255,252,248,0.06)" stroke-width="2"/>
+  <!-- Top-arc specular (upper 130° band) — circumference≈1319, 130°=473px, offset for top -->
+  <circle cx="280" cy="255" r="210" fill="none" stroke="rgba(255,252,248,0.065)" stroke-width="34"
+          stroke-dasharray="473 846" stroke-dashoffset="990" stroke-linecap="round"/>
+  <!-- Outer edge bright specular arc -->
+  <circle cx="280" cy="255" r="228" fill="none" stroke="rgba(255,252,248,0.10)" stroke-width="2"
+          stroke-dasharray="390 930" stroke-dashoffset="990" stroke-linecap="round"/>
+
+  <!-- ── Leather seam marks at spoke-rim junctions ── -->
+  <!-- Left seam at ~10:30 (132,107): tangent direction ~315° -->
+  <line x1="122" y1="117" x2="142" y2="97" stroke="rgba(170,165,158,0.50)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="126" y1="113" x2="138" y2="101" stroke="rgba(255,252,248,0.18)" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Right seam at ~1:30 (429,107): tangent direction ~45° -->
+  <line x1="419" y1="97" x2="439" y2="117" stroke="rgba(170,165,158,0.50)" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="422" y1="101" x2="436" y2="113" stroke="rgba(255,252,248,0.18)" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- ══════════════════════════════════════════
+       TURN SIGNAL BUTTONS
+       At 9 o'clock (88,255) and 3 o'clock (472,255)
+       Recessed circular buttons on crossbar ends
+       ══════════════════════════════════════════ -->
+  <!-- Left turn signal -->
+  <circle cx="88" cy="255" r="17" fill="#B0AA9C" stroke="rgba(0,0,0,0.30)" stroke-width="1.5"
+          onclick="swTurnSignal('L')" style="cursor:pointer"/>
+  <circle cx="88" cy="255" r="17" fill="rgba(0,0,0,0.08)" stroke="none"/><!-- inset shadow -->
+  <text id="swTurnLIcon" x="88" y="260" text-anchor="middle"
+        fill="#2E2A24" font-size="14" font-family="sans-serif" pointer-events="none">←</text>
+
+  <!-- Right turn signal -->
+  <circle cx="472" cy="255" r="17" fill="#B0AA9C" stroke="rgba(0,0,0,0.30)" stroke-width="1.5"
+          onclick="swTurnSignal('R')" style="cursor:pointer"/>
+  <circle cx="472" cy="255" r="17" fill="rgba(0,0,0,0.08)" stroke="none"/>
+  <text id="swTurnRIcon" x="472" y="260" text-anchor="middle"
+        fill="#2E2A24" font-size="14" font-family="sans-serif" pointer-events="none">→</text>
+
+  <!-- ══════════════════════════════════════════
+       HUB — dark dome with Ferrari badge
+       ══════════════════════════════════════════ -->
+  <circle cx="280" cy="255" r="82" fill="url(#hubGrad)"/>
+  <circle cx="280" cy="255" r="82" fill="url(#hubRimGlow)"/>
+  <circle cx="280" cy="255" r="82" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.2"/>
+
+  <!-- Ferrari badge: black outer ring → yellow circle → horse -->
+  <circle cx="280" cy="255" r="54" fill="#080808" stroke="#000" stroke-width="1"/>
+  <circle cx="280" cy="255" r="46" fill="#F5C800"/>
+  <!-- Prancing horse (black silhouette on yellow) -->
+  <image href="prancing_horse.png" x="258" y="219" width="44" height="58" opacity="1"/>
+  <!-- Badge gloss sheen upper-left -->
+  <ellipse cx="264" cy="240" rx="20" ry="13"
+           fill="rgba(255,255,255,0.28)" clip-path="url(#badgeClip)" opacity="0.35"/>
+  <!-- Badge ring inner highlight -->
+  <circle cx="280" cy="255" r="46" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+
+  <!-- AIRBAG text at hub bottom -->
+  <text x="280" y="322" text-anchor="middle" fill="rgba(255,255,255,0.13)"
+        font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="2.5">AIRBAG</text>
+
+  <!-- ══════════════════════════════════════════
+       LEFT POD — e-Manettino, Volume, Phone
+       ══════════════════════════════════════════ -->
+  <!-- Pod shadow -->
+  <path d="M 123,283 L 221,283 C 234,299 236,362 218,400 C 206,422 180,426 163,414 C 137,397 116,364 117,322 C 118,294 121,283 123,283 Z"
+        fill="rgba(0,0,0,0.5)" transform="translate(3,4)"/>
+  <!-- Pod body -->
+  <path d="M 122,282 L 220,282 C 232,298 234,360 216,398 C 204,420 178,424 162,412 C 136,396 115,362 116,320 C 117,292 120,282 122,282 Z"
+        fill="#0F0F14" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+  <!-- Pod inner bevel top edge -->
+  <path d="M 124,284 L 218,284 C 228,298 228,298 228,298" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- ── e-Manettino section header label ── -->
+  <text x="178" y="297" text-anchor="middle" fill="rgba(255,255,255,0.22)"
+        font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="1.5">e-MANETTINO</text>
+
+  <!-- ── e-Manettino knob (cx=175, cy=348) silver chrome dome ── -->
+  <!-- Outer tick ring -->
+  <circle cx="175" cy="348" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <!-- Tick marks at RANGE(-45°), TOUR(0°), PERFO(+45°) — short marks outside knob -->
+  <line x1="175" y1="320" x2="175" y2="325" transform="rotate(-45,175,348)"
+        stroke="rgba(255,255,255,0.30)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="175" y1="320" x2="175" y2="325" transform="rotate(0,175,348)"
+        stroke="rgba(255,255,255,0.30)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="175" y1="320" x2="175" y2="325" transform="rotate(45,175,348)"
+        stroke="rgba(255,255,255,0.30)" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Knob body — chrome dome -->
+  <circle cx="175" cy="348" r="22" fill="url(#eManGrad)" stroke="rgba(255,255,255,0.20)" stroke-width="1"/>
+  <!-- Knob dome specular spot -->
+  <ellipse cx="168" cy="341" rx="8" ry="6" fill="rgba(255,255,255,0.30)"/>
+  <!-- Indicator line (default: TOUR=0°, points up) -->
+  <line x1="175" y1="348" x2="175" y2="328" id="swEManLine"
+        stroke="#C8B455" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
+  <!-- Click overlay for knob + tick ring area -->
+  <circle cx="175" cy="348" r="28" fill="transparent" onclick="swEManStep(1)" style="cursor:pointer"/>
+
+  <!-- e-Man mode labels -->
+  <text id="swEManLbl0" x="151" y="330" text-anchor="middle"
+        fill="rgba(255,255,255,0.30)" font-size="7" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">RANGE</text>
+  <text id="swEManLbl1" x="175" y="318" text-anchor="middle"
+        fill="#C8B455" font-size="7.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">TOUR</text>
+  <text id="swEManLbl2" x="199" y="330" text-anchor="middle"
+        fill="rgba(255,255,255,0.30)" font-size="7" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">PERFO</text>
+
+  <!-- ── Volume toggle switch (cx=128, center of track) ── -->
+  <!-- Track -->
+  <rect x="122" y="322" width="12" height="40" rx="6" fill="#0A0A10" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+  <!-- Track groove -->
+  <rect x="126" y="324" width="4" height="36" rx="2" fill="rgba(255,255,255,0.06)"/>
+  <!-- Toggle lever knob (at center = neutral) -->
+  <circle cx="128" cy="342" r="8" fill="#2C2C36" stroke="rgba(255,255,255,0.22)" stroke-width="1"/>
+  <circle cx="128" cy="342" r="4" fill="rgba(255,255,255,0.12)"/>
+  <!-- "+" label above toggle -->
+  <text x="128" y="319" text-anchor="middle" fill="rgba(255,255,255,0.45)"
+        font-size="10" font-family="sans-serif" pointer-events="none">+</text>
+  <!-- "−" label below toggle -->
+  <text x="128" y="373" text-anchor="middle" fill="rgba(255,255,255,0.45)"
+        font-size="11" font-family="sans-serif" pointer-events="none">−</text>
+  <!-- Volume click areas (invisible) -->
+  <rect x="119" y="312" width="18" height="26" fill="transparent"
+        id="swVolPlusBtn" onclick="swVolume(1)" style="cursor:pointer"/>
+  <rect x="119" y="346" width="18" height="26" fill="transparent"
+        id="swVolMinusBtn" onclick="swVolume(-1)" style="cursor:pointer"/>
+
+  <!-- ── Phone button ── -->
+  <circle cx="155" cy="396" r="14" fill="#0A0A10" stroke="rgba(255,255,255,0.12)" stroke-width="1"
+          id="swPhoneBtn" onclick="swPhone()" style="cursor:pointer"/>
+  <!-- NFC/connectivity arcs -->
+  <path d="M 150,399 A 6,6 0 0,1 160,399" fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="1.5" stroke-linecap="round" pointer-events="none"/>
+  <path d="M 147,403 A 10,10 0 0,1 163,403" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round" pointer-events="none"/>
+  <path d="M 144,407 A 14,14 0 0,1 166,407" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round" pointer-events="none"/>
+
+  <!-- ══════════════════════════════════════════
+       RIGHT POD — Manettino, Wiper, Media
+       ══════════════════════════════════════════ -->
+  <!-- Pod shadow -->
+  <path d="M 437,283 L 339,283 C 326,299 324,362 342,400 C 354,422 380,426 397,414 C 423,397 444,364 443,322 C 442,294 439,283 437,283 Z"
+        fill="rgba(0,0,0,0.5)" transform="translate(-3,4)"/>
+  <!-- Pod body -->
+  <path d="M 438,282 L 340,282 C 328,298 326,360 344,398 C 356,420 382,424 398,412 C 424,396 445,362 444,320 C 443,292 440,282 438,282 Z"
+        fill="#0F0F14" stroke="rgba(255,255,255,0.10)" stroke-width="1"/>
+
+  <!-- ── Manettino section header label ── -->
+  <text x="382" y="297" text-anchor="middle" fill="rgba(255,255,255,0.22)"
+        font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="1.5">MANETTINO</text>
+
+  <!-- ── Manettino knob (cx=368, cy=348) red dome ── -->
+  <!-- Outer tick ring -->
+  <circle cx="368" cy="348" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+  <!-- Tick marks at ICE(-120°), WET(-60°), DRY(0°), SPORT(+60°), PERF(+120°) -->
+  <line x1="368" y1="320" x2="368" y2="325" transform="rotate(-120,368,348)"
+        stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="368" y1="320" x2="368" y2="325" transform="rotate(-60,368,348)"
+        stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="368" y1="320" x2="368" y2="325" transform="rotate(0,368,348)"
+        stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="368" y1="320" x2="368" y2="325" transform="rotate(60,368,348)"
+        stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="368" y1="320" x2="368" y2="325" transform="rotate(120,368,348)"
+        stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Knob base body -->
+  <circle cx="368" cy="348" r="22" fill="#1A1A20" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+  <!-- Red dome cap (matches reference image prominently) -->
+  <circle cx="368" cy="348" r="17" fill="url(#manGrad)"/>
+  <!-- Red dome specular -->
+  <ellipse cx="361" cy="341" rx="7" ry="5" fill="rgba(255,200,180,0.35)"/>
+  <!-- Indicator line (default: DRY=0°, points up) -->
+  <line x1="368" y1="348" x2="368" y2="328" id="swManLine"
+        stroke="rgba(255,255,255,0.80)" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
+  <!-- Click overlay -->
+  <circle cx="368" cy="348" r="28" fill="transparent" onclick="swManStep(1)" style="cursor:pointer"/>
+
+  <!-- Manettino mode labels -->
+  <text id="swManLbl0" x="344" y="363" text-anchor="middle"
+        fill="rgba(255,255,255,0.28)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">ICE</text>
+  <text id="swManLbl1" x="342" y="337" text-anchor="middle"
+        fill="rgba(255,255,255,0.28)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">WET</text>
+  <text id="swManLbl2" x="368" y="318" text-anchor="middle"
+        fill="rgba(80,200,80,0.80)" font-size="7" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">DRY</text>
+  <text id="swManLbl3" x="394" y="337" text-anchor="middle"
+        fill="rgba(80,200,80,0.80)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">SPORT</text>
+  <text id="swManLbl4" x="393" y="363" text-anchor="middle"
+        fill="rgba(255,255,255,0.28)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">ESC</text>
+
+  <!-- ── Wiper selector (right side of right pod) ── -->
+  <!-- Wiper icon (arc + blade) -->
+  <path d="M 420,312 A 14,14 0 0,0 438,320" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="429" y1="316" x2="425" y2="325" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Wiper label -->
+  <text x="428" y="310" text-anchor="middle" fill="rgba(255,255,255,0.18)"
+        font-size="6" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="1">WIPER</text>
+  <!-- Wiper positions 0, 1, 2 in an arc -->
+  <circle id="swWiper0" cx="412" cy="356" r="9" fill="#1A1A20" stroke="rgba(255,255,255,0.10)" stroke-width="1"
+          onclick="swWiperSet(0)" style="cursor:pointer"/>
+  <text x="412" y="360" text-anchor="middle" fill="rgba(255,255,255,0.55)"
+        font-size="8.5" font-family="'Barlow Condensed',sans-serif" font-weight="700" pointer-events="none">0</text>
+  <circle id="swWiper1" cx="424" cy="347" r="9" fill="#1A1A20" stroke="rgba(255,255,255,0.10)" stroke-width="1"
+          onclick="swWiperSet(1)" style="cursor:pointer"/>
+  <text x="424" y="351" text-anchor="middle" fill="rgba(255,255,255,0.55)"
+        font-size="8.5" font-family="'Barlow Condensed',sans-serif" font-weight="700" pointer-events="none">1</text>
+  <circle id="swWiper2" cx="436" cy="336" r="9" fill="#1A1A20" stroke="rgba(255,255,255,0.10)" stroke-width="1"
+          onclick="swWiperSet(2)" style="cursor:pointer"/>
+  <text x="436" y="340" text-anchor="middle" fill="rgba(255,255,255,0.55)"
+        font-size="8.5" font-family="'Barlow Condensed',sans-serif" font-weight="700" pointer-events="none">2</text>
+
+  <!-- ── Media / Next Track button ── -->
+  <circle cx="395" cy="396" r="14" fill="#0A0A10" stroke="rgba(255,255,255,0.12)" stroke-width="1"
+          id="swMediaBtn" onclick="swMedia()" style="cursor:pointer"/>
+  <!-- Play-next triangle + bar -->
+  <polygon points="390,391 390,401 399,396" fill="rgba(255,255,255,0.40)" pointer-events="none"/>
+  <rect x="399" y="391" width="2.5" height="10" rx="1" fill="rgba(255,255,255,0.40)" pointer-events="none"/>
+
+</svg>
+
+    <!-- Status strip -->
+    <div class="sw-status-strip">
+      <div class="sw-status-item">
+        <div class="sw-status-lbl">MANETTINO</div>
+        <div class="sw-status-val" id="swStatusMan">DRY</div>
+      </div>
+      <div class="sw-sep"></div>
+      <div class="sw-status-item">
+        <div class="sw-status-lbl">e-MANETTINO</div>
+        <div class="sw-status-val" id="swStatusEMan">TOUR</div>
+      </div>
+      <div class="sw-sep"></div>
+      <div class="sw-status-item">
+        <div class="sw-status-lbl">WIPER</div>
+        <div class="sw-status-val" id="swStatusWiper">OFF</div>
+      </div>
+      <div class="sw-sep"></div>
+      <div class="sw-status-item">
+        <div class="sw-status-lbl">VOLUME</div>
+        <div class="sw-status-val" id="swStatusVol">60%</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /tab-sw -->
 
 <div id="resizeOverlay">
   <div class="resize-handle rh-nw" data-rh="nw"></div>
@@ -1484,6 +1935,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 
 <div id="posHint">
   <span class="hint-selected">Selected: <span id="posHintNames"></span></span>
+  <div id="binnConfig"></div>
   <span class="hint-keys">
     <span class="hint-key">W</span><span class="hint-key">A</span><span class="hint-key">S</span><span class="hint-key">D</span> to move
     &nbsp;·&nbsp; <span class="hint-key">⇧</span>+WASD = ×5
@@ -1501,8 +1953,10 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
     <input type="range" id="fontSizeSlider" min="6" max="80" value="12">
     <span id="fontSizeVal">12px</span>
   </div>
-  <span class="hint-clear" onclick="clearSelection()">CLEAR SELECTION</span>
+  <span class="hint-clear" onclick="clearAllSelection()">CLEAR SELECTION</span>
 </div>
+
+<div id="binnHint"></div>
 
 <div class="modal-overlay" id="saveModal">
   <div class="modal-box">
@@ -1580,6 +2034,17 @@ const POS_ELEMENTS = {
   'handle':        'Handle',
 };
 
+const BINN_ELEMENTS = {
+  'binn-time':         'Time',
+  'binn-temp':         'Temperature',
+  'binn-power-dial':   'Power Dial',
+  'binn-pd-label':     'Power Mode',
+  'binn-central-dial': 'Central Dial',
+  'binn-prnd':         'Gear Selector',
+  'binn-driver-dial':  'Driver Dial',
+  'binn-dd-label':     'Manettino Mode',
+};
+
 // ══ STATE ══
 const s = {
   mIdx:2, eIdx:1,
@@ -1599,6 +2064,7 @@ const s = {
   mediaBaseTime:84, mediaStartT:Date.now(), sourceIdx:0,
   waveSpeedColor:'#4caf50',
   bearing:330,
+  wiperSpeed:0, turnFlashL:false, turnFlashR:false,
 };
 
 // Waveform buffers
@@ -2144,7 +2610,7 @@ document.getElementById('cpSyncBtn').addEventListener('click',()=>{
 document.getElementById('csManet').addEventListener('click',()=>{ s.mIdx=(s.mIdx+1)%MANETTINO.length; applyBadgesClean(); updateSettingsPanel(); });
 document.getElementById('csEManet').addEventListener('click',()=>{ s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean(); updateSettingsPanel(); });
 document.getElementById('csESC').addEventListener('click',()=>{ s.escIdx=(s.escIdx+1)%3; updateSettingsPanel(); updatePills(); });
-document.getElementById('csSUSP').addEventListener('click',()=>{ s.suspIdx=(s.suspIdx+1)%3; updateSettingsPanel(); updatePills(); });
+document.getElementById('csSUSP').addEventListener('click',()=>{ s.suspIdx=(s.suspIdx+1)%3; updateSettingsPanel(); updatePills(); updateSuspBars(); });
 document.getElementById('csRegen').addEventListener('click',()=>{ s.regenIdx=(s.regenIdx+1)%4; updateSettingsPanel(); updatePills(); updateModeLeds(); });
 document.getElementById('csADAS').addEventListener('click',()=>{ s.adasOn=!s.adasOn; updateSettingsPanel(); updatePills(); updateModeLeds(); });
 
@@ -2183,10 +2649,12 @@ let resizing=null;
 
 function updateResizeOverlay(){
   const ov=document.getElementById('resizeOverlay');
-  if(selectedIds.size!==1){ov.style.display='none';return;}
-  const id=[...selectedIds][0];
-  if(id==='volume-knob'){ov.style.display='none';return;}
-  const el=getPosEl(id); if(!el){ov.style.display='none';return;}
+  const isBinn=activeTab()==='binnacle';
+  const selSet=isBinn?selectedBinnIds:selectedIds;
+  if(selSet.size!==1){ov.style.display='none';return;}
+  const id=[...selSet][0];
+  if(!isBinn&&id==='volume-knob'){ov.style.display='none';return;}
+  const el=isBinn?getBinnEl(id):getPosEl(id); if(!el){ov.style.display='none';return;}
   const r=el.getBoundingClientRect();
   ov.style.display='block';
   ov.style.left=r.left+'px'; ov.style.top=r.top+'px';
@@ -2196,25 +2664,31 @@ function updateResizeOverlay(){
 document.querySelectorAll('.resize-handle').forEach(h=>{
   h.addEventListener('mousedown',(e)=>{
     e.preventDefault(); e.stopPropagation();
-    if(selectedIds.size!==1) return;
-    const id=[...selectedIds][0];
-    const el=getPosEl(id); if(!el) return;
+    const isBinn=activeTab()==='binnacle';
+    const selSet=isBinn?selectedBinnIds:selectedIds;
+    if(selSet.size!==1) return;
+    const id=[...selSet][0];
+    const posObj=isBinn?binnPos:positions;
+    const resObj=isBinn?binnResizes:resizes;
+    const el=isBinn?getBinnEl(id):getPosEl(id); if(!el) return;
     const r=el.getBoundingClientRect();
-    const cur=resizes[id]||{w:1,h:1};
-    resizing={id, handle:h.dataset.rh, startX:e.clientX, startY:e.clientY,
+    const cur=resObj[id]||{w:1,h:1};
+    resizing={isBinn, id, handle:h.dataset.rh, startX:e.clientX, startY:e.clientY,
       startW:cur.w, startH:cur.h,
-      startPX:positions[id].x, startPY:positions[id].y,
+      startPX:posObj[id].x, startPY:posObj[id].y,
       origW:r.width/cur.w, origH:r.height/cur.h};
   });
 });
 
 window.addEventListener('mousemove',(e)=>{
   if(!resizing) return;
-  const {id,handle,startX,startY,startW,startH,startPX,startPY,origW,origH}=resizing;
+  const {isBinn,id,handle,startX,startY,startW,startH,startPX,startPY,origW,origH}=resizing;
+  const posObj=isBinn?binnPos:positions;
+  const resObj=isBinn?binnResizes:resizes;
+  const applyFn=isBinn?applyBinnPosition:applyPosition;
   const dx=e.clientX-startX, dy=e.clientY-startY;
   const MIN=0.15;
   if(handle.length===2){
-    // Corner drag — project onto the element's diagonal to get a single scale ratio
     const W=origW*startW, H=origH*startH, d=Math.sqrt(W*W+H*H);
     let proj=0;
     if(handle==='se') proj=( dx*W+dy*H)/d;
@@ -2222,18 +2696,16 @@ window.addEventListener('mousemove',(e)=>{
     else if(handle==='ne') proj=( dx*W-dy*H)/d;
     else if(handle==='nw') proj=(-dx*W-dy*H)/d;
     const ratio=Math.max(MIN/Math.max(startW,startH),(d+proj)/d);
-    resizes[id].w=startW*ratio; resizes[id].h=startH*ratio;
-    // Anchor the opposite corner by compensating position
-    if(handle.includes('w')) positions[id].x=startPX+origW*startW-origW*resizes[id].w;
-    if(handle.includes('n')) positions[id].y=startPY+origH*startH-origH*resizes[id].h;
+    resObj[id].w=startW*ratio; resObj[id].h=startH*ratio;
+    if(handle.includes('w')) posObj[id].x=startPX+origW*startW-origW*resObj[id].w;
+    if(handle.includes('n')) posObj[id].y=startPY+origH*startH-origH*resObj[id].h;
   } else {
-    // Edge drag — free single-axis resize
-    if(handle==='e'){ resizes[id].w=Math.max(MIN,(origW*startW+dx)/origW); }
-    if(handle==='s'){ resizes[id].h=Math.max(MIN,(origH*startH+dy)/origH); }
-    if(handle==='w'){ const nw=Math.max(MIN,(origW*startW-dx)/origW); positions[id].x=startPX+(origW*startW-origW*nw); resizes[id].w=nw; }
-    if(handle==='n'){ const nh=Math.max(MIN,(origH*startH-dy)/origH); positions[id].y=startPY+(origH*startH-origH*nh); resizes[id].h=nh; }
+    if(handle==='e'){ resObj[id].w=Math.max(MIN,(origW*startW+dx)/origW); }
+    if(handle==='s'){ resObj[id].h=Math.max(MIN,(origH*startH+dy)/origH); }
+    if(handle==='w'){ const nw=Math.max(MIN,(origW*startW-dx)/origW); posObj[id].x=startPX+(origW*startW-origW*nw); resObj[id].w=nw; }
+    if(handle==='n'){ const nh=Math.max(MIN,(origH*startH-dy)/origH); posObj[id].y=startPY+(origH*startH-origH*nh); resObj[id].h=nh; }
   }
-  applyPosition(id);
+  applyFn(id);
 });
 
 window.addEventListener('scroll', updateResizeOverlay);
@@ -2269,9 +2741,10 @@ function hideTip(){ tipEl.style.display='none'; }
 function posTip(e){ tipEl.style.left=Math.min(e.clientX+14,window.innerWidth-245)+'px'; tipEl.style.top=Math.max(e.clientY-54,8)+'px'; }
 
 // ══ OVERLAY TOGGLE ══
-function activeTab(){ return document.getElementById('tab-binnacle').classList.contains('active')?'binnacle':'cp'; }
+function activeTab(){ return document.getElementById('tab-binnacle').classList.contains('active')?'binnacle':document.getElementById('tab-sw').classList.contains('active')?'sw':'cp'; }
 function toggleOverlay(){
   const btn=document.getElementById('overlayToggle');
+  if(activeTab()==='sw') return;
   if(activeTab()==='binnacle'){
     const img=document.getElementById('binnacleOverlay');
     img.classList.toggle('hidden'); const on=!img.classList.contains('hidden');
@@ -2292,6 +2765,12 @@ const resizes={};
 Object.keys(POS_ELEMENTS).forEach(id=>{ resizes[id]={w:1,h:1}; });
 const selectedIds=new Set();
 
+const binnPos={};
+Object.keys(BINN_ELEMENTS).forEach(id=>{ binnPos[id]={x:0,y:0}; });
+const binnResizes={};
+Object.keys(BINN_ELEMENTS).forEach(id=>{ binnResizes[id]={w:1,h:1}; });
+const binnNatDims={};
+
 const FONT_SIZE_IDS=new Set([
   'mode-badge','power-badge','speed-value','power-value',
   'info-time','info-date','info-temp','info-aqi','info-heading','enzo-badge'
@@ -2303,6 +2782,23 @@ function applyFontSize(id,px){
 }
 
 function getPosEl(id){ return document.querySelector(`[data-pos-id="${id}"]`); }
+function getBinnEl(id){ return document.querySelector(`[data-binn-id="${id}"]`); }
+
+function applyBinnPosition(id){
+  const el=getBinnEl(id); if(!el) return;
+  const {x,y}=binnPos[id]||{x:0,y:0};
+  const {w=1,h=1}=binnResizes[id]||{};
+  const hasScale=w!==1||h!==1;
+  el.style.transform=(x||y)?`translate(${x}px,${y}px)`:'';
+  if(hasScale){
+    if(!binnNatDims[id]){ const r=el.getBoundingClientRect(); binnNatDims[id]={w:r.width||1,h:r.height||1}; }
+    el.style.width=(binnNatDims[id].w*w)+'px';
+    el.style.height=(binnNatDims[id].h*h)+'px';
+  } else {
+    el.style.width=''; el.style.height='';
+  }
+  updateResizeOverlay();
+}
 
 const CONSOLE_NAT_W=660;
 let CONSOLE_NAT_H=0;
@@ -2362,22 +2858,56 @@ function applyShellRadius(){
   document.getElementById('consoleRadiusSlider').value=consoleRadius;
   document.getElementById('consoleRadiusVal').textContent=consoleRadius+'px';
 }
+function clearAllSelection(){
+  if(activeTab()==='binnacle') deselectBinnElem();
+  else clearSelection();
+}
+
+function hideBinnConfig(){
+  const bc=document.getElementById('binnConfig');
+  if(bc){ bc.innerHTML=''; bc.style.display='none'; }
+}
+
+function showBinnConfig(id){
+  const bc=document.getElementById('binnConfig');
+  if(!bc) return;
+  bc.innerHTML=''; bc.style.display='flex';
+  const sep=()=>{ const sp=document.createElement('span'); sp.className='bh-sep'; sp.textContent='·'; bc.appendChild(sp); };
+  if(id==='binn-power-dial'||id==='binn-pd-label'){
+    sep();
+    E_MANET.forEach((mode,i)=>{ const btn=document.createElement('button'); btn.className='bh-btn'+(s.eIdx===i?' bh-active':''); btn.textContent=mode; btn.addEventListener('click',()=>{ s.eIdx=i; applyBadgesClean(); showBinnConfig(id); }); bc.appendChild(btn); });
+  } else if(id==='binn-dd-label'){
+    sep();
+    MANETTINO.forEach((mode,i)=>{ const btn=document.createElement('button'); btn.className='bh-btn'+(s.mIdx===i?' bh-active':''); btn.textContent=mode==='PERFORMANCE'?'PERF':mode; btn.addEventListener('click',()=>{ s.mIdx=i; applyBadgesClean(); showBinnConfig(id); }); bc.appendChild(btn); });
+  } else if(id==='binn-prnd'){
+    sep();
+    ['P','R','N','D'].forEach(g=>{ const btn=document.createElement('button'); btn.className='bh-btn'+(s.gear===g?' bh-active':''); btn.textContent=g; btn.addEventListener('click',()=>{ selectGear(g); setTimeout(()=>showBinnConfig('binn-prnd'),70); }); bc.appendChild(btn); });
+  } else if(id==='binn-driver-dial'){
+    sep();
+    const pb=document.createElement('button'); pb.className='bh-btn'; pb.textContent='←'; pb.addEventListener('click',()=>{ driverModeIdx=(driverModeIdx-1+DRIVER_MODES.length)%DRIVER_MODES.length; showBinnConfig('binn-driver-dial'); }); bc.appendChild(pb);
+    const ms=document.createElement('span'); ms.className='bh-mode'; ms.textContent=DRIVER_MODES[driverModeIdx]; bc.appendChild(ms);
+    const nb=document.createElement('button'); nb.className='bh-btn'; nb.textContent='→'; nb.addEventListener('click',()=>{ driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length; showBinnConfig('binn-driver-dial'); }); bc.appendChild(nb);
+  }
+}
+
 function updatePosHint(){
   const hint=document.getElementById('posHint'),namesEl=document.getElementById('posHintNames');
-  if(selectedIds.size===0){hint.style.display='none';return;}
-  hint.style.display='flex'; namesEl.textContent=[...selectedIds].map(id=>POS_ELEMENTS[id]).join(', ');
+  const isBinn=activeTab()==='binnacle';
+  const selSet=isBinn?selectedBinnIds:selectedIds;
+  if(selSet.size===0){hint.style.display='none';hideBinnConfig();return;}
+  hint.style.display='flex';
+  const elemMap=isBinn?BINN_ELEMENTS:POS_ELEMENTS;
+  namesEl.textContent=[...selSet].map(id=>elemMap[id]||id).join(', ');
+  if(isBinn&&selSet.size===1) showBinnConfig([...selSet][0]);
+  else hideBinnConfig();
   const rc=document.getElementById('consoleRadiusControl');
-  rc.style.display=selectedIds.has('cp-shell')?'flex':'none';
+  rc.style.display=(!isBinn&&selectedIds.has('cp-shell'))?'flex':'none';
   const fc=document.getElementById('fontSizeControl');
-  const fsIds=[...selectedIds].filter(id=>FONT_SIZE_IDS.has(id));
-  if(fsIds.length>0){
-    fc.style.display='flex';
-    const px=fontSizes[fsIds[0]]||12;
-    document.getElementById('fontSizeSlider').value=px;
-    document.getElementById('fontSizeVal').textContent=Math.round(px)+'px';
-  } else {
-    fc.style.display='none';
-  }
+  if(!isBinn){
+    const fsIds=[...selectedIds].filter(id=>FONT_SIZE_IDS.has(id));
+    if(fsIds.length>0){ fc.style.display='flex'; const px=fontSizes[fsIds[0]]||12; document.getElementById('fontSizeSlider').value=px; document.getElementById('fontSizeVal').textContent=Math.round(px)+'px'; }
+    else fc.style.display='none';
+  } else { fc.style.display='none'; }
 }
 document.getElementById('consoleRadiusSlider').addEventListener('input',e=>{
   consoleRadius=parseInt(e.target.value);
@@ -2414,40 +2944,61 @@ document.addEventListener('click',(e)=>{
 // WASD movement
 document.addEventListener('keydown',(e)=>{
   if((e.target.tagName==='INPUT'&&e.target.type!=='checkbox')||e.target.tagName==='TEXTAREA') return;
-  if(selectedIds.size===0) return;
+  const isBinn=activeTab()==='binnacle';
+  const selSet=isBinn?selectedBinnIds:selectedIds;
+  if(selSet.size===0) return;
   const key=e.key.toLowerCase(); if(!['w','a','s','d'].includes(key)) return;
   e.preventDefault();
   const step=e.shiftKey?5:1, dx=key==='a'?-step:key==='d'?step:0, dy=key==='w'?-step:key==='s'?step:0;
-  selectedIds.forEach(id=>{ if(id==='console') return; positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
+  if(isBinn){
+    selSet.forEach(id=>{ binnPos[id].x+=dx; binnPos[id].y+=dy; applyBinnPosition(id); });
+  } else {
+    selSet.forEach(id=>{ if(id==='console') return; positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
+  }
 });
 
 // Arrow-key alignment (2+ elements selected)
 document.addEventListener('keydown',(e)=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-  if(selectedIds.size<2) return;
+  const isBinn=activeTab()==='binnacle';
+  const selSet=isBinn?selectedBinnIds:selectedIds;
+  if(selSet.size<2) return;
   const key=e.key; if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)) return;
   e.preventDefault();
-  const ids=[...selectedIds].filter(id=>id!=='console');
+  const posObj=isBinn?binnPos:positions;
+  const getElFn=isBinn?getBinnEl:getPosEl;
+  const applyFn=isBinn?applyBinnPosition:applyPosition;
+  const ids=[...selSet].filter(id=>!isBinn?id!=='console':true);
   if(ids.length<2) return;
   const rects={};
-  ids.forEach(id=>{ const el=getPosEl(id); if(el) rects[id]=el.getBoundingClientRect(); });
+  ids.forEach(id=>{ const el=getElFn(id); if(el) rects[id]=el.getBoundingClientRect(); });
   const valid=ids.filter(id=>rects[id]);
   if(valid.length<2) return;
   if(key==='ArrowUp'||key==='ArrowDown'){
-    // Align vertical centers
     const cy=valid.reduce((s,id)=>s+rects[id].top+rects[id].height/2,0)/valid.length;
-    valid.forEach(id=>{ positions[id].y=Math.round(positions[id].y+(cy-rects[id].top-rects[id].height/2)); applyPosition(id); });
+    valid.forEach(id=>{ posObj[id].y=Math.round(posObj[id].y+(cy-rects[id].top-rects[id].height/2)); applyFn(id); });
   } else {
-    // Align horizontal centers
     const cx=valid.reduce((s,id)=>s+rects[id].left+rects[id].width/2,0)/valid.length;
-    valid.forEach(id=>{ positions[id].x=Math.round(positions[id].x+(cx-rects[id].left-rects[id].width/2)); applyPosition(id); });
+    valid.forEach(id=>{ posObj[id].x=Math.round(posObj[id].x+(cx-rects[id].left-rects[id].width/2)); applyFn(id); });
   }
 });
 
 document.addEventListener('keydown',(e)=>{ if(e.ctrlKey||e.metaKey) document.body.classList.add('ctrl-held'); });
 document.addEventListener('keyup',  (e)=>{ if(!e.ctrlKey&&!e.metaKey) document.body.classList.remove('ctrl-held'); });
 window.addEventListener('blur',()=>document.body.classList.remove('ctrl-held'));
-document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(selectedIds.size>0){clearSelection();e.preventDefault();}else closeSaveModal(); } });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(activeTab()==='binnacle'&&selectedBinnIds.size>0){deselectBinnElem();e.preventDefault();}else if(selectedIds.size>0){clearSelection();e.preventDefault();}else closeSaveModal(); } });
+
+// Binnacle Ctrl/Shift+click to toggle element selection
+document.addEventListener('click',(e)=>{
+  if(activeTab()!=='binnacle') return;
+  const isCtrl=e.ctrlKey||e.metaKey, isShift=e.shiftKey;
+  if(!isCtrl&&!isShift) return;
+  if(e.target.closest('.toolbar')||e.target.closest('#elemPanel')||e.target.closest('#binnHint')) return;
+  const binnEl=e.target.closest('[data-binn-id]'); if(!binnEl) return;
+  e.preventDefault(); e.stopPropagation();
+  const id=binnEl.getAttribute('data-binn-id');
+  if(selectedBinnIds.has(id)) deselectBinnElem(id); else selectBinnElem(id);
+},true);
 
 // ══════════════════════════════════════════════════════
 // SAVE / LOAD SYSTEM
@@ -2535,6 +3086,7 @@ requestAnimationFrame(()=>{
   });
 });
 applyBadgesClean();
+Object.entries(BINN_ELEMENTS).forEach(([id,label])=>{ const el=getBinnEl(id); if(el) el.setAttribute('data-binn-label',label); });
 updateModeLeds();
 updatePills();
 updateTime();
@@ -2542,7 +3094,7 @@ updateHeading();
 dom.tempLeftEl.textContent=s.tempLeft+'°';
 dom.tempRightEl.textContent=s.tempRight+'°';
 document.getElementById('overlayToggle').classList.add('active');
-document.fonts.ready.then(() => updateTabIndicator(true));
+document.fonts.ready.then(() => { updateTabIndicator(true); initSW(); });
 
 // ══════════════════════════════════════════════════════
 // TAB SYSTEM
@@ -2551,13 +3103,16 @@ function switchTab(tab){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
-  const btnId = tab==='cp' ? 'tabBtnCp' : 'tabBtnBinnacle';
+  const btnId = tab==='cp' ? 'tabBtnCp' : tab==='binnacle' ? 'tabBtnBinnacle' : 'tabBtnSW';
   document.getElementById(btnId).classList.add('active');
   if(tab!=='cp'){ clearSelection(); }
+  if(tab!=='binnacle'){ deselectBinnElem(); }
+  if(tab==='sw'){ updateSWDisplay(); }
   if(elemPanelOpen) renderElemPanel();
   updateTabIndicator();
   // Sync overlay button to the newly active tab's overlay state
   const btn=document.getElementById('overlayToggle');
+  if(tab==='sw'){ btn.textContent='OVERLAY: N/A'; btn.classList.remove('active'); return; }
   const ovId=tab==='binnacle'?'binnacleOverlay':'refOverlay';
   const on=!document.getElementById(ovId).classList.contains('hidden');
   btn.textContent='OVERLAY: '+(on?'ON':'OFF'); btn.classList.toggle('active',on);
@@ -2602,21 +3157,7 @@ function drawPowerDial(){
   // Outer dark frame
   ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
 
-  // Silver chapter ring (annulus)
-  const ringR=r*0.88;
-  const rg=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
-  rg.addColorStop(0,'#71717a'); rg.addColorStop(0.35,'#d8d8de'); rg.addColorStop(0.65,'#b8b8be'); rg.addColorStop(1,'#5a5a62');
-  ctx.beginPath(); ctx.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctx.arc(cx,cy,ringR,0,Math.PI*2,true);
-  ctx.fillStyle=rg; ctx.fill();
-
-  // Decorative tick marks on ring (dark etched on silver)
-  for(let i=0;i<60;i++){
-    const a=(i/60)*Math.PI*2, maj=i%5===0;
-    const ro=r-1.5, ri=maj?ringR+(r-ringR)*.42:ringR+(r-ringR)*.14;
-    ctx.beginPath(); ctx.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    ctx.strokeStyle=maj?'rgba(14,14,20,0.88)':'rgba(44,44,55,0.45)';
-    ctx.lineWidth=maj?2.6:1.2; ctx.stroke();
-  }
+  const ringR=r*0.96;
 
   // Dark glossy face
   const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
@@ -2786,7 +3327,7 @@ function drawPowerDial(){
 
   // Update label
   const lbl=document.getElementById('pdLabel');
-  if(lbl){ lbl.textContent='POWER — '+E_MANET[s.eIdx]; lbl.className='binnacle-dial-label '+E_MANET[s.eIdx].toLowerCase()+'-mode'; }
+  if(lbl){ lbl.textContent=E_MANET[s.eIdx]; lbl.className='binnacle-dial-label '+E_MANET[s.eIdx].toLowerCase()+'-mode'+(selectedBinnIds.has('binn-pd-label')?' binn-sel':''); }
 }
 
 
@@ -2800,10 +3341,11 @@ function drawCentralDial(){
   const D=d=>d*Math.PI/180;
   const spd=Math.max(0,s.speed||0);
 
-  // Dark face
-  const bg=ctx.createRadialGradient(cx,cy*.85,0,cx,cy,r);
-  bg.addColorStop(0,'#161619'); bg.addColorStop(1,'#04040a');
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=bg; ctx.fill();
+  const ringR=r*0.96;
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
+  const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
+  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
+  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
 
   // Geometry: speed 220° (top arc), E/F 100° (bottom arc, centred at 90°/6-o'clock)
   // 20° gap on each side between speed and E/F
@@ -2811,7 +3353,7 @@ function drawCentralDial(){
   // E/F:   D(40)  → D(140),        100° clockwise through D(90)
   const AS=D(160), ASPAN=D(220);       // speed arc
   const GS=D(40),  GSPAN=D(100);       // E/F arc: F(right)=D(40), E(left)=D(140)
-  const TOUTR=r-2;
+  const TOUTR=ringR;
 
   // Layered tick depths: minor → medium → gap → major (gap prevents major touching minor)
   const tlMin=r*.040, tlMed=r*.036, tlGap=r*.010, tlMaj=r*.057;  // tlMaj 50% longer than original r*.038
@@ -2922,7 +3464,7 @@ function drawCentralDial(){
 
   // ── Orange needle — drawn before disc, disc covers hub ──
   const needleA=AS+(Math.min(320,spd)/320)*ASPAN;
-  const nl=r-8;
+  const nl=ringR-4;
   ctx.save();
   ctx.translate(cx,cy); ctx.rotate(needleA);
   ctx.beginPath();
@@ -2999,30 +3541,10 @@ function drawDriverDial(){
   const ctx=cv.getContext('2d');
   const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=W/2-2;
   ctx.clearRect(0,0,W,H);
-  const ringR=r*0.86;
+  const ringR=r*0.94;
 
   // Outer dark frame
   ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
-
-  // Silver chapter ring
-  const rg=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
-  rg.addColorStop(0,'#71717a'); rg.addColorStop(0.35,'#d8d8de'); rg.addColorStop(0.65,'#b8b8be'); rg.addColorStop(1,'#5a5a62');
-  ctx.beginPath(); ctx.arc(cx,cy,r-0.5,0,Math.PI*2,false); ctx.arc(cx,cy,ringR,0,Math.PI*2,true);
-  ctx.fillStyle=rg; ctx.fill();
-
-  // Tick marks (6 major = 6 modes)
-  for(let i=0;i<36;i++){
-    const a=(i/36)*Math.PI*2-Math.PI/2, maj=i%6===0;
-    const ro=r-1.5, ri=maj?ringR+(r-ringR)*.44:ringR+(r-ringR)*.14;
-    ctx.beginPath(); ctx.moveTo(cx+ro*Math.cos(a),cy+ro*Math.sin(a)); ctx.lineTo(cx+ri*Math.cos(a),cy+ri*Math.sin(a));
-    ctx.strokeStyle=maj?'rgba(14,14,20,0.9)':'rgba(44,44,55,0.45)';
-    ctx.lineWidth=maj?2.8:1.2; ctx.stroke();
-  }
-  // Highlight active major tick
-  const majA=(driverModeIdx/6)*Math.PI*2-Math.PI/2;
-  ctx.beginPath(); ctx.moveTo(cx+(r-1.5)*Math.cos(majA),cy+(r-1.5)*Math.sin(majA));
-  ctx.lineTo(cx+(ringR+(r-ringR)*.44)*Math.cos(majA),cy+(ringR+(r-ringR)*.44)*Math.sin(majA));
-  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=2.8; ctx.stroke();
 
   // Dark glossy face
   const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
@@ -3049,9 +3571,13 @@ function drawDriverDial(){
   ctx.fillStyle='rgba(255,255,255,0.50)';
   ctx.fillText(mode,cx,cy+ringR*0.78);
 
-  // Update label pill
+  // Update label pill + suspension widget color
   const lbl=document.getElementById('ddLabel');
-  if(lbl) lbl.textContent=mode;
+  if(lbl){ lbl.textContent=MANETTINO[s.mIdx]; lbl.className='binnacle-dial-label '+MANETTINO[s.mIdx].toLowerCase()+'-mode'+(selectedBinnIds.has('binn-dd-label')?' binn-sel':''); }
+  const MANET_COLORS={ICE:'#A8C4D4',WET:'#B8D0E0',DRY:'#4caf50',SPORT:'#E87722',PERFORMANCE:'#FF2800'};
+  const sw=document.getElementById('suspWidget');
+  if(sw) sw.style.color=MANET_COLORS[MANETTINO[s.mIdx]]||'rgba(255,255,255,0.4)';
+  updateSuspBars();
 
   // Update external mode dots
   document.querySelectorAll('.dd-dot').forEach((el,i)=>{
@@ -3515,25 +4041,39 @@ function updateBinnacle(){
 // ── BINNACLE INTERACTIONS ────────────────────────────
 document.getElementById('pdCanvas').addEventListener('click',()=>{
   s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean();
+  if(selectedBinnIds.has('binn-power-dial')||selectedBinnIds.has('binn-pd-label')) renderBinnHint();
 });
 document.getElementById('pdLabel').addEventListener('click',()=>{
   s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean();
+  if(selectedBinnIds.has('binn-power-dial')||selectedBinnIds.has('binn-pd-label')) renderBinnHint();
 });
 document.getElementById('ddCanvas').addEventListener('click',()=>{
   driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length;
+  if(selectedBinnIds.has('binn-driver-dial')) renderBinnHint();
 });
 document.getElementById('ddLabel').addEventListener('click',()=>{
-  driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length;
+  s.mIdx=(s.mIdx+1)%MANETTINO.length; applyBadgesClean();
+  if(selectedBinnIds.has('binn-dd-label')) renderBinnHint();
 });
 // PRND gear selection
+function selectGear(gear){
+  const prev=document.querySelector('.prnd-gear.active');
+  const next=document.querySelector(`.prnd-gear[data-gear="${gear}"]`);
+  if(!next||prev===next) return;
+  s.gear=gear;
+  if(prev) prev.classList.remove('active');
+  // Stagger: let outgoing deactivation begin, then trigger incoming
+  setTimeout(()=>{ next.classList.add('active'); },55);
+  if(selectedBinnIds.has('binn-prnd')) renderBinnHint();
+}
 document.getElementById('binnPrnd').addEventListener('click',(e)=>{
   const gear=e.target.dataset.gear; if(!gear) return;
-  s.gear=gear;
-  document.querySelectorAll('.prnd-gear').forEach(el=>el.classList.toggle('active',el.dataset.gear===gear));
+  selectGear(gear);
 });
 
 // ══ ELEMENTS PANEL ══
 let elemPanelOpen = false;
+const selectedBinnIds = new Set();
 
 function toggleElemPanel() {
   elemPanelOpen = !elemPanelOpen;
@@ -3546,6 +4086,28 @@ function renderElemPanel() {
   const list = document.getElementById('epList');
   if (!list) return;
   list.innerHTML = '';
+  if (activeTab() === 'binnacle') {
+    Object.entries(BINN_ELEMENTS).forEach(([id, label]) => {
+      const item = document.createElement('label');
+      item.className = 'ep-item' + (selectedBinnIds.has(id) ? ' ep-sel' : '');
+      item.dataset.epId = id;
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedBinnIds.has(id);
+      cb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (cb.checked) selectBinnElem(id);
+        else deselectBinnElem(id);
+      });
+      const lbl = document.createElement('span');
+      lbl.className = 'ep-lbl';
+      lbl.textContent = label;
+      item.appendChild(cb);
+      item.appendChild(lbl);
+      list.appendChild(item);
+    });
+    return;
+  }
   if (activeTab() !== 'cp') {
     list.innerHTML = '<div class="ep-none">No selectable elements on this tab.</div>';
     return;
@@ -3568,6 +4130,49 @@ function renderElemPanel() {
     item.appendChild(cb);
     item.appendChild(lbl);
     list.appendChild(item);
+  });
+}
+
+// ── BINNACLE ELEMENT SELECTION ──
+function selectBinnElem(id) {
+  selectedBinnIds.add(id);
+  const el = document.querySelector('[data-binn-id="' + id + '"]');
+  if (el) el.classList.add('binn-sel');
+  updatePosHint(); updateResizeOverlay(); syncBinnPanel();
+}
+
+function deselectBinnElem(id) {
+  if (id === undefined) {
+    selectedBinnIds.forEach(bid => {
+      const el = document.querySelector('[data-binn-id="' + bid + '"]');
+      if (el) el.classList.remove('binn-sel');
+    });
+    selectedBinnIds.clear();
+  } else {
+    selectedBinnIds.delete(id);
+    const el = document.querySelector('[data-binn-id="' + id + '"]');
+    if (el) el.classList.remove('binn-sel');
+  }
+  updatePosHint(); updateResizeOverlay(); syncBinnPanel();
+}
+
+function renderBinnHint(){ updatePosHint(); }
+
+function updateSuspBars(){
+  document.querySelectorAll('.binn-susp-bar').forEach((bar,i)=>{
+    bar.classList.toggle('lit', i<=s.suspIdx);
+  });
+}
+
+function syncBinnPanel() {
+  if (!elemPanelOpen) return;
+  document.querySelectorAll('#epList .ep-item').forEach(item => {
+    const id = item.dataset.epId;
+    if (!id || !BINN_ELEMENTS[id]) return;
+    const cb = item.querySelector('input[type="checkbox"]');
+    const sel = selectedBinnIds.has(id);
+    if (cb) cb.checked = sel;
+    item.classList.toggle('ep-sel', sel);
   });
 }
 
@@ -3595,6 +4200,146 @@ function updateTabIndicator(instant) {
   ind.style.width = btnRect.width + 'px';
   if (instant) requestAnimationFrame(() => { ind.style.transition = ''; });
 }
+
+
+// ══════════════════════════════════════════════════════
+// STEERING WHEEL
+// ══════════════════════════════════════════════════════
+// Indicator angles (degrees clockwise from straight-up) for each mode
+const MAN_ANGLES  = [-120, -60, 0, 60, 120]; // ICE, WET, DRY, SPORT, PERFORMANCE
+const EMAN_ANGLES = [-45, 0, 45];             // RANGE, TOUR, PERFO
+
+function swManStep(dir) {
+  if (dir === undefined) dir = 1;
+  s.mIdx = (s.mIdx + dir + MANETTINO.length) % MANETTINO.length;
+  applyBadgesClean();
+  updateSWDisplay();
+}
+
+function swEManStep(dir) {
+  if (dir === undefined) dir = 1;
+  s.eIdx = (s.eIdx + dir + E_MANET.length) % E_MANET.length;
+  applyBadgesClean();
+  updateSWDisplay();
+}
+
+function swWiperSet(v) {
+  s.wiperSpeed = v;
+  updateSWDisplay();
+}
+
+function swVolume(delta) {
+  s.volume = Math.max(0, Math.min(100, s.volume + delta * 5));
+  updatePills();
+  updateSWDisplay();
+}
+
+function swPhone() {
+  const btn = document.getElementById('swPhoneBtn');
+  if (btn) {
+    btn.style.opacity = '0.4';
+    setTimeout(() => btn.style.opacity = '', 140);
+  }
+}
+
+function swMedia() {
+  s.trackIdx = (s.trackIdx + 1) % TRACKS.length;
+  s.mediaBaseTime = 0; s.mediaStartT = Date.now();
+  updateMedia();
+  const btn = document.getElementById('swMediaBtn');
+  if (btn) {
+    btn.style.opacity = '0.4';
+    setTimeout(() => btn.style.opacity = '', 140);
+  }
+}
+
+function swTurnSignal(side) {
+  if (side === 'L') {
+    s.turnFlashL = !s.turnFlashL;
+    if (s.turnFlashL) s.turnFlashR = false;
+  } else {
+    s.turnFlashR = !s.turnFlashR;
+    if (s.turnFlashR) s.turnFlashL = false;
+  }
+  updateSWDisplay();
+  updateBinnTurnSignals();
+}
+
+function updateBinnTurnSignals() {
+  const lEl = document.getElementById('binnTurnL');
+  const rEl = document.getElementById('binnTurnR');
+  if (lEl) lEl.classList.toggle('active', s.turnFlashL);
+  if (rEl) rEl.classList.toggle('active', s.turnFlashR);
+}
+
+function updateSWDisplay() {
+  // Manettino indicator rotation
+  const manLine = document.getElementById('swManLine');
+  if (manLine) manLine.setAttribute('transform', 'rotate(' + MAN_ANGLES[s.mIdx] + ',368,348)');
+
+  // e-Manettino indicator rotation
+  const eManLine = document.getElementById('swEManLine');
+  if (eManLine) eManLine.setAttribute('transform', 'rotate(' + EMAN_ANGLES[s.eIdx] + ',175,348)');
+
+  // Wiper button fill
+  [0,1,2].forEach(function(i) {
+    const el = document.getElementById('swWiper' + i);
+    if (el) el.setAttribute('fill', i === s.wiperSpeed ? '#FF2800' : '#1c1c22');
+  });
+
+  // Turn signal icon color
+  const tli = document.getElementById('swTurnLIcon');
+  const tri = document.getElementById('swTurnRIcon');
+  if (tli) tli.setAttribute('fill', s.turnFlashL ? '#FF8C00' : 'rgba(255,255,255,0.28)');
+  if (tri) tri.setAttribute('fill', s.turnFlashR ? '#FF8C00' : 'rgba(255,255,255,0.28)');
+
+  // Manettino label highlights
+  ['ICE','WET','DRY','SPORT','PERF'].forEach(function(lbl, i) {
+    const el = document.getElementById('swManLbl' + i);
+    if (!el) return;
+    const active = (i === s.mIdx);
+    el.setAttribute('fill', active ? '#e8e8e0' : 'rgba(255,255,255,0.28)');
+    el.setAttribute('font-size', active ? '8' : '7');
+  });
+
+  // e-Manettino label highlights
+  ['RANGE','TOUR','PERFO'].forEach(function(lbl, i) {
+    const el = document.getElementById('swEManLbl' + i);
+    if (!el) return;
+    const active = (i === s.eIdx);
+    const col = active ? (i === 0 ? '#A8C4D4' : i === 1 ? '#FFF200' : '#FF2800') : 'rgba(255,255,255,0.28)';
+    el.setAttribute('fill', col);
+    el.setAttribute('font-size', active ? '8' : '7');
+  });
+
+  // Status strip values
+  const msv = document.getElementById('swStatusMan');
+  const esv = document.getElementById('swStatusEMan');
+  const wsv = document.getElementById('swStatusWiper');
+  const vsv = document.getElementById('swStatusVol');
+  if (msv) {
+    msv.textContent = MANETTINO[s.mIdx];
+    msv.className = 'sw-status-val ' + MANETTINO[s.mIdx].toLowerCase();
+  }
+  if (esv) {
+    esv.textContent = E_MANET[s.eIdx];
+    esv.className = 'sw-status-val ' + E_MANET[s.eIdx].toLowerCase();
+  }
+  if (wsv) {
+    const wLabels = ['OFF','LOW','HIGH'];
+    wsv.textContent = wLabels[s.wiperSpeed];
+    wsv.className = 'sw-status-val ' + (s.wiperSpeed > 0 ? 'wiper-on' : 'wiper-off');
+  }
+  if (vsv) {
+    vsv.textContent = Math.round(s.volume) + '%';
+  }
+}
+
+function initSW() {
+  updateSWDisplay();
+  updateBinnTurnSignals();
+}
+
 
 </script>
 

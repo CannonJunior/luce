@@ -34,7 +34,7 @@
 <div id="cockpit" class="cockpit hidden">
 
   <!-- OVERHEAD CONSOLE -->
-  <div class="overhead-console" id="overheadConsole">
+  <div class="overhead-console" id="overheadConsole" data-binn-id="overhead">
     <div class="overhead-rail">
       <div class="toggle-group">
         <div class="toggle-switch" data-label="HVAC" id="toggleHVAC">
@@ -55,7 +55,7 @@
         </div>
       </div>
 
-      <div class="launch-handle-zone">
+      <div class="launch-handle-zone" data-binn-id="launch">
         <div class="launch-handle" id="launchHandle">
           <div class="lh-grip">
             <span class="lh-label">LAUNCH</span>
@@ -89,7 +89,7 @@
   <div class="binnacle-wrapper">
 
     <!-- STEERING WHEEL -->
-    <div class="steering-wheel-zone">
+    <div class="steering-wheel-zone" data-binn-id="steering">
       <div class="steering-wheel" id="steeringWheel">
         <div class="sw-hub"></div>
         <svg class="sw-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -114,7 +114,7 @@
         </svg>
 
         <!-- Left Pod: e-Manettino -->
-        <div class="pod pod-left" id="eManettino">
+        <div class="pod pod-left" id="eManettino" data-binn-id="e-manet">
           <div class="pod-label">e-MANETTINO</div>
           <div class="pod-rotary">
             <div class="rotary-ring">
@@ -131,7 +131,7 @@
         </div>
 
         <!-- Right Pod: Manettino -->
-        <div class="pod pod-right" id="manettino">
+        <div class="pod pod-right" id="manettino" data-binn-id="manettino">
           <div class="pod-label">MANETTINO</div>
           <div class="pod-rotary">
             <div class="rotary-ring red">
@@ -159,7 +159,7 @@
     <div class="binnacle" id="binnacle">
 
       <!-- DIAL LEFT: Power/Energy -->
-      <div class="dial-container dial-left">
+      <div class="dial-container dial-left" data-binn-id="dial-left">
         <div class="dial-bezel">
           <div class="dial-lens">
             <svg class="dial-svg" viewBox="0 0 220 220" id="dialLeftSVG">
@@ -192,7 +192,7 @@
       </div>
 
       <!-- DIAL CENTER: Speedometer (PRIMARY) -->
-      <div class="dial-container dial-center">
+      <div class="dial-container dial-center" data-binn-id="dial-center">
         <div class="dial-bezel center-bezel">
           <div class="dial-lens center-lens">
             <svg class="dial-svg" viewBox="0 0 300 300" id="dialCenterSVG">
@@ -226,6 +226,11 @@
               <text id="batteryPct" x="150" y="252" text-anchor="middle" font-family="Rajdhani" font-size="16" font-weight="300" fill="#3a9a3a">98%</text>
               <!-- Range -->
               <text id="rangeValue" x="150" y="268" text-anchor="middle" font-family="Barlow Condensed" font-size="9" font-weight="300" fill="#444" letter-spacing="3">458 km</text>
+              <!-- TORQUE METER (toggleable overlay at top of dial) -->
+              <g id="torqueMeter" data-binn-id="torque-meter" style="pointer-events:none">
+                <path id="tmBgBand" fill="none" stroke="#030c18" stroke-width="16" stroke-linecap="butt"/>
+                <g id="tmSegments"></g>
+              </g>
             </svg>
             <div class="dial-label-bottom">VELOCITÀ</div>
           </div>
@@ -233,7 +238,7 @@
       </div>
 
       <!-- DIAL RIGHT: Configurable -->
-      <div class="dial-container dial-right">
+      <div class="dial-container dial-right" data-binn-id="dial-right">
         <div class="dial-bezel">
           <div class="dial-lens">
             <svg class="dial-svg" viewBox="0 0 220 220" id="dialRightSVG">
@@ -278,7 +283,7 @@
 
     <!-- DRIVE SELECTOR STRIP -->
     <div class="drive-selector-zone">
-      <div class="drive-selector" id="driveSelector">
+      <div class="drive-selector" id="driveSelector" data-binn-id="drive">
         <div class="ds-gate">
           <div class="ds-position" data-pos="P" id="dsP">P</div>
           <div class="ds-divider"></div>
@@ -294,7 +299,7 @@
       </div>
 
       <!-- MULTIGRAPH -->
-      <div class="multigraph" id="multigraph">
+      <div class="multigraph" id="multigraph" data-binn-id="multigraph">
         <div class="mg-bezel">
           <div class="mg-face">
             <svg class="mg-svg" viewBox="0 0 140 140" id="mgSVG">
@@ -328,7 +333,7 @@
       </div>
 
       <!-- GLASS KEY INSERTED STATE -->
-      <div class="glass-key-slot" id="glassKeySlot">
+      <div class="glass-key-slot" id="glassKeySlot" data-binn-id="glasskey">
         <div class="gks-body">
           <div class="gks-eink" id="gksEink">
             <span class="gks-e">e</span>
@@ -341,7 +346,7 @@
   </div><!-- /binnacle-wrapper -->
 
   <!-- CENTER TOUCHSCREEN -->
-  <div class="center-screen-zone">
+  <div class="center-screen-zone" data-binn-id="centerscr">
     <div class="center-screen" id="centerScreen">
       <div class="cs-bezel">
         <div class="cs-display">
@@ -389,7 +394,7 @@
   </div>
 
   <!-- WARNING STRIP -->
-  <div class="warning-strip" id="warningStrip">
+  <div class="warning-strip" id="warningStrip" data-binn-id="warnings">
     <div class="warn-item" id="warnBattery">
       <div class="warn-icon">⚡</div>
       <div class="warn-text">CHARGE LOW</div>
@@ -405,7 +410,7 @@
   </div>
 
   <!-- KEYBOARD HINT -->
-  <div class="key-hints" id="keyHints">
+  <div class="key-hints" id="keyHints" data-binn-id="keyhints">
     <div class="kh-item">↑↓ SPEED</div>
     <div class="kh-sep">·</div>
     <div class="kh-item">←→ STEER</div>
@@ -415,6 +420,8 @@
     <div class="kh-item">SPACE DEMO</div>
     <div class="kh-sep">·</div>
     <div class="kh-item">L LAUNCH</div>
+    <div class="kh-sep">·</div>
+    <div class="kh-item">T TORQUE</div>
   </div>
 
   <!-- LAUNCH CONTROL OVERLAY -->
@@ -425,6 +432,28 @@
       <div class="lco-sub">RELEASE BRAKE TO DEPLOY</div>
       <div class="lco-count" id="lcoCount">READY</div>
     </div>
+  </div>
+
+  <!-- BINNACLE ELEMENT TOOLBAR -->
+  <div class="binn-toolbar" id="binnToolbar">
+    <button class="binn-tb-btn" id="binnElemBtn" onclick="toggleBinnElemPanel()">ELEMENTS</button>
+  </div>
+
+  <!-- BINNACLE ELEMENTS PANEL (right side) -->
+  <div id="binnElemPanel">
+    <div class="bep-hd">
+      <span class="bep-title">ELEMENTS</span>
+      <span class="bep-close" onclick="closeBinnElemPanel()">✕</span>
+    </div>
+    <div class="bep-hint">Ctrl+click cockpit elements to select</div>
+    <div class="bep-body" id="bepBody"></div>
+  </div>
+
+  <!-- CONFIG STRIP (bottom overlay, appears on element selection) -->
+  <div class="binn-cfg-strip" id="binnCfgStrip">
+    <span class="bcs-label" id="bcsLabel">—</span>
+    <div class="bcs-controls" id="bcsControls"></div>
+    <span class="bcs-dismiss" onclick="deselectBinnElem()">✕</span>
   </div>
 
 </div><!-- /cockpit -->

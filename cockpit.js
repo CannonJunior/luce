@@ -24,6 +24,12 @@ const E_MANETTINO_LABELS = ['RANGE', 'TOUR', 'PERFO'];
 const RIGHT_DIAL_MODES = ['G-FORCE', 'TYRE PRESS', 'TORQUE', 'LAT G', 'TEMP', 'REGEN %', 'POWER'];
 const MG_MODES = ['CLOCK', 'CHRONO', 'COMPASS', 'LAUNCH'];
 
+// Torque meter overlay geometry
+const TM_N    = 14;   // number of segments
+const TM_R    = 137;  // arc radius (sits between depth rings at r=136 and r=145)
+const TM_HALF = 68;   // half-span in degrees → total 136° arc at top of dial
+const TM_GAP  = 1.5;  // gap between segments (degrees)
+
 // ─── STATE ────────────────────────────────────────────────────────────────────
 
 const state = {
@@ -135,6 +141,10 @@ const dom = {
   mgModeLabel:$('mgModeLabel'),
   mgModeBtn:  $('mgModeBtn'),
   mgMarkers:  $('mgMarkers'),
+  // Torque meter overlay
+  torqueMeter: $('torqueMeter'),
+  tmBgBand:    $('tmBgBand'),
+  tmSegments:  $('tmSegments'),
   // Key slot
   gksEink:    $('gksEink'),
   // Overhead
@@ -238,6 +248,36 @@ function buildMgMarkers(group) {
   }
 }
 
+function buildTorqueMeterSegments() {
+  const g = dom.tmSegments;
+  if (!g) return;
+  while (g.firstChild) g.removeChild(g.firstChild);
+  const slotDeg = (TM_HALF * 2) / TM_N;
+  for (let i = 0; i < TM_N; i++) {
+    const a0 = -TM_HALF + i * slotDeg + TM_GAP / 2;
+    const a1 = a0 + slotDeg - TM_GAP;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', arcPath(SVGC.cx, SVGC.cy, TM_R, a0, a1));
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#0d2a3a');
+    path.setAttribute('stroke-width', '8');
+    path.setAttribute('stroke-linecap', 'round');
+    g.appendChild(path);
+  }
+  if (dom.tmBgBand) {
+    dom.tmBgBand.setAttribute('d', arcPath(SVGC.cx, SVGC.cy, TM_R, -TM_HALF, TM_HALF));
+  }
+}
+
+function updateTorqueMeter() {
+  if (!dom.tmSegments) return;
+  const lit  = Math.round((state.torquePct / 100) * TM_N);
+  const segs = dom.tmSegments.children;
+  for (let i = 0; i < segs.length; i++) {
+    segs[i].setAttribute('stroke', i < lit ? '#FFF200' : '#0d2a3a');
+  }
+}
+
 function initGauges() {
   // Small dials: 40 ticks, major every 8 → 6 labels (0–5 segments)
   const leftLabels  = ['0', '20', '40', '60', '80', '100'];
@@ -280,6 +320,7 @@ function initGauges() {
     ARC_START + ARC_SWEEP * 0.0, ARC_START + ARC_SWEEP * 0.15));
 
   buildMgMarkers(dom.mgMarkers);
+  buildTorqueMeterSegments();
 }
 
 // ─── NEEDLE UPDATES ───────────────────────────────────────────────────────────
@@ -316,6 +357,9 @@ function updateGauges() {
   // Right dial (configurable)
   updateRightDial();
 
+  // Torque meter overlay
+  updateTorqueMeter();
+
   // Mode-driven arc stroke
   applyModeColor();
 
@@ -323,6 +367,11 @@ function updateGauges() {
   dom.warnBattery.classList.toggle('active', state.battery < 15);
   dom.warnTemp.classList.toggle('active',    state.tempC > 55);
   dom.warnTrac.classList.toggle('active',    state.speed > 60 && Math.abs(state.gForceX) > 1.2);
+
+  // Live-refresh config strip for dynamic elements
+  if (selectedBinnId === 'steering' || selectedBinnId === 'warnings' || selectedBinnId === 'dial-center' || selectedBinnId === 'torque-meter') {
+    renderBinnConfigStrip(selectedBinnId);
+  }
 }
 
 function updateRightDial() {
@@ -449,6 +498,9 @@ function startupCeremony() {
     dom.cockpit.classList.remove('hidden');
     dom.cockpit.classList.add('visible');
     initGauges();
+    // Apply initial hidden state for overlay elements
+    const tmEl = getBinnElemDom('torque-meter');
+    if (tmEl) tmEl.classList.add('binn-hidden');
     updateGauges();
     updateMultigraph();
   }, 400);
@@ -475,11 +527,11 @@ function startupCeremony() {
     updateGauges();
   }, 1500);
 
-  // Phase 5: yellow flows to drive selector
+  // Phase 5: yellow flows to drive selector; toolbar becomes available
   setTimeout(() => {
     dom.gksEink.classList.add('yellow-state');
-    // Drive selector knob illuminates Ferrari yellow
     dom.dsSelectorKnob.style.boxShadow = '0 0 12px #FFF200, 0 0 24px rgba(255, 242, 0, 0.3)';
+    document.getElementById('binnToolbar').classList.add('visible');
   }, 1800);
 
   // Start animation loop
@@ -717,6 +769,9 @@ document.addEventListener('keydown', e => {
     case 'l': case 'L':
       activateLaunch();
       break;
+    case 't': case 'T':
+      toggleBinnElemVis('torque-meter');
+      break;
     case ',':
       // Left turn signal
       toggleSignal('left');
@@ -733,6 +788,8 @@ document.addEventListener('keydown', e => {
     case 'd': case 'D':
       setDrive('D'); break;
     case 'Escape':
+      if (selectedBinnId) { deselectBinnElem(); break; }
+      if (binnElemPanelOpen) { closeBinnElemPanel(); break; }
       dom.launchOverlay.classList.remove('active');
       state.launchActive = false;
       break;
@@ -939,6 +996,293 @@ const SPECS = {
     tooltip.style.opacity = '0';
   }, 7000);
 })();
+
+// ─── BINNACLE ELEMENT SYSTEM ──────────────────────────────────────────────────
+
+const BINN_ELEMS = [
+  { group: 'BINNACLE', items: [
+    { id: 'dial-left',    label: 'Energy Output',   sel: '.dial-left',     canHide: true  },
+    { id: 'dial-center',  label: 'Speedometer',     sel: '.dial-center',   canHide: false },
+    { id: 'torque-meter', label: 'Torque Meter',    sel: '#torqueMeter',   canHide: true  },
+    { id: 'dial-right',   label: 'Driver Display',  sel: '.dial-right',    canHide: true  },
+  ]},
+  { group: 'STEERING', items: [
+    { id: 'steering',   label: 'Steering Wheel',   sel: '.steering-wheel-zone',  canHide: true  },
+    { id: 'e-manet',    label: 'e-Manettino',      sel: '#eManettino',           canHide: true  },
+    { id: 'manettino',  label: 'Manettino',        sel: '#manettino',            canHide: true  },
+  ]},
+  { group: 'INSTRUMENTS', items: [
+    { id: 'multigraph', label: 'Multigraph',       sel: '.multigraph',           canHide: true  },
+    { id: 'drive',      label: 'Drive Selector',   sel: '.drive-selector',       canHide: false },
+    { id: 'glasskey',   label: 'Glass Key',        sel: '.glass-key-slot',       canHide: true  },
+  ]},
+  { group: 'INTERFACE', items: [
+    { id: 'overhead',   label: 'Overhead Console', sel: '.overhead-console',     canHide: true  },
+    { id: 'launch',     label: 'Launch Handle',    sel: '.launch-handle-zone',   canHide: true  },
+    { id: 'centerscr',  label: 'Center Screen',    sel: '.center-screen-zone',   canHide: true  },
+    { id: 'warnings',   label: 'Warning Strip',    sel: '.warning-strip',        canHide: true  },
+    { id: 'keyhints',   label: 'Key Hints',        sel: '.key-hints',            canHide: true  },
+  ]},
+];
+
+const binnVis = {};
+BINN_ELEMS.forEach(g => g.items.forEach(it => { binnVis[it.id] = true; }));
+binnVis['torque-meter'] = false; // overlay hidden by default
+
+let selectedBinnId = null;
+let binnElemPanelOpen = false;
+
+function getBinnElemDom(id) {
+  for (const g of BINN_ELEMS) {
+    const item = g.items.find(i => i.id === id);
+    if (item) return document.querySelector(item.sel);
+  }
+  return null;
+}
+
+function getBinnElemLabel(id) {
+  for (const g of BINN_ELEMS) {
+    const item = g.items.find(i => i.id === id);
+    if (item) return item.label;
+  }
+  return id;
+}
+
+function getBinnElemStatus(id) {
+  switch (id) {
+    case 'dial-right': return RIGHT_DIAL_MODES[state.rightDialIdx];
+    case 'multigraph': return MG_MODES[state.mgModeIdx];
+    case 'drive':      return state.drive;
+    case 'manettino':  return MANETTINO_MODES[state.manettinoIdx].toUpperCase().slice(0, 4);
+    case 'e-manet':    return E_MANETTINO_LABELS[state.eManettinoIdx];
+    default:           return '';
+  }
+}
+
+function renderBinnElemPanel() {
+  const body = document.getElementById('bepBody');
+  if (!body) return;
+  let html = '';
+  BINN_ELEMS.forEach(group => {
+    html += `<div class="bep-group">${group.group}</div>`;
+    group.items.forEach(item => {
+      const vis  = binnVis[item.id];
+      const sel  = selectedBinnId === item.id;
+      const stat = getBinnElemStatus(item.id);
+      html += `<div class="bep-item${sel ? ' bep-sel' : ''}" data-id="${item.id}" onclick="selectBinnElem('${item.id}')">
+        <input type="checkbox" class="bep-check" ${vis ? 'checked' : ''} ${!item.canHide ? 'disabled title="Core element"' : ''}
+          onclick="event.stopPropagation();toggleBinnElemVis('${item.id}')">
+        <span class="bep-lbl">${item.label}</span>
+        ${stat ? `<span class="bep-status">${stat}</span>` : ''}
+      </div>`;
+    });
+  });
+  body.innerHTML = html;
+}
+
+function toggleBinnElemPanel() {
+  if (!state.keyInserted) return;
+  binnElemPanelOpen = !binnElemPanelOpen;
+  document.getElementById('binnElemPanel').classList.toggle('open', binnElemPanelOpen);
+  document.getElementById('binnElemBtn').classList.toggle('active', binnElemPanelOpen);
+  if (binnElemPanelOpen) renderBinnElemPanel();
+  else deselectBinnElem();
+}
+
+function closeBinnElemPanel() {
+  binnElemPanelOpen = false;
+  document.getElementById('binnElemPanel').classList.remove('open');
+  document.getElementById('binnElemBtn').classList.remove('active');
+  deselectBinnElem();
+}
+
+function selectBinnElem(id) {
+  if (selectedBinnId) {
+    const prev = getBinnElemDom(selectedBinnId);
+    if (prev) prev.classList.remove('binn-sel');
+  }
+  selectedBinnId = id;
+  const el = getBinnElemDom(id);
+  if (el) el.classList.add('binn-sel');
+  renderBinnElemPanel();
+  renderBinnConfigStrip(id);
+  document.getElementById('binnCfgStrip').classList.add('open');
+}
+
+function deselectBinnElem() {
+  if (selectedBinnId) {
+    const el = getBinnElemDom(selectedBinnId);
+    if (el) el.classList.remove('binn-sel');
+    selectedBinnId = null;
+  }
+  document.getElementById('binnCfgStrip').classList.remove('open');
+  if (binnElemPanelOpen) renderBinnElemPanel();
+}
+
+function toggleBinnElemVis(id) {
+  binnVis[id] = !binnVis[id];
+  const el = getBinnElemDom(id);
+  if (el) el.classList.toggle('binn-hidden', !binnVis[id]);
+  renderBinnElemPanel();
+}
+
+function renderBinnConfigStrip(id) {
+  document.getElementById('bcsLabel').textContent = getBinnElemLabel(id).toUpperCase();
+  let html = '';
+
+  switch (id) {
+    case 'dial-right':
+      html = RIGHT_DIAL_MODES.map((m, i) =>
+        `<button class="cfg-btn${i === state.rightDialIdx ? ' cfg-active' : ''}" data-act="rd" data-i="${i}">${m}</button>`
+      ).join('');
+      break;
+    case 'e-manet':
+      html = E_MANETTINO_LABELS.map((m, i) =>
+        `<button class="cfg-btn${i === state.eManettinoIdx ? ' cfg-active' : ''}" data-act="em" data-i="${i}">${m}</button>`
+      ).join('');
+      break;
+    case 'manettino':
+      html = MANETTINO_MODES.map((m, i) =>
+        `<button class="cfg-btn${i === state.manettinoIdx ? ' cfg-active' : ''}" data-act="ma" data-i="${i}">${m.toUpperCase()}</button>`
+      ).join('');
+      break;
+    case 'multigraph':
+      html = MG_MODES.map((m, i) =>
+        `<button class="cfg-btn${i === state.mgModeIdx ? ' cfg-active' : ''}" data-act="mg" data-i="${i}">${m}</button>`
+      ).join('');
+      break;
+    case 'drive':
+      html = ['P','R','N','D'].map(p =>
+        `<button class="cfg-btn${state.drive === p ? ' cfg-active' : ''}" data-act="drive" data-pos="${p}">${p}</button>`
+      ).join('');
+      break;
+    case 'overhead': {
+      const switches = Array.from(dom.toggleSwitches);
+      html = switches.map(sw => {
+        const on = sw.classList.contains('active');
+        return `<button class="cfg-btn${on ? ' cfg-active' : ''}" data-act="sw" data-lbl="${sw.dataset.label}">${sw.dataset.label}</button>`;
+      }).join('');
+      break;
+    }
+    case 'launch':
+      html = `<button class="cfg-btn cfg-primary" data-act="launch">ARM LAUNCH CONTROL</button>`;
+      break;
+    case 'centerscr': {
+      const activeTab = document.querySelector('.cs-tab.active')?.textContent?.trim() || 'NAV';
+      html = ['NAV','AUDIO','CAR'].map(t =>
+        `<button class="cfg-btn${t === activeTab ? ' cfg-active' : ''}" data-act="cstab" data-tab="${t}">${t}</button>`
+      ).join('');
+      break;
+    }
+    case 'keyhints': {
+      const on = !dom.keyHints.classList.contains('binn-hidden') && binnVis['keyhints'];
+      html = `<button class="cfg-btn${on ? ' cfg-active' : ''}" data-act="hints">HINTS ${on ? 'ON' : 'OFF'}</button>`;
+      break;
+    }
+    case 'warnings': {
+      const batW  = state.battery < 15;
+      const tmpW  = state.tempC > 55;
+      const tracW = state.speed > 60 && Math.abs(state.gForceX) > 1.2;
+      html = `<span class="cfg-status${batW  ? ' cfg-warn' : ''}">⚡ CHARGE LOW${batW  ? ' !' : ''}</span>
+              <span class="cfg-status${tmpW  ? ' cfg-warn' : ''}">⬆ BAT TEMP${tmpW   ? ' !' : ''}</span>
+              <span class="cfg-status${tracW ? ' cfg-warn' : ''}">◈ TRAC ACT${tracW  ? ' !' : ''}</span>`;
+      break;
+    }
+    case 'glasskey':
+      html = `<span class="cfg-status">${state.keyInserted ? 'INSERTED · ACTIVE' : 'NOT INSERTED'}</span>`;
+      break;
+    case 'steering':
+      html = `<span class="cfg-status">ANGLE ${Math.round(state.gForceX * 30)}°</span>
+              <span class="cfg-status">LATERAL G ${state.gForceX.toFixed(2)}</span>`;
+      break;
+    case 'dial-left':
+      html = `<span class="cfg-status">POWER kW · 0–610</span>
+              <span class="cfg-status">40 TICKS · 225° SWEEP</span>`;
+      break;
+    case 'dial-center':
+      html = `<span class="cfg-status">0–320 km/h</span>
+              <span class="cfg-status">BATTERY ARC ${Math.round(state.battery)}%</span>`;
+      break;
+    case 'torque-meter':
+      html = `<span class="cfg-status">${Math.round(state.torquePct * 8.45)} Nm</span>
+              <span class="cfg-status">${TM_N} SEGS · 136° ARC</span>`;
+      break;
+    default:
+      html = `<span class="cfg-status">${getBinnElemLabel(id)}</span>`;
+  }
+
+  const ctrl = document.getElementById('bcsControls');
+  ctrl.innerHTML = html;
+  ctrl.onclick = e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    handleBinnCfgAction(btn.dataset.act, btn.dataset);
+  };
+}
+
+function handleBinnCfgAction(act, data) {
+  switch (act) {
+    case 'rd':
+      state.rightDialIdx = +data.i;
+      renderBinnConfigStrip('dial-right');
+      renderBinnElemPanel();
+      break;
+    case 'em':
+      state.eManettinoIdx = +data.i;
+      updateEManettino();
+      renderBinnConfigStrip('e-manet');
+      renderBinnElemPanel();
+      break;
+    case 'ma':
+      state.manettinoIdx = +data.i;
+      updateManettino();
+      renderBinnConfigStrip('manettino');
+      renderBinnElemPanel();
+      break;
+    case 'mg':
+      state.mgModeIdx = +data.i;
+      dom.mgModeLabel.textContent = MG_MODES[state.mgModeIdx];
+      updateMultigraph();
+      renderBinnConfigStrip('multigraph');
+      renderBinnElemPanel();
+      break;
+    case 'drive':
+      setDrive(data.pos);
+      renderBinnConfigStrip('drive');
+      renderBinnElemPanel();
+      break;
+    case 'sw': {
+      const sw = Array.from(dom.toggleSwitches).find(s => s.dataset.label === data.lbl);
+      if (sw) sw.classList.toggle('active');
+      renderBinnConfigStrip('overhead');
+      break;
+    }
+    case 'launch':
+      activateLaunch();
+      break;
+    case 'cstab':
+      document.querySelectorAll('.cs-tab').forEach(t =>
+        t.classList.toggle('active', t.textContent.trim() === data.tab)
+      );
+      renderBinnConfigStrip('centerscr');
+      break;
+    case 'hints':
+      toggleBinnElemVis('keyhints');
+      renderBinnConfigStrip('keyhints');
+      break;
+  }
+}
+
+// Ctrl+click on cockpit elements to select when panel is open
+dom.cockpit.addEventListener('click', e => {
+  if (!binnElemPanelOpen) return;
+  if (!e.ctrlKey && !e.metaKey) return;
+  const target = e.target.closest('[data-binn-id]');
+  if (!target) return;
+  e.preventDefault();
+  e.stopPropagation();
+  selectBinnElem(target.dataset.binnId);
+}, true);
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 

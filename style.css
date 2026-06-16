@@ -1218,3 +1218,272 @@ html, body {
 /* ── DIAL ARC SVG TEXT ───────────────────────────────────── */
 .dial-unit { font-family: 'Barlow Condensed', sans-serif; }
 .dial-bignum { font-family: 'Rajdhani', sans-serif; }
+
+/* ══ BINNACLE ELEMENT SYSTEM ════════════════════════════════ */
+
+/* ── TOOLBAR ─────────────────────────────────────────────── */
+.binn-toolbar {
+  position: fixed;
+  top: 10px;
+  right: 14px;
+  z-index: 1000;
+  display: none;
+  gap: 6px;
+}
+.binn-toolbar.visible { display: flex; }
+.binn-tb-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.4);
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.binn-tb-btn:hover {
+  background: rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.75);
+  border-color: rgba(255,255,255,0.22);
+}
+.binn-tb-btn.active {
+  background: rgba(255,242,0,0.1);
+  border-color: rgba(255,242,0,0.4);
+  color: var(--yellow);
+}
+
+/* ── ELEMENTS PANEL ──────────────────────────────────────── */
+#binnElemPanel {
+  position: fixed;
+  right: -232px;
+  top: 0;
+  height: 100vh;
+  width: 232px;
+  background: rgba(5,5,7,0.97);
+  border-left: 1px solid rgba(255,255,255,0.08);
+  z-index: 7000;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(12px);
+  transition: right 0.24s cubic-bezier(0.22,1,0.36,1);
+}
+#binnElemPanel.open { right: 0; }
+
+.bep-hd {
+  padding: 14px 14px 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.bep-title {
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.28);
+}
+.bep-close {
+  font-size: 14px;
+  color: rgba(255,255,255,0.22);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: color 150ms ease;
+}
+.bep-close:hover { color: rgba(255,255,255,0.65); }
+
+.bep-hint {
+  padding: 6px 14px;
+  font-family: var(--font-label);
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.18);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  flex-shrink: 0;
+}
+
+.bep-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.07) transparent;
+}
+
+.bep-group {
+  padding: 10px 14px 4px;
+  font-family: var(--font-label);
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: rgba(255,255,255,0.18);
+  text-transform: uppercase;
+}
+
+.bep-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+.bep-item:hover { background: rgba(255,255,255,0.03); }
+.bep-item.bep-sel { background: rgba(255,242,0,0.05); }
+.bep-item.bep-sel .bep-lbl { color: var(--yellow); }
+
+.bep-check {
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  accent-color: var(--yellow);
+  cursor: pointer;
+  margin: 0;
+}
+.bep-check:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.bep-lbl {
+  flex: 1;
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  color: rgba(200,200,196,0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  user-select: none;
+}
+
+.bep-status {
+  font-family: var(--font-label);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.22);
+  white-space: nowrap;
+  padding: 1px 5px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.bep-item.bep-sel .bep-status {
+  color: rgba(255,242,0,0.6);
+  border-color: rgba(255,242,0,0.2);
+}
+
+/* ── ELEMENT SELECTION HIGHLIGHT ─────────────────────────── */
+[data-binn-id].binn-sel {
+  outline: 1.5px solid rgba(255,242,0,0.55) !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 4px rgba(255,242,0,0.04), 0 0 16px rgba(255,242,0,0.06) !important;
+  position: relative !important;
+  z-index: 30 !important;
+}
+
+/* ── ELEMENT VISIBILITY ───────────────────────────────────── */
+[data-binn-id].binn-hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 300ms ease !important;
+}
+
+/* ── CONFIG STRIP ─────────────────────────────────────────── */
+.binn-cfg-strip {
+  position: fixed;
+  bottom: -52px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: rgba(6,6,8,0.96);
+  border-top: 1px solid rgba(255,242,0,0.18);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  transition: bottom 0.2s cubic-bezier(0.22,1,0.36,1);
+  backdrop-filter: blur(8px);
+}
+.binn-cfg-strip.open { bottom: 0; }
+
+.bcs-label {
+  font-family: var(--font-label);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: rgba(255,242,0,0.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.bcs-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.cfg-btn {
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: rgba(200,200,196,0.45);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 3px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+.cfg-btn:hover {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.22);
+}
+.cfg-btn.cfg-active {
+  color: var(--yellow);
+  background: rgba(255,242,0,0.08);
+  border-color: rgba(255,242,0,0.35);
+}
+.cfg-btn.cfg-primary {
+  color: rgba(255,60,0,0.8);
+  border-color: rgba(255,60,0,0.3);
+  background: rgba(255,60,0,0.05);
+}
+.cfg-btn.cfg-primary:hover {
+  color: #FF2800;
+  border-color: rgba(255,40,0,0.6);
+  background: rgba(255,40,0,0.1);
+}
+
+.cfg-status {
+  font-family: var(--font-label);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(200,200,196,0.4);
+  padding: 0 6px;
+}
+.cfg-status.cfg-warn {
+  color: var(--yellow);
+}
+
+.bcs-dismiss {
+  font-size: 13px;
+  color: rgba(255,255,255,0.2);
+  cursor: pointer;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  transition: color 150ms ease;
+}
+.bcs-dismiss:hover { color: rgba(255,255,255,0.6); }
