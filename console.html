@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ferrari Luce — Control Panel</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -395,6 +397,8 @@ body.ctrl-held .ferrari-watermark { pointer-events: auto; }
 
 /* ══ POSITIONING SYSTEM ══ */
 body.ctrl-held [data-pos-id] { cursor: crosshair !important; }
+body.ctrl-held .sw-svg [data-sw-id] { cursor: crosshair !important; }
+.sw-svg [data-sw-id].sw-sel { filter: drop-shadow(0 0 5px #FFF200) drop-shadow(0 0 2px #FFF200); }
 body.ctrl-held [data-pos-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !important; outline-offset: 4px; }
 .console-select-tab, .cp-shell-tab {
   display: none; position: absolute; top: 0; left: 0; z-index: 100;
@@ -588,7 +592,22 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
   border-radius: 50%; padding: 2px;
   background: #0a0a0e;
   box-shadow: inset 0 3px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.07);
+  position: relative;
 }
+.cd-tick-group { position:absolute; top:2px; left:2px; width:280px; height:280px; z-index:1; pointer-events:auto; border-radius:50%; }
+/* These canvas-overlay divs must stay absolutely positioned even when .binn-sel adds position:relative !important */
+#cd-ticks, #cd-battery { position: absolute !important; }
+#cdLabelOverlay { position:absolute; top:2px; left:2px; width:280px; height:280px; z-index:2; pointer-events:none; }
+.cd-lbl { position:absolute; pointer-events:auto; white-space:nowrap; font-family:'Barlow Condensed',sans-serif; letter-spacing:1.5px; line-height:1; }
+#ddLabelOverlay { position:absolute; top:2px; left:2px; width:200px; height:200px; z-index:2; pointer-events:none; }
+.dd-arc-sel { position:absolute; pointer-events:auto; font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; color:rgba(255,255,255,0.28); letter-spacing:0.5px; line-height:1; text-align:center; transform:translate(-50%,-50%); display:none; cursor:default; }
+.dd-arc-sel.batt-mode-vis { display:block; }
+#cd-spd  { font-family:'Rajdhani',sans-serif; font-size:44px; font-weight:700; color:#eaeae2; letter-spacing:0; }
+#cd-kmh  { font-size:10px; font-weight:500; color:rgba(200,200,200,0.50); }
+#cd-f    { font-size:11px; font-weight:600; color:rgba(215,215,215,0.80); }
+#cd-half { font-size:9px;  font-weight:500; color:rgba(215,215,215,0.72); }
+#cd-e    { font-size:11px; font-weight:600; color:#ef4444; }
+#cd-range{ font-size:10px; font-weight:600; color:#4ade80; }
 .binnacle-dial-label {
   font-family: 'Barlow Condensed', sans-serif; font-size: 9px; font-weight: 600;
   letter-spacing: 2.5px; color: rgba(255,255,255,0.28); text-align: center;
@@ -607,14 +626,11 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 
 /* Suspension widget (next to ddLabel) */
 .binn-dd-row { display: flex; align-items: center; gap: 7px; justify-content: center; }
-.binn-susp-widget { display: flex; align-items: center; gap: 4px; }
-.binn-susp-icon { display: block; opacity: 0.55; flex-shrink: 0; }
-.binn-susp-bars { display: flex; align-items: flex-end; gap: 2px; height: 13px; }
-.binn-susp-bar { width: 4px; border: 1px solid rgba(255,255,255,0.18); border-radius: 1px; background: transparent; transition: background 0.22s, border-color 0.22s; }
-.binn-susp-bar:nth-child(1) { height: 7px; }
-.binn-susp-bar:nth-child(2) { height: 10px; }
-.binn-susp-bar:nth-child(3) { height: 13px; }
-.binn-susp-bar.lit { background: currentColor; border-color: currentColor; }
+.binn-susp-widget { display: flex; align-items: center; gap: 4px; color: #888; }
+.binn-susp-icon { display: block; opacity: 0.7; flex-shrink: 0; }
+.binn-susp-bars { display: flex; align-items: center; gap: 2px; height: 11px; }
+.binn-susp-bar { width: 4px; height: 11px; border: 1px solid #555; border-radius: 1px; background: transparent; transition: background 0.22s, border-color 0.22s; }
+.binn-susp-bar.lit { background: #888; border-color: #888; }
 
 /* Binnacle header: time / temp */
 .binnacle-header {
@@ -1526,6 +1542,19 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
             <canvas id="cdCanvas" width="280" height="280"
               style="border-radius:50%;display:block;"
               data-tip="Central Dial" data-tip-fn="Main instrument showing speed, power output, and drive mode arc."></canvas>
+            <!-- Tick-labels group overlay (canvas-drawn, selectable as group) -->
+            <div id="cd-ticks" data-binn-id="binn-cd-ticks" class="cd-tick-group"></div>
+            <!-- Individual label overlays -->
+            <div id="cdLabelOverlay">
+              <div class="cd-lbl" id="cd-spd"   data-binn-id="binn-cd-spd"   style="left:140px;top:118px;transform:translate(-50%,-50%);">0</div>
+              <div class="cd-lbl" id="cd-kmh"   data-binn-id="binn-cd-kmh"   style="left:140px;top:148px;transform:translate(-50%,-50%);">km/h</div>
+              <div class="cd-lbl" id="cd-f"     data-binn-id="binn-cd-f"     style="left:211px;top:207px;transform:translate(-50%,-50%);">F</div>
+              <div class="cd-lbl" id="cd-half"  data-binn-id="binn-cd-half"  style="left:140px;top:238px;transform:translate(-50%,-50%);">½</div>
+              <div class="cd-lbl" id="cd-e"     data-binn-id="binn-cd-e"     style="left:69px;top:207px;transform:translate(-50%,-50%);">E</div>
+              <div class="cd-lbl" id="cd-range" style="left:126px;top:185px;transform:translateY(-50%);">408 km</div>
+            </div>
+            <!-- Battery + arrow + range group (canvas-drawn, selectable as group) -->
+            <div id="cd-battery" data-binn-id="binn-cd-battery" style="position:absolute;left:114px;top:169px;width:50px;height:28px;z-index:3;pointer-events:auto;"></div>
           </div>
         </div>
         <div class="binnacle-dial-label" id="cdLabel" style="display:none;"></div>
@@ -1546,6 +1575,10 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
               <canvas id="ddCanvas" width="200" height="200"
                 style="border-radius:50%;display:block;cursor:pointer;"
                 data-tip="Driver Dial" data-tip-fn="Click to cycle: G METER → VEHICLE STATUS → BATTERY → TRIP → DYNAMICS → TIRES."></canvas>
+              <div id="ddLabelOverlay">
+                <div class="dd-arc-sel" id="dd-batt-temp" data-binn-id="binn-dd-batt-temp" style="left:100px;top:70px;">∪</div>
+                <div class="dd-arc-sel" id="dd-pwr-pot"   data-binn-id="binn-dd-pwr-pot"   style="left:100px;top:143px;">∩</div>
+              </div>
             </div>
           </div>
           <!-- Mode dots — positioned outside the dial at top-right -->
@@ -1560,7 +1593,7 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         </div>
         <div class="binn-dd-row">
           <div class="binnacle-dial-label dry-mode" id="ddLabel" data-binn-id="binn-dd-label">DRY</div>
-          <div class="binn-susp-widget" id="suspWidget">
+          <div class="binn-susp-widget" id="suspWidget" data-binn-id="binn-susp">
             <svg class="binn-susp-icon" viewBox="0 0 8 16" width="8" height="16" xmlns="http://www.w3.org/2000/svg">
               <line x1="4" y1="0" x2="4" y2="2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
               <polyline points="1.5,2 6.5,3.8 1.5,5.6 6.5,7.4 1.5,9.2 6.5,11 1.5,12.8" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1617,6 +1650,15 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
       <stop offset="78%"  stop-color="#991100"/>
       <stop offset="100%" stop-color="#661100"/>
     </radialGradient>
+    <!-- Prancing Horse: remove white bg, keep dark silhouette -->
+    <filter id="horseFilter" color-interpolation-filters="sRGB" x="-5%" y="-5%" width="110%" height="110%">
+      <feColorMatrix type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+               -3 -3 -3 1 3" result="bgOut"/>
+      <feComposite in="bgOut" in2="SourceAlpha" operator="in"/>
+    </filter>
     <!-- Badge gloss clip -->
     <clipPath id="badgeClip">
       <circle cx="280" cy="255" r="46"/>
@@ -1629,6 +1671,10 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
     <clipPath id="podClipR">
       <path d="M 438,282 L 340,282 C 328,298 326,360 344,398 C 356,420 382,424 398,412 C 424,396 445,362 444,320 C 443,292 440,282 438,282 Z"/>
     </clipPath>
+    <!-- Rim D-cut: clips circular layers above fy=440 -->
+    <clipPath id="swRimClip">
+      <rect id="swRimClipRect" x="-20" y="-20" width="600" height="460"/>
+    </clipPath>
   </defs>
 
   <!-- Background -->
@@ -1640,20 +1686,11 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
        Hub covers center junction.
        ══════════════════════════════════════════ -->
 
-  <!-- Upper-left spoke: from crossbar-top-left (252,237) to 10:30 rim (132,107) -->
-  <line x1="252" y1="237" x2="132" y2="107" stroke="#C8C2B4" stroke-width="26" stroke-linecap="round"/>
-  <!-- Chamfer highlight on upper edge -->
-  <line x1="252" y1="237" x2="132" y2="107" stroke="rgba(255,252,246,0.26)" stroke-width="6" stroke-linecap="round"/>
-  <!-- Chamfer shadow on lower edge -->
-  <line x1="252" y1="237" x2="132" y2="107" stroke="rgba(0,0,0,0.18)" stroke-width="4" stroke-linecap="round"
-        transform="translate(4,4)"/>
 
-  <!-- Upper-right spoke: (308,237) to 1:30 rim (429,107) -->
-  <line x1="308" y1="237" x2="429" y2="107" stroke="#C8C2B4" stroke-width="26" stroke-linecap="round"/>
-  <line x1="308" y1="237" x2="429" y2="107" stroke="rgba(255,252,246,0.26)" stroke-width="6" stroke-linecap="round"/>
-  <line x1="308" y1="237" x2="429" y2="107" stroke="rgba(0,0,0,0.18)" stroke-width="4" stroke-linecap="round"
-        transform="translate(-4,4)"/>
 
+
+
+  <g data-sw-id="sw-frame" data-sw-label="Wheel Frame">
   <!-- Horizontal crossbar: 9 o'clock to 3 o'clock through hub center -->
   <rect x="63" y="236" width="434" height="38" rx="19" fill="#C8C2B4"/>
   <!-- Crossbar top highlight -->
@@ -1661,75 +1698,109 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
   <!-- Crossbar bottom shadow -->
   <rect x="74" y="265" width="412" height="5" rx="2.5" fill="rgba(0,0,0,0.20)"/>
 
-  <!-- Bottom spoke: tapered from hub bottom (280,335) to 6 o'clock rim (280,465) -->
-  <path d="M 264,335 L 296,335 L 290,465 L 270,465 Z" fill="#C8C2B4"/>
+  <!-- Bottom spoke: tapered from hub bottom (280,335) to flat rim bottom (280,440) -->
+  <path d="M 264,335 L 296,335 L 292,440 L 268,440 Z" fill="#C8C2B4"/>
   <!-- Bottom spoke rounded hub cap -->
   <ellipse cx="280" cy="335" rx="16" ry="7" fill="#C8C2B4"/>
-  <!-- Bottom spoke rim cap -->
-  <ellipse cx="280" cy="465" rx="10" ry="5" fill="#C8C2B4"/>
   <!-- Bottom spoke highlight stripe -->
-  <path d="M 277,336 L 283,336 L 281,464 L 279,464 Z" fill="rgba(255,252,246,0.22)"/>
+  <path d="M 277,336 L 283,336 L 281,439 L 279,439 Z" fill="rgba(255,252,246,0.22)"/>
   <!-- Bottom spoke side shadow -->
-  <path d="M 264,336 L 269,336 L 270,464 L 265,464 Z" fill="rgba(0,0,0,0.14)"/>
+  <path d="M 264,336 L 269,336 L 270,439 L 265,439 Z" fill="rgba(0,0,0,0.14)"/>
+  </g>
 
   <!-- ══════════════════════════════════════════
-       RIM — very dark, multi-layer for depth
-       cx=280 cy=255 r=210 stroke=36
+       RIM — D-cut flat bottom, multi-layer depth
+       cx=280 cy=255 r=210 stroke=36  fy=440
        ══════════════════════════════════════════ -->
-  <!-- Outer ambient -->
-  <circle cx="280" cy="255" r="210" fill="none" stroke="#25242C" stroke-width="44" opacity="0.55"/>
-  <!-- Main rim body -->
-  <circle cx="280" cy="255" r="210" fill="none" stroke="#18181E" stroke-width="36"/>
-  <!-- Inner edge shadow -->
-  <circle cx="280" cy="255" r="193" fill="none" stroke="rgba(0,0,0,0.45)" stroke-width="4"/>
-  <!-- Outer edge micro-highlight -->
-  <circle cx="280" cy="255" r="228" fill="none" stroke="rgba(255,252,248,0.06)" stroke-width="2"/>
-  <!-- Top-arc specular (upper 130° band) — circumference≈1319, 130°=473px, offset for top -->
-  <circle cx="280" cy="255" r="210" fill="none" stroke="rgba(255,252,248,0.065)" stroke-width="34"
-          stroke-dasharray="473 846" stroke-dashoffset="990" stroke-linecap="round"/>
-  <!-- Outer edge bright specular arc -->
-  <circle cx="280" cy="255" r="228" fill="none" stroke="rgba(255,252,248,0.10)" stroke-width="2"
-          stroke-dasharray="390 930" stroke-dashoffset="990" stroke-linecap="round"/>
+  <g id="swRimGroup" data-sw-id="sw-rim" data-sw-label="Wheel Rim">
+    <!-- Circular arc layers clipped at fy=440 -->
+    <g clip-path="url(#swRimClip)">
+      <circle cx="280" cy="255" r="210" fill="none" stroke="#25242C" stroke-width="44" opacity="0.55"/>
+      <circle cx="280" cy="255" r="210" fill="none" stroke="#18181E" stroke-width="36"/>
+      <circle cx="280" cy="255" r="193" fill="none" stroke="rgba(0,0,0,0.45)" stroke-width="4"/>
+      <circle cx="280" cy="255" r="228" fill="none" stroke="rgba(255,252,248,0.06)" stroke-width="2"/>
+      <circle cx="280" cy="255" r="210" fill="none" stroke="rgba(255,252,248,0.065)" stroke-width="34"
+              stroke-dasharray="473 846" stroke-dashoffset="990" stroke-linecap="round"/>
+      <circle cx="280" cy="255" r="228" fill="none" stroke="rgba(255,252,248,0.10)" stroke-width="2"
+              stroke-dasharray="390 930" stroke-dashoffset="990" stroke-linecap="round"/>
+      <!-- Inner-radius metal trim: champagne aluminium matching crossbar -->
+      <circle cx="280" cy="255" r="192" fill="none" stroke="#C8C2B4" stroke-width="3.5" opacity="0.88"/>
+      <circle cx="280" cy="255" r="191" fill="none" stroke="rgba(255,252,246,0.38)" stroke-width="1.2"/>
+      <circle cx="280" cy="255" r="193.2" fill="none" stroke="rgba(0,0,0,0.28)" stroke-width="1.4"/>
+    </g>
+    <!-- Bottom bar: closes the D-cut end (Bezier — edit via JS swRimBez) -->
+    <!-- Ambient layer: outer r=232→r=188 at y=440: xOL=140 xOR=420 xIL=247 xIR=313 -->
+    <path id="swRimBarAmbient"
+          d="M 140,440 C 196,452 364,452 420,440 L 313,440 C 307,447 253,447 247,440 Z"
+          fill="#25242C" opacity="0.55"/>
+    <!-- Main body: outer r=228→r=192 at y=440: xOL=147 xOR=413 xIL=229 xIR=331 -->
+    <path id="swRimBar"
+          d="M 147,440 C 205,450 355,450 413,440 L 331,440 C 310,445 250,445 229,440 Z"
+          fill="#18181E"/>
+    <!-- Inner shadow strip -->
+    <path id="swRimBarShadow"
+          d="M 225,440 C 253,443 307,443 335,440 L 333,440 C 310,444 250,444 227,440 Z"
+          fill="rgba(0,0,0,0.45)"/>
+    <!-- Inner bottom bar metal trim: matches crossbar and rim inner edge -->
+    <path d="M 229,440 C 250,445 310,445 331,440" fill="none" stroke="#C8C2B4" stroke-width="3" opacity="0.88"/>
+    <path d="M 230,440 C 251,444 309,444 330,440" fill="none" stroke="rgba(255,252,246,0.38)" stroke-width="1.1"/>
+    <!-- Bezier edit handles (shown when rim is selected) -->
+    <g id="swBezHandles" display="none">
+      <line id="swBezGuide0" x1="147" y1="440" x2="205" y2="450" stroke="#FFF200" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.7"/>
+      <line id="swBezGuide1" x1="413" y1="440" x2="355" y2="450" stroke="#FFF200" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.7"/>
+      <line id="swBezGuide2" x1="229" y1="440" x2="250" y2="445" stroke="rgba(255,242,0,0.5)" stroke-width="0.8" stroke-dasharray="2,2"/>
+      <line id="swBezGuide3" x1="331" y1="440" x2="310" y2="445" stroke="rgba(255,242,0,0.5)" stroke-width="0.8" stroke-dasharray="2,2"/>
+      <circle cx="147" cy="440" r="3" fill="none" stroke="#FFF200" stroke-width="1" opacity="0.5"/>
+      <circle cx="413" cy="440" r="3" fill="none" stroke="#FFF200" stroke-width="1" opacity="0.5"/>
+      <circle cx="229" cy="440" r="3" fill="none" stroke="rgba(255,242,0,0.4)" stroke-width="1" opacity="0.5"/>
+      <circle cx="331" cy="440" r="3" fill="none" stroke="rgba(255,242,0,0.4)" stroke-width="1" opacity="0.5"/>
+      <circle id="swBezH0" cx="205" cy="450" r="7" fill="#FFF200" stroke="#000" stroke-width="1.5" style="cursor:move"/>
+      <circle id="swBezH1" cx="355" cy="450" r="7" fill="#FFF200" stroke="#000" stroke-width="1.5" style="cursor:move"/>
+      <circle id="swBezH2" cx="250" cy="445" r="5" fill="rgba(255,242,0,0.75)" stroke="#000" stroke-width="1" style="cursor:move"/>
+      <circle id="swBezH3" cx="310" cy="445" r="5" fill="rgba(255,242,0,0.75)" stroke="#000" stroke-width="1" style="cursor:move"/>
+    </g>
+  </g>
 
-  <!-- ── Leather seam marks at spoke-rim junctions ── -->
-  <!-- Left seam at ~10:30 (132,107): tangent direction ~315° -->
-  <line x1="122" y1="117" x2="142" y2="97" stroke="rgba(170,165,158,0.50)" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="126" y1="113" x2="138" y2="101" stroke="rgba(255,252,248,0.18)" stroke-width="1.2" stroke-linecap="round"/>
-  <!-- Right seam at ~1:30 (429,107): tangent direction ~45° -->
-  <line x1="419" y1="97" x2="439" y2="117" stroke="rgba(170,165,158,0.50)" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="422" y1="101" x2="436" y2="113" stroke="rgba(255,252,248,0.18)" stroke-width="1.2" stroke-linecap="round"/>
+
 
   <!-- ══════════════════════════════════════════
        TURN SIGNAL BUTTONS
        At 9 o'clock (88,255) and 3 o'clock (472,255)
        Recessed circular buttons on crossbar ends
        ══════════════════════════════════════════ -->
+  <g data-sw-id="sw-turn-l" data-sw-label="Left Turn Signal">
   <!-- Left turn signal -->
   <circle cx="88" cy="255" r="17" fill="#B0AA9C" stroke="rgba(0,0,0,0.30)" stroke-width="1.5"
           onclick="swTurnSignal('L')" style="cursor:pointer"/>
   <circle cx="88" cy="255" r="17" fill="rgba(0,0,0,0.08)" stroke="none"/><!-- inset shadow -->
   <text id="swTurnLIcon" x="88" y="260" text-anchor="middle"
         fill="#2E2A24" font-size="14" font-family="sans-serif" pointer-events="none">←</text>
+  </g>
 
+  <g data-sw-id="sw-turn-r" data-sw-label="Right Turn Signal">
   <!-- Right turn signal -->
   <circle cx="472" cy="255" r="17" fill="#B0AA9C" stroke="rgba(0,0,0,0.30)" stroke-width="1.5"
           onclick="swTurnSignal('R')" style="cursor:pointer"/>
   <circle cx="472" cy="255" r="17" fill="rgba(0,0,0,0.08)" stroke="none"/>
   <text id="swTurnRIcon" x="472" y="260" text-anchor="middle"
         fill="#2E2A24" font-size="14" font-family="sans-serif" pointer-events="none">→</text>
+  </g>
 
   <!-- ══════════════════════════════════════════
        HUB — dark dome with Ferrari badge
        ══════════════════════════════════════════ -->
+  <g data-sw-id="sw-hub" data-sw-label="Hub">
   <circle cx="280" cy="255" r="82" fill="url(#hubGrad)"/>
   <circle cx="280" cy="255" r="82" fill="url(#hubRimGlow)"/>
   <circle cx="280" cy="255" r="82" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.2"/>
+  </g>
 
+  <g data-sw-id="sw-badge" data-sw-label="Ferrari Badge">
   <!-- Ferrari badge: black outer ring → yellow circle → horse -->
   <circle cx="280" cy="255" r="54" fill="#080808" stroke="#000" stroke-width="1"/>
   <circle cx="280" cy="255" r="46" fill="#F5C800"/>
   <!-- Prancing horse (black silhouette on yellow) -->
-  <image href="prancing_horse.png" x="258" y="219" width="44" height="58" opacity="1"/>
+  <image href="prancing_horse.png" x="258" y="219" width="44" height="58" opacity="1" filter="url(#horseFilter)"/>
   <!-- Badge gloss sheen upper-left -->
   <ellipse cx="264" cy="240" rx="20" ry="13"
            fill="rgba(255,255,255,0.28)" clip-path="url(#badgeClip)" opacity="0.35"/>
@@ -1739,10 +1810,12 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
   <!-- AIRBAG text at hub bottom -->
   <text x="280" y="322" text-anchor="middle" fill="rgba(255,255,255,0.13)"
         font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="2.5">AIRBAG</text>
+  </g>
 
   <!-- ══════════════════════════════════════════
        LEFT POD — e-Manettino, Volume, Phone
        ══════════════════════════════════════════ -->
+  <g data-sw-id="sw-pod-l" data-sw-label="Left Pod (e-Manettino)">
   <!-- Pod shadow -->
   <path d="M 123,283 L 221,283 C 234,299 236,362 218,400 C 206,422 180,426 163,414 C 137,397 116,364 117,322 C 118,294 121,283 123,283 Z"
         fill="rgba(0,0,0,0.5)" transform="translate(3,4)"/>
@@ -1757,6 +1830,7 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="1.5">e-MANETTINO</text>
 
   <!-- ── e-Manettino knob (cx=175, cy=348) silver chrome dome ── -->
+  <g data-sw-id="sw-eman-knob" data-sw-label="e-Man Knob">
   <!-- Outer tick ring -->
   <circle cx="175" cy="348" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
   <!-- Tick marks at RANGE(-45°), TOUR(0°), PERFO(+45°) — short marks outside knob -->
@@ -1775,16 +1849,20 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         stroke="#C8B455" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
   <!-- Click overlay for knob + tick ring area -->
   <circle cx="175" cy="348" r="28" fill="transparent" onclick="swEManStep(1)" style="cursor:pointer"/>
+  </g><!-- /sw-eman-knob -->
 
   <!-- e-Man mode labels -->
+  <g data-sw-id="sw-eman-labels" data-sw-label="e-Man Labels">
   <text id="swEManLbl0" x="151" y="330" text-anchor="middle"
         fill="rgba(255,255,255,0.30)" font-size="7" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">RANGE</text>
   <text id="swEManLbl1" x="175" y="318" text-anchor="middle"
         fill="#C8B455" font-size="7.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">TOUR</text>
   <text id="swEManLbl2" x="199" y="330" text-anchor="middle"
         fill="rgba(255,255,255,0.30)" font-size="7" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">PERFO</text>
+  </g><!-- /sw-eman-labels -->
 
   <!-- ── Volume toggle switch (cx=128, center of track) ── -->
+  <g data-sw-id="sw-vol-toggle" data-sw-label="Volume Toggle">
   <!-- Track -->
   <rect x="122" y="322" width="12" height="40" rx="6" fill="#0A0A10" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
   <!-- Track groove -->
@@ -1803,18 +1881,23 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         id="swVolPlusBtn" onclick="swVolume(1)" style="cursor:pointer"/>
   <rect x="119" y="346" width="18" height="26" fill="transparent"
         id="swVolMinusBtn" onclick="swVolume(-1)" style="cursor:pointer"/>
+  </g><!-- /sw-vol-toggle -->
 
   <!-- ── Phone button ── -->
+  <g data-sw-id="sw-phone-btn" data-sw-label="Phone Button">
   <circle cx="155" cy="396" r="14" fill="#0A0A10" stroke="rgba(255,255,255,0.12)" stroke-width="1"
           id="swPhoneBtn" onclick="swPhone()" style="cursor:pointer"/>
   <!-- NFC/connectivity arcs -->
   <path d="M 150,399 A 6,6 0 0,1 160,399" fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="1.5" stroke-linecap="round" pointer-events="none"/>
   <path d="M 147,403 A 10,10 0 0,1 163,403" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" stroke-linecap="round" pointer-events="none"/>
   <path d="M 144,407 A 14,14 0 0,1 166,407" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round" pointer-events="none"/>
+  </g><!-- /sw-phone-btn -->
+  </g><!-- /sw-pod-l -->
 
   <!-- ══════════════════════════════════════════
        RIGHT POD — Manettino, Wiper, Media
        ══════════════════════════════════════════ -->
+  <g data-sw-id="sw-pod-r" data-sw-label="Right Pod (Manettino)">
   <!-- Pod shadow -->
   <path d="M 437,283 L 339,283 C 326,299 324,362 342,400 C 354,422 380,426 397,414 C 423,397 444,364 443,322 C 442,294 439,283 437,283 Z"
         fill="rgba(0,0,0,0.5)" transform="translate(-3,4)"/>
@@ -1827,6 +1910,7 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="1.5">MANETTINO</text>
 
   <!-- ── Manettino knob (cx=368, cy=348) red dome ── -->
+  <g data-sw-id="sw-man-knob" data-sw-label="Manettino Knob">
   <!-- Outer tick ring -->
   <circle cx="368" cy="348" r="28" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
   <!-- Tick marks at ICE(-120°), WET(-60°), DRY(0°), SPORT(+60°), PERF(+120°) -->
@@ -1851,8 +1935,10 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         stroke="rgba(255,255,255,0.80)" stroke-width="2.5" stroke-linecap="round" pointer-events="none"/>
   <!-- Click overlay -->
   <circle cx="368" cy="348" r="28" fill="transparent" onclick="swManStep(1)" style="cursor:pointer"/>
+  </g><!-- /sw-man-knob -->
 
   <!-- Manettino mode labels -->
+  <g data-sw-id="sw-man-labels" data-sw-label="Manettino Labels">
   <text id="swManLbl0" x="344" y="363" text-anchor="middle"
         fill="rgba(255,255,255,0.28)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">ICE</text>
   <text id="swManLbl1" x="342" y="337" text-anchor="middle"
@@ -1863,8 +1949,10 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
         fill="rgba(80,200,80,0.80)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">SPORT</text>
   <text id="swManLbl4" x="393" y="363" text-anchor="middle"
         fill="rgba(255,255,255,0.28)" font-size="6.5" font-family="'Barlow Condensed',sans-serif" font-weight="600" letter-spacing="0.5">ESC</text>
+  </g><!-- /sw-man-labels -->
 
   <!-- ── Wiper selector (right side of right pod) ── -->
+  <g data-sw-id="sw-wiper" data-sw-label="Wiper Selector">
   <!-- Wiper icon (arc + blade) -->
   <path d="M 420,312 A 14,14 0 0,0 438,320" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" stroke-linecap="round"/>
   <line x1="429" y1="316" x2="425" y2="325" stroke="rgba(255,255,255,0.22)" stroke-width="1.5" stroke-linecap="round"/>
@@ -1884,13 +1972,17 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
           onclick="swWiperSet(2)" style="cursor:pointer"/>
   <text x="436" y="340" text-anchor="middle" fill="rgba(255,255,255,0.55)"
         font-size="8.5" font-family="'Barlow Condensed',sans-serif" font-weight="700" pointer-events="none">2</text>
+  </g><!-- /sw-wiper -->
 
   <!-- ── Media / Next Track button ── -->
+  <g data-sw-id="sw-media-btn" data-sw-label="Media Button">
   <circle cx="395" cy="396" r="14" fill="#0A0A10" stroke="rgba(255,255,255,0.12)" stroke-width="1"
           id="swMediaBtn" onclick="swMedia()" style="cursor:pointer"/>
   <!-- Play-next triangle + bar -->
   <polygon points="390,391 390,401 399,396" fill="rgba(255,255,255,0.40)" pointer-events="none"/>
   <rect x="399" y="391" width="2.5" height="10" rx="1" fill="rgba(255,255,255,0.40)" pointer-events="none"/>
+  </g><!-- /sw-media-btn -->
+  </g><!-- /sw-pod-r -->
 
 </svg>
 
@@ -2040,9 +2132,38 @@ const BINN_ELEMENTS = {
   'binn-power-dial':   'Power Dial',
   'binn-pd-label':     'Power Mode',
   'binn-central-dial': 'Central Dial',
+  'binn-cd-spd':       'Speed Readout',
+  'binn-cd-kmh':       'Speed Unit',
+  'binn-cd-f':         'Charge Full',
+  'binn-cd-half':      'Charge Half',
+  'binn-cd-e':         'Charge Empty',
+  'binn-cd-battery':   'Battery & Range',
+  'binn-cd-ticks':     'Speed Labels',
   'binn-prnd':         'Gear Selector',
-  'binn-driver-dial':  'Driver Dial',
-  'binn-dd-label':     'Manettino Mode',
+  'binn-driver-dial':    'Driver Dial',
+  'binn-dd-label':       'Manettino Mode',
+  'binn-dd-batt-temp':   'Battery Temp Arc',
+  'binn-dd-pwr-pot':     'Power Potential Arc',
+  'binn-susp':           'Suspension',
+};
+
+const SW_ELEMENTS = {
+  'sw-rim':         'Wheel Rim',
+  'sw-frame':       'Wheel Frame',
+  'sw-hub':         'Hub',
+  'sw-badge':       'Ferrari Badge',
+  'sw-turn-l':      'Left Turn Signal',
+  'sw-turn-r':      'Right Turn Signal',
+  'sw-pod-l':       'Left Pod (e-Manettino)',
+  'sw-eman-knob':   'e-Man Knob',
+  'sw-eman-labels': 'e-Man Labels',
+  'sw-vol-toggle':  'Volume Toggle',
+  'sw-phone-btn':   'Phone Button',
+  'sw-pod-r':       'Right Pod (Manettino)',
+  'sw-man-knob':    'Manettino Knob',
+  'sw-man-labels':  'Manettino Labels',
+  'sw-wiper':       'Wiper Selector',
+  'sw-media-btn':   'Media Button',
 };
 
 // ══ STATE ══
@@ -2506,10 +2627,13 @@ function updateMedia(){
 
 // ══ SIMULATION ══
 let simT=0;
+let odoKm=3159.2, odoLastMs=Date.now();
 function updateSim(){
   simT+=0.022;
   s.speed=Math.max(0,180+35*Math.sin(simT*.65)+18*Math.sin(simT*2.1)+(Math.random()-.5)*5);
-  s.power=Math.max(0,420+85*Math.sin(simT*.85)+45*Math.sin(simT*3.0)+(Math.random()-.5)*18);
+  s.power=200+280*Math.sin(simT*.65)+55*Math.sin(simT*2.2)+(Math.random()-.5)*22;
+  const _now=Date.now(), _dtH=(_now-odoLastMs)/3600000; odoLastMs=_now;
+  odoKm+=s.speed*_dtH;
   speedBuf[wPtr%WAVE]=s.speed; powerBuf[wPtr%WAVE]=s.power; wPtr=(wPtr+1)%WAVE;
   dom.speedVal.innerHTML=Math.round(s.speed)+' <span class="unit">km/h</span>';
   dom.powerVal.innerHTML=Math.round(s.power)+' <span class="unit">kW</span>';
@@ -2650,12 +2774,15 @@ let resizing=null;
 function updateResizeOverlay(){
   const ov=document.getElementById('resizeOverlay');
   const isBinn=activeTab()==='binnacle';
-  const selSet=isBinn?selectedBinnIds:selectedIds;
+  const isSw=activeTab()==='sw';
+  const selSet=isBinn?selectedBinnIds:isSw?selectedSwIds:selectedIds;
   if(selSet.size!==1){ov.style.display='none';return;}
   const id=[...selSet][0];
-  if(!isBinn&&id==='volume-knob'){ov.style.display='none';return;}
-  const el=isBinn?getBinnEl(id):getPosEl(id); if(!el){ov.style.display='none';return;}
+  if(!isBinn&&!isSw&&id==='volume-knob'){ov.style.display='none';return;}
+  if(isSw&&id==='sw-rim'){ov.style.display='none';return;}
+  const el=isBinn?getBinnEl(id):isSw?getSwEl(id):getPosEl(id); if(!el){ov.style.display='none';return;}
   const r=el.getBoundingClientRect();
+  if(!r.width&&!r.height){ov.style.display='none';return;}
   ov.style.display='block';
   ov.style.left=r.left+'px'; ov.style.top=r.top+'px';
   ov.style.width=r.width+'px'; ov.style.height=r.height+'px';
@@ -2665,23 +2792,60 @@ document.querySelectorAll('.resize-handle').forEach(h=>{
   h.addEventListener('mousedown',(e)=>{
     e.preventDefault(); e.stopPropagation();
     const isBinn=activeTab()==='binnacle';
-    const selSet=isBinn?selectedBinnIds:selectedIds;
+    const isSw=activeTab()==='sw';
+    const selSet=isBinn?selectedBinnIds:isSw?selectedSwIds:selectedIds;
     if(selSet.size!==1) return;
     const id=[...selSet][0];
+    if(isSw){
+      if(id==='sw-rim') return;
+      const el=getSwEl(id); if(!el) return;
+      const r=el.getBoundingClientRect();
+      const sc=svgScale();
+      resizing={isSw:true, id, handle:h.dataset.rh, startX:e.clientX, startY:e.clientY,
+        startSx:swSx[id]||1, startSy:swSy[id]||1,
+        startTx:swTx[id]||0, startTy:swTy[id]||0,
+        origW:r.width/(swSx[id]||1), origH:r.height/(swSy[id]||1), scX:sc.x, scY:sc.y};
+      return;
+    }
     const posObj=isBinn?binnPos:positions;
     const resObj=isBinn?binnResizes:resizes;
     const el=isBinn?getBinnEl(id):getPosEl(id); if(!el) return;
     const r=el.getBoundingClientRect();
     const cur=resObj[id]||{w:1,h:1};
+    // For canvas dials, use the native canvas size as origW/H so scale is always relative to it
+    const dialNat=isBinn&&DIAL_CANVAS_NAT[id]?DIAL_CANVAS_NAT[id].nat:null;
     resizing={isBinn, id, handle:h.dataset.rh, startX:e.clientX, startY:e.clientY,
       startW:cur.w, startH:cur.h,
       startPX:posObj[id].x, startPY:posObj[id].y,
-      origW:r.width/cur.w, origH:r.height/cur.h};
+      origW:dialNat||r.width/cur.w, origH:dialNat||r.height/cur.h};
   });
 });
 
 window.addEventListener('mousemove',(e)=>{
   if(!resizing) return;
+  if(resizing.isSw){
+    const {id,handle,startX,startY,startSx,startSy,startTx,startTy,origW,origH,scX,scY}=resizing;
+    const dx=e.clientX-startX, dy=e.clientY-startY;
+    const MIN=0.15;
+    if(handle.length===2){
+      const W=origW*startSx, H=origH*startSy, d=Math.sqrt(W*W+H*H);
+      let proj=0;
+      if(handle==='se') proj=( dx*W+dy*H)/d;
+      else if(handle==='sw') proj=(-dx*W+dy*H)/d;
+      else if(handle==='ne') proj=( dx*W-dy*H)/d;
+      else if(handle==='nw') proj=(-dx*W-dy*H)/d;
+      const ratio=Math.max(MIN/Math.max(startSx,startSy),(d+proj)/d);
+      swSx[id]=startSx*ratio; swSy[id]=startSy*ratio;
+      if(handle.includes('w')) swTx[id]=startTx+(origW*startSx-origW*swSx[id])*scX;
+      if(handle.includes('n')) swTy[id]=startTy+(origH*startSy-origH*swSy[id])*scY;
+    } else {
+      if(handle==='e') swSx[id]=Math.max(MIN,(origW*startSx+dx)/origW);
+      if(handle==='s') swSy[id]=Math.max(MIN,(origH*startSy+dy)/origH);
+      if(handle==='w'){ const ns=Math.max(MIN,(origW*startSx-dx)/origW); swTx[id]=startTx+(origW*startSx-origW*ns)*scX; swSx[id]=ns; }
+      if(handle==='n'){ const ns=Math.max(MIN,(origH*startSy-dy)/origH); swTy[id]=startTy+(origH*startSy-origH*ns)*scY; swSy[id]=ns; }
+    }
+    applySwTransform(id); updateResizeOverlay(); return;
+  }
   const {isBinn,id,handle,startX,startY,startW,startH,startPX,startPY,origW,origH}=resizing;
   const posObj=isBinn?binnPos:positions;
   const resObj=isBinn?binnResizes:resizes;
@@ -2771,6 +2935,28 @@ const binnResizes={};
 Object.keys(BINN_ELEMENTS).forEach(id=>{ binnResizes[id]={w:1,h:1}; });
 const binnNatDims={};
 
+// ── SW element transform state ──
+const swTx={}; const swTy={}; const swSx={}; const swSy={}; const swBbc={};
+Object.keys(SW_ELEMENTS).forEach(id=>{ swTx[id]=0; swTy[id]=0; swSx[id]=1; swSy[id]=1; });
+
+function getSwSvg(){ return document.querySelector('.sw-svg'); }
+function svgScale(){ const sv=getSwSvg(); if(!sv) return {x:1,y:1}; const r=sv.getBoundingClientRect(); return {x:560/(r.width||560), y:520/(r.height||520)}; }
+
+function applySwTransform(id){
+  const el=getSwEl(id); if(!el) return;
+  const tx=swTx[id]||0, ty=swTy[id]||0, sx=swSx[id]||1, sy=swSy[id]||1;
+  let t='';
+  if(sx!==1||sy!==1){
+    if(!swBbc[id]){ try{ const b=el.getBBox(); swBbc[id]={x:b.x+b.width/2, y:b.y+b.height/2}; }catch(err){ swBbc[id]={x:280,y:260}; } }
+    const {x:cx,y:cy}=swBbc[id];
+    t=`translate(${tx},${ty}) translate(${cx},${cy}) scale(${sx},${sy}) translate(${-cx},${-cy})`;
+  } else if(tx||ty){
+    t=`translate(${tx},${ty})`;
+  }
+  el.setAttribute('transform',t);
+  el._swTx=tx; el._swTy=ty;
+}
+
 const FONT_SIZE_IDS=new Set([
   'mode-badge','power-badge','speed-value','power-value',
   'info-time','info-date','info-temp','info-aqi','info-heading','enzo-badge'
@@ -2781,15 +2967,40 @@ function applyFontSize(id,px){
   fontSizes[id]=px; el.style.fontSize=px+'px';
 }
 
+const BINN_FONT_SIZE_IDS=new Set([
+  'binn-time','binn-temp',
+  'binn-pd-label',
+  'binn-cd-spd','binn-cd-kmh','binn-cd-f','binn-cd-half','binn-cd-e','binn-cd-range',
+  'binn-dd-label',
+]);
+const binnFontSizes={};
+function applyBinnFontSize(id,px){
+  const el=getBinnEl(id); if(!el) return;
+  binnFontSizes[id]=px; el.style.fontSize=px+'px';
+}
+
 function getPosEl(id){ return document.querySelector(`[data-pos-id="${id}"]`); }
 function getBinnEl(id){ return document.querySelector(`[data-binn-id="${id}"]`); }
 
+const DIAL_CANVAS_NAT={'binn-power-dial':{cvId:'pdCanvas',nat:200,draw:()=>drawPowerDial()},'binn-central-dial':{cvId:'cdCanvas',nat:280,draw:()=>drawCentralDial()},'binn-driver-dial':{cvId:'ddCanvas',nat:200,draw:()=>drawDriverDial()}};
 function applyBinnPosition(id){
   const el=getBinnEl(id); if(!el) return;
   const {x,y}=binnPos[id]||{x:0,y:0};
   const {w=1,h=1}=binnResizes[id]||{};
   const hasScale=w!==1||h!==1;
   el.style.transform=(x||y)?`translate(${x}px,${y}px)`:'';
+  // Dial containers: resize by changing canvas size so housing scales naturally
+  if(DIAL_CANVAS_NAT[id]){
+    const dc=DIAL_CANVAS_NAT[id], cv=document.getElementById(dc.cvId);
+    if(cv){
+      const scale=Math.max(w,h);
+      const sz=Math.max(40,Math.round(dc.nat*scale));
+      if(cv.width!==sz||cv.height!==sz){ cv.width=sz; cv.height=sz; }
+      dc.draw();
+    }
+    el.style.width=''; el.style.height='';
+    updateResizeOverlay(); return;
+  }
   if(hasScale){
     if(!binnNatDims[id]){ const r=el.getBoundingClientRect(); binnNatDims[id]={w:r.width||1,h:r.height||1}; }
     el.style.width=(binnNatDims[id].w*w)+'px';
@@ -2797,6 +3008,7 @@ function applyBinnPosition(id){
   } else {
     el.style.width=''; el.style.height='';
   }
+  if(id==='binn-cd-ticks'||id==='binn-cd-battery') drawCentralDial();
   updateResizeOverlay();
 }
 
@@ -2860,6 +3072,7 @@ function applyShellRadius(){
 }
 function clearAllSelection(){
   if(activeTab()==='binnacle') deselectBinnElem();
+  else if(activeTab()==='sw') clearSwSelection();
   else clearSelection();
 }
 
@@ -2886,24 +3099,100 @@ function showBinnConfig(id){
     sep();
     const pb=document.createElement('button'); pb.className='bh-btn'; pb.textContent='←'; pb.addEventListener('click',()=>{ driverModeIdx=(driverModeIdx-1+DRIVER_MODES.length)%DRIVER_MODES.length; showBinnConfig('binn-driver-dial'); }); bc.appendChild(pb);
     const ms=document.createElement('span'); ms.className='bh-mode'; ms.textContent=DRIVER_MODES[driverModeIdx]; bc.appendChild(ms);
-    const nb=document.createElement('button'); nb.className='bh-btn'; nb.textContent='→'; nb.addEventListener('click',()=>{ driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length; showBinnConfig('binn-driver-dial'); }); bc.appendChild(nb);
+    const nb=document.createElement('button'); nb.className='bh-btn'; nb.textContent='→'; nb.addEventListener('click',()=>{ driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length; battArc.sel=null; showBinnConfig('binn-driver-dial'); }); bc.appendChild(nb);
+    if(DRIVER_MODES[driverModeIdx]==='BATTERY'&&battArc.sel){
+      sep();
+      const arcKey=battArc.sel;
+      const arcLbl=document.createElement('span'); arcLbl.className='bh-mode';
+      arcLbl.textContent=arcKey==='temp'?'BATT TEMP':'PWR POT'; bc.appendChild(arcLbl);
+      sep();
+      const yL=document.createElement('span'); yL.className='bh-mode'; yL.style.fontSize='10px'; yL.textContent='Y'; bc.appendChild(yL);
+      const yS=document.createElement('input'); yS.type='range'; yS.min=-1.5; yS.max=1.5; yS.step=0.01; yS.value=battArc[arcKey].yOff;
+      yS.style.cssText='accent-color:#FFF200;cursor:pointer;width:80px';
+      const yV=document.createElement('span'); yV.className='bh-mode'; yV.style.cssText='font-size:10px;color:#FFF200;min-width:32px;text-align:right'; yV.textContent=parseFloat(battArc[arcKey].yOff).toFixed(2);
+      yS.addEventListener('input',()=>{ battArc[arcKey].yOff=parseFloat(yS.value); yV.textContent=parseFloat(yS.value).toFixed(2); drawDriverDial(); }); bc.appendChild(yS); bc.appendChild(yV);
+      sep();
+      const dL=document.createElement('span'); dL.className='bh-mode'; dL.style.fontSize='10px'; dL.textContent='DEPTH'; bc.appendChild(dL);
+      const dS=document.createElement('input'); dS.type='range'; dS.min=0.4; dS.max=1.4; dS.step=0.01; dS.value=battArc[arcKey].rad;
+      dS.style.cssText='accent-color:#FFF200;cursor:pointer;width:80px';
+      const dV=document.createElement('span'); dV.className='bh-mode'; dV.style.cssText='font-size:10px;color:#FFF200;min-width:32px;text-align:right'; dV.textContent=parseFloat(battArc[arcKey].rad).toFixed(2);
+      dS.addEventListener('input',()=>{ battArc[arcKey].rad=parseFloat(dS.value); dV.textContent=parseFloat(dS.value).toFixed(2); drawDriverDial(); }); bc.appendChild(dS); bc.appendChild(dV);
+    }
+  } else if(id==='binn-dd-batt-temp'||id==='binn-dd-pwr-pot'){
+    const arcKey=id==='binn-dd-batt-temp'?'temp':'power';
+    battArc.sel=arcKey; drawDriverDial();
+    sep();
+    const arcLbl=document.createElement('span'); arcLbl.className='bh-mode';
+    arcLbl.textContent=arcKey==='temp'?'BATT TEMP':'PWR POT'; bc.appendChild(arcLbl);
+    sep();
+    const yL=document.createElement('span'); yL.className='bh-mode'; yL.style.fontSize='10px'; yL.textContent='Y'; bc.appendChild(yL);
+    const yS=document.createElement('input'); yS.type='range'; yS.min=-1.5; yS.max=1.5; yS.step=0.01; yS.value=battArc[arcKey].yOff;
+    yS.style.cssText='accent-color:#FFF200;cursor:pointer;width:80px';
+    const yV=document.createElement('span'); yV.className='bh-mode'; yV.style.cssText='font-size:10px;color:#FFF200;min-width:32px;text-align:right'; yV.textContent=parseFloat(battArc[arcKey].yOff).toFixed(2);
+    yS.addEventListener('input',()=>{ battArc[arcKey].yOff=parseFloat(yS.value); yV.textContent=parseFloat(yS.value).toFixed(2); drawDriverDial(); }); bc.appendChild(yS); bc.appendChild(yV);
+    sep();
+    const dL=document.createElement('span'); dL.className='bh-mode'; dL.style.fontSize='10px'; dL.textContent='DEPTH'; bc.appendChild(dL);
+    const dS=document.createElement('input'); dS.type='range'; dS.min=0.4; dS.max=1.4; dS.step=0.01; dS.value=battArc[arcKey].rad;
+    dS.style.cssText='accent-color:#FFF200;cursor:pointer;width:80px';
+    const dV=document.createElement('span'); dV.className='bh-mode'; dV.style.cssText='font-size:10px;color:#FFF200;min-width:32px;text-align:right'; dV.textContent=parseFloat(battArc[arcKey].rad).toFixed(2);
+    dS.addEventListener('input',()=>{ battArc[arcKey].rad=parseFloat(dS.value); dV.textContent=parseFloat(dS.value).toFixed(2); drawDriverDial(); }); bc.appendChild(dS); bc.appendChild(dV);
+  }
+  // Font-size slider for HTML text elements
+  if(BINN_FONT_SIZE_IDS.has(id)){
+    const el=getBinnEl(id);
+    const cur=binnFontSizes[id]!==undefined?binnFontSizes[id]:el?parseFloat(getComputedStyle(el).fontSize)||12:12;
+    sep();
+    const szL=document.createElement('span'); szL.className='bh-mode'; szL.style.fontSize='10px'; szL.textContent='SIZE'; bc.appendChild(szL);
+    const szS=document.createElement('input'); szS.type='range'; szS.min=4; szS.max=120; szS.step=1; szS.value=Math.round(cur);
+    szS.style.cssText='accent-color:#FFF200;cursor:pointer;width:80px';
+    const szV=document.createElement('span'); szV.className='bh-mode'; szV.style.cssText='font-size:10px;color:#FFF200;min-width:28px;text-align:right'; szV.textContent=Math.round(cur)+'px';
+    szS.addEventListener('input',()=>{ const px=parseInt(szS.value); szV.textContent=px+'px'; applyBinnFontSize(id,px); });
+    bc.appendChild(szS); bc.appendChild(szV);
+  }
+}
+
+function showSwConfig(id){
+  const bc=document.getElementById('binnConfig');
+  if(!bc) return;
+  bc.innerHTML=''; bc.style.display='flex';
+  const sep=()=>{ const sp=document.createElement('span'); sp.className='bh-sep'; sp.textContent='·'; bc.appendChild(sp); };
+  if(id==='sw-eman-knob'||id==='sw-eman-labels'){
+    sep();
+    E_MANET.forEach((mode,i)=>{ const btn=document.createElement('button'); btn.className='bh-btn'+(s.eIdx===i?' bh-active':''); btn.textContent=mode; btn.addEventListener('click',()=>{ s.eIdx=i; applyBadgesClean(); updateSWDisplay(); showSwConfig(id); }); bc.appendChild(btn); });
+  } else if(id==='sw-man-knob'||id==='sw-man-labels'){
+    sep();
+    MANETTINO.forEach((mode,i)=>{ const btn=document.createElement('button'); btn.className='bh-btn'+(s.mIdx===i?' bh-active':''); btn.textContent=mode==='PERFORMANCE'?'PERF':mode; btn.addEventListener('click',()=>{ s.mIdx=i; applyBadgesClean(); updateSWDisplay(); showSwConfig(id); }); bc.appendChild(btn); });
+  } else if(id==='sw-wiper'){
+    sep();
+    ['OFF','LOW','HIGH'].forEach((lbl,i)=>{ const btn=document.createElement('button'); btn.className='bh-btn'+(s.wiperSpeed===i?' bh-active':''); btn.textContent=lbl; btn.addEventListener('click',()=>{ s.wiperSpeed=i; updateSWDisplay(); showSwConfig(id); }); bc.appendChild(btn); });
+  } else if(id==='sw-vol-toggle'){
+    sep();
+    const mb=document.createElement('button'); mb.className='bh-btn'; mb.textContent='−'; mb.addEventListener('click',()=>{ swVolume(-1); showSwConfig(id); }); bc.appendChild(mb);
+    const sp=document.createElement('span'); sp.className='bh-mode'; sp.textContent=Math.round(s.volume)+'%'; bc.appendChild(sp);
+    const pb=document.createElement('button'); pb.className='bh-btn'; pb.textContent='+'; pb.addEventListener('click',()=>{ swVolume(1); showSwConfig(id); }); bc.appendChild(pb);
+  } else if(id==='sw-turn-l'||id==='sw-turn-r'){
+    sep();
+    const side=id==='sw-turn-l'?'L':'R';
+    const btn=document.createElement('button'); btn.className='bh-btn'; btn.textContent='FLASH'; btn.addEventListener('click',()=>{ swTurnSignal(side); showSwConfig(id); }); bc.appendChild(btn);
   }
 }
 
 function updatePosHint(){
   const hint=document.getElementById('posHint'),namesEl=document.getElementById('posHintNames');
   const isBinn=activeTab()==='binnacle';
-  const selSet=isBinn?selectedBinnIds:selectedIds;
+  const isSw=activeTab()==='sw';
+  const selSet=isBinn?selectedBinnIds:isSw?selectedSwIds:selectedIds;
   if(selSet.size===0){hint.style.display='none';hideBinnConfig();return;}
   hint.style.display='flex';
-  const elemMap=isBinn?BINN_ELEMENTS:POS_ELEMENTS;
+  const elemMap=isBinn?BINN_ELEMENTS:isSw?SW_ELEMENTS:POS_ELEMENTS;
   namesEl.textContent=[...selSet].map(id=>elemMap[id]||id).join(', ');
   if(isBinn&&selSet.size===1) showBinnConfig([...selSet][0]);
+  else if(isSw&&selSet.size===1) showSwConfig([...selSet][0]);
   else hideBinnConfig();
   const rc=document.getElementById('consoleRadiusControl');
-  rc.style.display=(!isBinn&&selectedIds.has('cp-shell'))?'flex':'none';
+  rc.style.display=(!isBinn&&!isSw&&selectedIds.has('cp-shell'))?'flex':'none';
   const fc=document.getElementById('fontSizeControl');
-  if(!isBinn){
+  if(!isBinn&&!isSw){
     const fsIds=[...selectedIds].filter(id=>FONT_SIZE_IDS.has(id));
     if(fsIds.length>0){ fc.style.display='flex'; const px=fontSizes[fsIds[0]]||12; document.getElementById('fontSizeSlider').value=px; document.getElementById('fontSizeVal').textContent=Math.round(px)+'px'; }
     else fc.style.display='none';
@@ -2944,14 +3233,18 @@ document.addEventListener('click',(e)=>{
 // WASD movement
 document.addEventListener('keydown',(e)=>{
   if((e.target.tagName==='INPUT'&&e.target.type!=='checkbox')||e.target.tagName==='TEXTAREA') return;
-  const isBinn=activeTab()==='binnacle';
-  const selSet=isBinn?selectedBinnIds:selectedIds;
+  const isBinn=activeTab()==='binnacle', isSw=activeTab()==='sw';
+  const selSet=isBinn?selectedBinnIds:isSw?selectedSwIds:selectedIds;
   if(selSet.size===0) return;
   const key=e.key.toLowerCase(); if(!['w','a','s','d'].includes(key)) return;
   e.preventDefault();
   const step=e.shiftKey?5:1, dx=key==='a'?-step:key==='d'?step:0, dy=key==='w'?-step:key==='s'?step:0;
   if(isBinn){
     selSet.forEach(id=>{ binnPos[id].x+=dx; binnPos[id].y+=dy; applyBinnPosition(id); });
+  } else if(isSw){
+    const sc=svgScale();
+    selSet.forEach(id=>{ if(id==='sw-rim') return; swTx[id]=(swTx[id]||0)+dx*sc.x; swTy[id]=(swTy[id]||0)+dy*sc.y; applySwTransform(id); });
+    updateResizeOverlay();
   } else {
     selSet.forEach(id=>{ if(id==='console') return; positions[id].x+=dx; positions[id].y+=dy; applyPosition(id); });
   }
@@ -2960,11 +3253,27 @@ document.addEventListener('keydown',(e)=>{
 // Arrow-key alignment (2+ elements selected)
 document.addEventListener('keydown',(e)=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
-  const isBinn=activeTab()==='binnacle';
-  const selSet=isBinn?selectedBinnIds:selectedIds;
+  const isBinn=activeTab()==='binnacle', isSw=activeTab()==='sw';
+  const selSet=isBinn?selectedBinnIds:isSw?selectedSwIds:selectedIds;
   if(selSet.size<2) return;
   const key=e.key; if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key)) return;
   e.preventDefault();
+  if(isSw){
+    const ids=[...selSet].filter(id=>id!=='sw-rim');
+    if(ids.length<2) return;
+    const sc=svgScale();
+    const rects={}; ids.forEach(id=>{ const el=getSwEl(id); if(el) rects[id]=el.getBoundingClientRect(); });
+    const valid=ids.filter(id=>rects[id]);
+    if(valid.length<2) return;
+    if(key==='ArrowUp'||key==='ArrowDown'){
+      const cy=valid.reduce((s,id)=>s+rects[id].top+rects[id].height/2,0)/valid.length;
+      valid.forEach(id=>{ swTy[id]=(swTy[id]||0)+Math.round((cy-rects[id].top-rects[id].height/2)*sc.y); applySwTransform(id); });
+    } else {
+      const cx=valid.reduce((s,id)=>s+rects[id].left+rects[id].width/2,0)/valid.length;
+      valid.forEach(id=>{ swTx[id]=(swTx[id]||0)+Math.round((cx-rects[id].left-rects[id].width/2)*sc.x); applySwTransform(id); });
+    }
+    return;
+  }
   const posObj=isBinn?binnPos:positions;
   const getElFn=isBinn?getBinnEl:getPosEl;
   const applyFn=isBinn?applyBinnPosition:applyPosition;
@@ -2986,7 +3295,7 @@ document.addEventListener('keydown',(e)=>{
 document.addEventListener('keydown',(e)=>{ if(e.ctrlKey||e.metaKey) document.body.classList.add('ctrl-held'); });
 document.addEventListener('keyup',  (e)=>{ if(!e.ctrlKey&&!e.metaKey) document.body.classList.remove('ctrl-held'); });
 window.addEventListener('blur',()=>document.body.classList.remove('ctrl-held'));
-document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(activeTab()==='binnacle'&&selectedBinnIds.size>0){deselectBinnElem();e.preventDefault();}else if(selectedIds.size>0){clearSelection();e.preventDefault();}else closeSaveModal(); } });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ if(activeTab()==='binnacle'&&selectedBinnIds.size>0){deselectBinnElem();e.preventDefault();}else if(activeTab()==='sw'&&selectedSwIds.size>0){clearSwSelection();e.preventDefault();}else if(selectedIds.size>0){clearSelection();e.preventDefault();}else closeSaveModal(); } });
 
 // Binnacle Ctrl/Shift+click to toggle element selection
 document.addEventListener('click',(e)=>{
@@ -3000,6 +3309,18 @@ document.addEventListener('click',(e)=>{
   if(selectedBinnIds.has(id)) deselectBinnElem(id); else selectBinnElem(id);
 },true);
 
+// SW Ctrl+click to toggle element selection
+document.addEventListener('click', (e) => {
+  if (activeTab() !== 'sw') return;
+  if (!e.ctrlKey && !e.metaKey) return;
+  if (e.target.closest('.toolbar') || e.target.closest('#elemPanel')) return;
+  const swEl = e.target.closest('[data-sw-id]');
+  if (!swEl) return;
+  e.preventDefault(); e.stopPropagation();
+  const id = swEl.getAttribute('data-sw-id');
+  if (selectedSwIds.has(id)) deselectSwElem(id); else selectSwElem(id);
+}, true);
+
 // ══════════════════════════════════════════════════════
 // SAVE / LOAD SYSTEM
 // ══════════════════════════════════════════════════════
@@ -3008,14 +3329,16 @@ let currentLayoutName='Default';
 let activeLayoutName='Default';
 function getLayouts(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch{return{};} }
 function putLayouts(obj){ localStorage.setItem(LS_KEY,JSON.stringify(obj)); }
-function snapshot(){ const snap={}; Object.keys(POS_ELEMENTS).forEach(id=>{ const {w=1,h=1}=resizes[id]||{}; snap[id]={...positions[id],w,h}; }); snap._consoleRadius=consoleRadius; snap._fontSizes={...fontSizes}; return snap; }
+function snapshot(){ const snap={}; Object.keys(POS_ELEMENTS).forEach(id=>{ const {w=1,h=1}=resizes[id]||{}; snap[id]={...positions[id],w,h}; }); snap._consoleRadius=consoleRadius; snap._fontSizes={...fontSizes}; const swSnap={}; Object.keys(SW_ELEMENTS).forEach(id=>{ swSnap[id]={tx:swTx[id]||0,ty:swTy[id]||0,sx:swSx[id]||1,sy:swSy[id]||1}; }); snap._swTransforms=swSnap; return snap; }
 function applySnapshot(snap){
   Object.keys(POS_ELEMENTS).forEach(id=>{ if(snap&&snap[id]){ const {x=0,y=0,w=1,h=1}=snap[id]; positions[id]={x,y}; resizes[id]={w,h}; applyPosition(id); } });
   if(snap&&snap._consoleRadius!=null){ consoleRadius=snap._consoleRadius; applyShellRadius(); }
   if(snap&&snap._fontSizes){ Object.entries(snap._fontSizes).forEach(([id,px])=>applyFontSize(id,px)); }
+  if(snap&&snap._swTransforms){ Object.entries(snap._swTransforms).forEach(([id,t])=>{ swTx[id]=t.tx||0; swTy[id]=t.ty||0; swSx[id]=t.sx||1; swSy[id]=t.sy||1; swBbc[id]=null; applySwTransform(id); }); }
 }
 function resetToDefault(){
   Object.keys(POS_ELEMENTS).forEach(id=>{positions[id]={x:0,y:0};resizes[id]={w:1,h:1};applyPosition(id);});
+  Object.keys(SW_ELEMENTS).forEach(id=>{ swTx[id]=0; swTy[id]=0; swSx[id]=1; swSy[id]=1; swBbc[id]=null; applySwTransform(id); });
   consoleRadius=30; applyShellRadius();
   FONT_SIZE_IDS.forEach(id=>{ const el=getPosEl(id); if(el) el.style.fontSize=''; });
   FONT_SIZE_IDS.forEach(id=>{ const el=getPosEl(id); if(!el) return; const fs=parseFloat(getComputedStyle(el).fontSize); if(fs) fontSizes[id]=fs; });
@@ -3107,6 +3430,7 @@ function switchTab(tab){
   document.getElementById(btnId).classList.add('active');
   if(tab!=='cp'){ clearSelection(); }
   if(tab!=='binnacle'){ deselectBinnElem(); }
+  if(tab!=='sw'){ clearSwSelection(); }
   if(tab==='sw'){ updateSWDisplay(); }
   if(elemPanelOpen) renderElemPanel();
   updateTabIndicator();
@@ -3123,6 +3447,11 @@ function switchTab(tab){
 // ══════════════════════════════════════════════════════
 const DRIVER_MODES=['G METER','VEHICLE STATUS','BATTERY','TRIP','DYNAMICS','TIRES'];
 let driverModeIdx=0;
+const battArc={
+  temp:  {yOff:-0.78, rad:0.89},
+  power: {yOff: 0.74, rad:0.84},
+  sel: null
+};
 
 // G-meter physics
 let gX=0,gY=0,gXT=0,gYT=0;
@@ -3146,7 +3475,6 @@ function drawPowerDial(){
   ctx.clearRect(0,0,W,H);
   const D=d=>d*Math.PI/180;
 
-  // Per-mode power arc config
   const MODE_CFG=[
     {max:50, labels:[10,20,30,40,50]},
     {max:70, labels:[10,20,30,40,50,60,70]},
@@ -3164,15 +3492,15 @@ function drawPowerDial(){
   fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
   ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
 
-  // Arc geometry: split at 12 o'clock, 150° each side, 60° gap at bottom
-  const TOP=D(270);   // 12 o'clock
-  const SPAN=D(150);  // 150° per arc
+  // Arc geometry: 130° each side, 100° gap at bottom for odometer
+  const TOP=D(270);
+  const SPAN=D(130);
   const TOUTR=ringR;
   const tlMin=r*.035, tlMed=r*.030, tlMaj=r*.036;
   const tlTotal=tlMin+tlMed+tlMaj;
   const lblR=TOUTR-tlTotal-r*.090;
 
-  // ── LEFT ARC: white, speed reference 0-100 (counterclockwise from top) ──
+  // LEFT ARC: white, 0-100, counterclockwise from top
   const N=50;
   for(let i=0;i<=N;i++){
     const frac=i/N, a=TOP-frac*SPAN;
@@ -3200,7 +3528,7 @@ function drawPowerDial(){
     ctx.fillText(v,cx+lblR*Math.cos(a),cy+lblR*Math.sin(a));
   });
 
-  // ── RIGHT ARC: yellow, power scale (clockwise from top, mode-dependent) ──
+  // RIGHT ARC: yellow, mode-dependent scale, clockwise from top
   for(let i=0;i<=N;i++){
     const frac=i/N, a=TOP+frac*SPAN;
     ctx.beginPath();
@@ -3228,10 +3556,11 @@ function drawPowerDial(){
     ctx.fillText(v,cx+lblR*Math.cos(a),cy+lblR*Math.sin(a));
   });
 
-  // ── Orange needle (sweeps right arc with speed) ──
-  const spd=Math.max(0,s.speed||0);
-  const pwrFrac=Math.min(1,spd/320);
-  const needleA=TOP+pwrFrac*SPAN;
+  // Orange needle — right arc (positive power/output), left arc (negative/regen)
+  const pwr=s.power||0;
+  const needleA=pwr>=0
+    ? TOP+Math.min(1,pwr/600)*SPAN
+    : TOP-Math.min(1,-pwr/200)*SPAN;
   const nl=TOUTR-3;
   ctx.save();
   ctx.translate(cx,cy); ctx.rotate(needleA);
@@ -3241,7 +3570,7 @@ function drawPowerDial(){
   ctx.fillStyle='#FF8C00'; ctx.shadowColor='#FF8C00'; ctx.shadowBlur=12; ctx.fill();
   ctx.restore(); ctx.shadowBlur=0;
 
-  // ── Inner disc (full circle) ──
+  // Inner disc — complete circle, obscures needle hub
   const innerR=r*.44;
   const ig=ctx.createRadialGradient(cx,cy-innerR*.2,0,cx,cy,innerR);
   ig.addColorStop(0,'#1d1d22'); ig.addColorStop(0.65,'#101014'); ig.addColorStop(1,'#060609');
@@ -3250,73 +3579,82 @@ function drawPowerDial(){
   ctx.beginPath(); ctx.arc(cx,cy,innerR,0,Math.PI*2);
   ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1.2; ctx.stroke();
 
-  // Prancing horse (center, white)
+  // Prancing horse — screen blend erases image background against dark disc
   const hw=innerR*.72, hh=innerR*.82;
   if(cdHorseImg.complete&&cdHorseImg.naturalWidth>0){
     ctx.save();
     ctx.filter='invert(100%)';
+    ctx.globalCompositeOperation='screen';
     ctx.globalAlpha=0.88;
     ctx.drawImage(cdHorseImg,cx-hw/2,cy-hh/2-innerR*.10,hw,hh);
     ctx.restore();
   }
 
-  // Odometer display
-  const odoY=cy+innerR*.56;
+  // Odometer in bottom gap (outside inner disc area, between the two arcs)
+  const odoY=cy+r*.70;
   const fsPx=Math.round(r*.082);
   const charW=fsPx*.66;
-  const mainDigits='3159';
-  const tripDigit='2';
-  const totalOdoW=(mainDigits.length+1)*charW;
+  // Analog drum-scroll odometer — each digit position scrolls at its own rate
+  const NKM=4, NTOT=NKM+1;          // 4 km digits + 1 tenths drum
+  const cellH=fsPx+4;
+  const totalOdoW=NTOT*charW;
   const odoX=cx-totalOdoW/2;
   const padX=5, padY=3;
+
+  // Housing background + border
   ctx.fillStyle='#0e0e16';
   ctx.strokeStyle='rgba(255,255,255,0.12)';
   ctx.lineWidth=0.8;
   ctx.beginPath();
-  ctx.rect(odoX-padX, odoY-fsPx/2-padY, totalOdoW+padX*2, fsPx+padY*2);
+  ctx.rect(odoX-padX, odoY-cellH/2-padY, totalOdoW+padX*2, cellH+padY*2);
   ctx.fill(); ctx.stroke();
-  ctx.font=`500 ${fsPx}px 'Courier New',monospace`;
-  ctx.textBaseline='middle';
-  for(let i=0;i<mainDigits.length;i++){
-    ctx.textAlign='center';
-    ctx.fillStyle='rgba(225,225,205,0.92)';
-    ctx.fillText(mainDigits[i], odoX+i*charW+charW/2, odoY);
-  }
-  const tripX=odoX+mainDigits.length*charW;
+
+  // Red background for tenths drum
   ctx.fillStyle='#cc1020';
-  ctx.fillRect(tripX, odoY-fsPx/2-padY+1, charW, fsPx+padY*2-2);
-  ctx.textAlign='center';
-  ctx.fillStyle='#fff';
-  ctx.fillText(tripDigit, tripX+charW/2, odoY);
+  ctx.fillRect(odoX+NKM*charW, odoY-cellH/2-padY+1, charW, cellH+padY*2-2);
+
+  ctx.font=`500 ${fsPx}px 'Courier New',monospace`;
+
+  const _tenthsRot=odoKm*10;
+  const _tenthsFrac=_tenthsRot-Math.floor(_tenthsRot);
+
+  for(let i=0;i<NTOT;i++){
+    const n=NTOT-1-i;
+    const rot=_tenthsRot/Math.pow(10,n);
+    const cur=Math.floor(rot)%10;
+    const nxt=(cur+1)%10;
+
+    // Tenths scrolls continuously; higher drums only activate during the carry
+    // window — when every digit to the right is currently at 9 (about to flip to 0)
+    let frac;
+    if(i===NTOT-1){
+      frac=_tenthsFrac;
+    } else {
+      let allNines=true;
+      for(let j=i+1;j<NTOT;j++){
+        const nj=NTOT-1-j;
+        if(Math.floor(_tenthsRot/Math.pow(10,nj))%10!==9){allNines=false;break;}
+      }
+      frac=allNines?_tenthsFrac:0;
+    }
+
+    const dx=odoX+i*charW+charW/2;
+    const isTrip=(i===NKM);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(odoX+i*charW, odoY-cellH/2-padY, charW, cellH+padY*2);
+    ctx.clip();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle=isTrip?'#fff':'rgba(225,225,205,0.92)';
+    ctx.fillText(cur, dx, odoY-frac*cellH);
+    ctx.fillText(nxt, dx, odoY+(1-frac)*cellH);
+    ctx.restore();
+  }
+
   ctx.textAlign='left';
   ctx.font=`400 ${Math.round(fsPx*.80)}px Barlow Condensed,sans-serif`;
   ctx.fillStyle='rgba(175,175,155,0.55)';
   ctx.fillText('km', odoX+totalOdoW+padX+3, odoY);
-
-  // ── e-Manettino position indicators (RANGE · TOUR · PERFO) ──
-  {
-    const modes=['RANGE','TOUR','PERFO'];
-    const dotSpacing=innerR*.44, dotY=cy+innerR*.28;
-    const dotColors={RANGE:'#A8C4D4',TOUR:'#FFF200',PERFO:'#FF2800'};
-    modes.forEach((m,i)=>{
-      const dx=cx+(i-1)*dotSpacing;
-      const active=i===s.eIdx, col=dotColors[m];
-      ctx.beginPath(); ctx.arc(dx,dotY,active?3.8:2.4,0,Math.PI*2);
-      if(active){ ctx.shadowColor=col; ctx.shadowBlur=8; }
-      ctx.fillStyle=active?col:'rgba(180,180,195,0.20)'; ctx.fill();
-      ctx.shadowBlur=0;
-      ctx.beginPath(); ctx.arc(dx,dotY,active?3.8:2.4,0,Math.PI*2);
-      ctx.strokeStyle=active?col:'rgba(200,210,220,0.28)'; ctx.lineWidth=0.7; ctx.stroke();
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font=`600 ${Math.round(r*.058)}px Barlow Condensed,sans-serif`;
-      ctx.fillStyle=active?col:'rgba(180,180,195,0.28)';
-      ctx.fillText(m,dx,dotY+innerR*.28);
-    });
-  }
-
-  // Hub cap
-  ctx.beginPath(); ctx.arc(cx,cy,r*.042,0,Math.PI*2); ctx.fillStyle='#1a1a1f'; ctx.fill();
-  ctx.beginPath(); ctx.arc(cx,cy,r*.020,0,Math.PI*2); ctx.fillStyle='#b8b8b8'; ctx.fill();
 
   // Gloss highlight
   const gls=ctx.createRadialGradient(cx+r*.2,cy-r*.28,0,cx+r*.15,cy-r*.22,r*.75);
@@ -3330,8 +3668,6 @@ function drawPowerDial(){
   if(lbl){ lbl.textContent=E_MANET[s.eIdx]; lbl.className='binnacle-dial-label '+E_MANET[s.eIdx].toLowerCase()+'-mode'+(selectedBinnIds.has('binn-pd-label')?' binn-sel':''); }
 }
 
-
-// ── CENTRAL DIAL ─────────────────────────────────────
 function drawCentralDial(){
   const cv=document.getElementById('cdCanvas'); if(!cv) return;
   const ctx=cv.getContext('2d');
@@ -3342,10 +3678,7 @@ function drawCentralDial(){
   const spd=Math.max(0,s.speed||0);
 
   const ringR=r*0.96;
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#09090d'; ctx.fill();
-  const fg=ctx.createRadialGradient(cx-ringR*.2,cy-ringR*.25,0,cx,cy,ringR);
-  fg.addColorStop(0,'#1c1c26'); fg.addColorStop(0.6,'#0e0e16'); fg.addColorStop(1,'#06060e');
-  ctx.beginPath(); ctx.arc(cx,cy,ringR,0,Math.PI*2); ctx.fillStyle=fg; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle='#101014'; ctx.fill();
 
   // Geometry: speed 220° (top arc), E/F 100° (bottom arc, centred at 90°/6-o'clock)
   // 20° gap on each side between speed and E/F
@@ -3388,12 +3721,13 @@ function drawCentralDial(){
 
   // Speed labels — inside the tick stack
   const lblR=TOUTR-tlTotal-r*.110;
+  const tkOff=binnPos['binn-cd-ticks']||{x:0,y:0};
   [0,40,80,120,160,200,240,280,320].forEach(v=>{
     const a=AS+(v/320)*ASPAN;
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.font=`600 ${Math.round(r*.160)}px Barlow Condensed,sans-serif`;
     ctx.fillStyle=v<=spd?'#FFF200':'rgba(215,215,215,0.88)';
-    ctx.fillText(v,cx+lblR*Math.cos(a),cy+lblR*Math.sin(a));
+    ctx.fillText(v,cx+lblR*Math.cos(a)+tkOff.x,cy+lblR*Math.sin(a)+tkOff.y);
   });
 
   // ── E/F arc: 80 ticks, 120° centred at bottom, 10° gap each side ──
@@ -3448,69 +3782,55 @@ function drawCentralDial(){
     }
   }
 
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-
-  // "1/2" label at the ½ major tick (D(90) = bottom centre)
-  ctx.font=`500 ${Math.round(r*.068)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(215,215,215,0.72)';
-  ctx.fillText('1/2', cx+lblR*Math.cos(D(90)), cy+lblR*Math.sin(D(90)));
-
-  // E / F labels — 8% inside arc ends to avoid speed labels at D(20) and D(160)
-  ctx.font=`600 ${Math.round(r*.080)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(215,215,215,0.80)';
-  ctx.fillText('F',cx+lblR*Math.cos(GS+GSPAN*.03),cy+lblR*Math.sin(GS+GSPAN*.03));
-  ctx.fillStyle='#ef4444';
-  ctx.fillText('E',cx+lblR*Math.cos(GS+GSPAN*.97),cy+lblR*Math.sin(GS+GSPAN*.97));
-
   // ── Orange needle — drawn before disc, disc covers hub ──
   const needleA=AS+(Math.min(320,spd)/320)*ASPAN;
   const nl=ringR-4;
   ctx.save();
   ctx.translate(cx,cy); ctx.rotate(needleA);
   ctx.beginPath();
-  ctx.moveTo(-r*.05,-2.8); ctx.lineTo(nl,0); ctx.lineTo(-r*.05,2.8);
+  ctx.moveTo(-r*.05,-5.6); ctx.lineTo(nl,0); ctx.lineTo(-r*.05,5.6);
   ctx.closePath();
   ctx.fillStyle='#FF8C00'; ctx.shadowColor='#FF8C00'; ctx.shadowBlur=12; ctx.fill();
   ctx.restore(); ctx.shadowBlur=0;
 
   // ── Inner disc — sector shape, top 220° only, bottom open (items 3,4) ──
   const innerR=r*.44;
-  const ig=ctx.createRadialGradient(cx,cy-innerR*.2,0,cx,cy,innerR);
-  ig.addColorStop(0,'#1d1d22'); ig.addColorStop(0.65,'#101014'); ig.addColorStop(1,'#060609');
   ctx.beginPath();
-  ctx.moveTo(cx,cy);
-  ctx.arc(cx,cy,innerR,AS,AS+ASPAN); // 160°→380° clockwise, covers top 220°
-  ctx.closePath();
-  ctx.fillStyle=ig; ctx.fill();
-  // Housing ring arc (only where disc exists)
+  ctx.arc(cx,cy,innerR,0,Math.PI*2);
+  ctx.fillStyle='#101014'; ctx.fill();
+  // Housing ring — only the live arc (speed range), no border in the dead zone
   ctx.beginPath();
   ctx.arc(cx,cy,innerR,AS,AS+ASPAN);
   ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1.5; ctx.stroke();
 
   // ── Disc content ──
-  ctx.textAlign='center'; ctx.textBaseline='middle';
+  // Speed number and km/h are rendered as HTML overlay elements (#cd-spd, #cd-kmh)
+  const spdEl=document.getElementById('cd-spd');
+  if(spdEl) spdEl.textContent=Math.round(spd);
 
-  // Speed number — slightly above center (in filled sector)
-  ctx.font=`700 ${Math.round(r*.32)}px Rajdhani,sans-serif`;
-  ctx.fillStyle='#eaeae2';
-  ctx.fillText(Math.round(spd),cx,cy-r*.16);
-
-  // km/h — just below center
-  ctx.font=`500 ${Math.round(r*.072)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(200,200,200,0.50)';
-  ctx.fillText('km/h',cx,cy+r*.06);
-
-  // Battery icon — green outline rect above 408 km
-  const bw=r*.13, bh=r*.060, btx=cx-bw/2, bty=cy+r*.19;
-  ctx.strokeStyle='#4ade80'; ctx.lineWidth=1.2;
-  ctx.strokeRect(btx,bty-bh/2,bw,bh);
+  // Battery icon — car battery (landscape, terminal posts on top, lightning bolt)
+  const batOff=binnPos['binn-cd-battery']||{x:0,y:0};
+  const bw=r*.09, bh=r*.055, btx=cx-bw/2+batOff.x, bty=cy+r*.200+batOff.y;
+  ctx.strokeStyle='#4ade80'; ctx.lineWidth=0.8;
+  ctx.strokeRect(btx, bty, bw, bh);
+  const tW=r*.015, tH=r*.010;
   ctx.fillStyle='#4ade80';
-  ctx.fillRect(btx+bw,bty-bh*.28,r*.014,bh*.56); // terminal nub
-  ctx.fillRect(btx+1.5,bty-bh/2+1.5,bw*.50-1.5,bh-3); // ~50% fill inside
+  ctx.fillRect(btx+bw*.22-tW/2, bty-tH, tW, tH);  // left terminal post
+  ctx.fillRect(btx+bw*.68-tW/2, bty-tH, tW, tH);  // right terminal post
+  const bcx=btx+bw*.50, bcy=bty+bh*.50, sz=bh*.68;
+  ctx.beginPath();
+  ctx.moveTo(bcx+sz*.18, bcy-sz*.50);
+  ctx.lineTo(bcx-sz*.06, bcy);
+  ctx.lineTo(bcx+sz*.12, bcy);
+  ctx.lineTo(bcx-sz*.18, bcy+sz*.50);
+  ctx.strokeStyle='#4ade80'; ctx.lineWidth=sz*.30;
+  ctx.lineJoin='miter'; ctx.miterLimit=4; ctx.lineCap='round'; ctx.stroke();
 
-  // Green left arrow + 408 km label
-  const ry408=cy+r*.30;
-  const arx=cx-r*.20;
+  // Green left arrow + 408 km label — offset with battery group
+  const ry408=cy+r*.325+batOff.y;
+  const arx=cx-r*.20+batOff.x;
+  const rangeEl=document.getElementById('cd-range');
+  if(rangeEl){ rangeEl.style.left=(126+batOff.x)+'px'; rangeEl.style.top=(185+batOff.y)+'px'; }
   ctx.strokeStyle='#4ade80'; ctx.lineWidth=1.3;
   ctx.beginPath(); ctx.moveTo(arx+r*.058,ry408); ctx.lineTo(arx,ry408); ctx.stroke();
   ctx.beginPath();
@@ -3518,10 +3838,6 @@ function drawCentralDial(){
   ctx.lineTo(arx,ry408);
   ctx.lineTo(arx+r*.024,ry408+r*.016);
   ctx.stroke();
-  ctx.textAlign='left';
-  ctx.font=`600 ${Math.round(r*.072)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='#4ade80';
-  ctx.fillText('408 km',cx-r*.10,ry408);
 
   // Hub cap
   ctx.beginPath(); ctx.arc(cx,cy,r*.048,0,Math.PI*2); ctx.fillStyle='#1a1a1f'; ctx.fill();
@@ -3565,24 +3881,46 @@ function drawDriverDial(){
 
   ctx.restore();
 
-  // Mode label at bottom of face
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.font=`600 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(255,255,255,0.50)';
-  ctx.fillText(mode,cx,cy+ringR*0.78);
+  // Mode label at bottom of face (suppressed for VEHICLE STATUS and BATTERY)
+  if(mode!=='VEHICLE STATUS' && mode!=='BATTERY'){
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font=`600 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.50)';
+    ctx.fillText(mode,cx,cy+ringR*0.78);
+  }
 
   // Update label pill + suspension widget color
   const lbl=document.getElementById('ddLabel');
   if(lbl){ lbl.textContent=MANETTINO[s.mIdx]; lbl.className='binnacle-dial-label '+MANETTINO[s.mIdx].toLowerCase()+'-mode'+(selectedBinnIds.has('binn-dd-label')?' binn-sel':''); }
-  const MANET_COLORS={ICE:'#A8C4D4',WET:'#B8D0E0',DRY:'#4caf50',SPORT:'#E87722',PERFORMANCE:'#FF2800'};
-  const sw=document.getElementById('suspWidget');
-  if(sw) sw.style.color=MANET_COLORS[MANETTINO[s.mIdx]]||'rgba(255,255,255,0.4)';
   updateSuspBars();
 
   // Update external mode dots
   document.querySelectorAll('.dd-dot').forEach((el,i)=>{
     el.classList.toggle('active',i===driverModeIdx);
   });
+
+  updateBattArcSels();
+}
+
+function updateBattArcSels(){
+  const cv=document.getElementById('ddCanvas'); if(!cv) return;
+  const r=cv.width/2*0.94, cx=cv.width/2, cy=cv.height/2;
+  const inBatt=DRIVER_MODES[driverModeIdx]==='BATTERY';
+  const tcy=cy+battArc.temp.yOff*r,  tr=battArc.temp.rad*r;
+  const bcy=cy+battArc.power.yOff*r, br=battArc.power.rad*r;
+  const tempEl=document.getElementById('dd-batt-temp');
+  const pwrEl=document.getElementById('dd-pwr-pot');
+  if(tempEl){
+    tempEl.classList.toggle('batt-mode-vis', inBatt);
+    tempEl.style.left=(2+cx)+'px';
+    tempEl.style.top=(2+tcy+tr*.60-r*.07)+'px';
+  }
+  if(pwrEl){
+    pwrEl.classList.toggle('batt-mode-vis', inBatt);
+    pwrEl.style.left=(2+cx)+'px';
+    const ppBase=bcy-br*.5+r*.14;
+    pwrEl.style.top=(2+ppBase)+'px';
+  }
 }
 
 function ddGMeter(ctx,cx,cy,r){
@@ -3682,8 +4020,8 @@ function ddGMeter(ctx,cx,cy,r){
   half(cx,cy+g5,YLO);
   flanked('1',cx,cy+gr+pad,YWH);
 
-  // ── "G FORCE" label (upper-left quadrant) ────────────
-  const gx=cx-g5*.90, gy=cy-g5*.50;
+  // ── "G FORCE" label (upper-left corner, above tick grid) ────────────
+  const gx=cx-r*.74, gy=cy-r*.60;
   ctx.textAlign='left'; ctx.textBaseline='middle';
   ctx.font=`600 ${Math.round(r*.105)}px Barlow Condensed,sans-serif`;
   ctx.fillStyle='rgba(240,240,240,0.88)'; ctx.fillText('G FORCE',gx,gy);
@@ -3701,36 +4039,36 @@ function ddGMeter(ctx,cx,cy,r){
 }
 
 function ddVehicleStatus(ctx,cx,cy,r){
-  // ── Car body ──
-  const bw=r*.22, bh=r*.60;
+  // ── Car body (chassis — same colour as before) ──
+  const bw=r*.32, bh=r*.88*1.8;
   ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
   rrect(ctx,cx-bw/2,cy-bh/2,bw,bh,r*.03); ctx.stroke();
 
-  // ── Battery cell grid ──
+  // ── Battery cell grid (white) ──
   const cols=3,rows=5, pw=bw*.78, ph=bh*.66;
   const px0=cx-pw/2, py0=cy-ph/2, cw=pw/cols, ch=ph/rows;
   for(let row=0;row<rows;row++){
     for(let col=0;col<cols;col++){
       const bx=px0+col*cw+.5, by=py0+row*ch+.5;
-      ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(bx,by,cw-1,ch-1);
-      ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=0.5;
+      ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.fillRect(bx,by,cw-1,ch-1);
+      ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=0.5;
       ctx.strokeRect(bx,by,cw-1,ch-1);
     }
   }
 
-  // ── Wheels ──
-  const tw=r*.11, th=r*.22;
+  // ── Wheels / tires (white) ──
+  const tw=r*.14, th=r*.30;
   const fay=cy-bh*.27, ray=cy+bh*.22;
   const wx=bw/2+r*.04;
   [[cx-wx-tw,fay],[cx+wx,fay],[cx-wx-tw,ray],[cx+wx,ray]].forEach(([x,y])=>{
-    ctx.fillStyle='rgba(255,255,255,0.09)'; ctx.fillRect(x,y-th/2,tw,th);
-    ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=0.8;
+    ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.fillRect(x,y-th/2,tw,th);
+    ctx.strokeStyle='rgba(255,255,255,0.95)'; ctx.lineWidth=0.8;
     ctx.strokeRect(x,y-th/2,tw,th);
-    ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=0.5;
+    ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=0.5;
     [.3,.5,.7].forEach(t=>{ ctx.beginPath(); ctx.moveTo(x,y-th/2+th*t); ctx.lineTo(x+tw,y-th/2+th*t); ctx.stroke(); });
   });
 
-  // ── Suspension links with damper arrows ──
+  // ── Suspension links (chassis colour) ──
   ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=0.8;
   [-1,1].forEach(sv=>{
     ctx.beginPath(); ctx.moveTo(cx+sv*bw/2,fay); ctx.lineTo(cx+sv*(wx+.5),fay); ctx.stroke();
@@ -3740,192 +4078,262 @@ function ddVehicleStatus(ctx,cx,cy,r){
     ctx.beginPath(); ctx.moveTo(cx+sv*bw/2,ray); ctx.lineTo(cx+sv*(wx+.5),ray); ctx.stroke();
   });
 
-  // ── Rear motor connector ──
-  const mw=r*.20, mh=r*.065, my=cy+bh/2-mh-r*.005;
+  // ── Rear motor connector (chassis colour) ──
+  const mw=r*.26, mh=r*.082, my=cy+bh/2-mh-r*.004;
   ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fillRect(cx-mw/2,my,mw,mh);
   ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=0.6; ctx.strokeRect(cx-mw/2,my,mw,mh);
   ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=0.4;
   [.33,.67].forEach(t=>{ ctx.beginPath(); ctx.moveTo(cx-mw/2+mw*t,my); ctx.lineTo(cx-mw/2+mw*t,my+mh); ctx.stroke(); });
 
-  // ── OK badge ──
-  const okX=cx+r*.43, okY=cy-r*.09;
-  ctx.fillStyle='rgba(74,222,128,0.11)';
-  rrect(ctx,okX-r*.115,okY-r*.072,r*.23,r*.144,2); ctx.fill();
-  ctx.strokeStyle='#4ade80'; ctx.lineWidth=0.9;
-  rrect(ctx,okX-r*.115,okY-r*.072,r*.23,r*.144,2); ctx.stroke();
-  ctx.font=`600 ${Math.round(r*.12)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='#4ade80'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  // ── OK badge — black text on solid green, 2× font, 2.2× width ──
+  const okW=r*.506, okH=r*.26;
+  const okX=cx+r*.60, okY=cy;
+  ctx.fillStyle='#4ade80';
+  rrect(ctx,okX-okW/2,okY-okH/2,okW,okH,3); ctx.fill();
+  ctx.font=`400 ${Math.round(r*.192)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='#000'; ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.fillText('OK',okX,okY);
 }
 
 function ddBattery(ctx,cx,cy,r){
   const pi=Math.PI, deg=pi/180;
-
-  // ── TOP: Battery Temperature arc (∩ shape in upper half) ──
-  // Arc from 210° to 330° clockwise through 270° (top), centered above dial center
-  const tcx=cx, tcy=cy-r*.24, tr=r*.30;
-  const tS=210*deg, tE=330*deg, tSpan=120*deg;
-
-  // Background track
-  ctx.beginPath(); ctx.arc(tcx,tcy,tr,tS,tE);
-  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=5; ctx.lineCap='butt'; ctx.stroke();
-  // Cold zone (blue)
-  ctx.beginPath(); ctx.arc(tcx,tcy,tr,tS,tS+tSpan*.22);
-  ctx.strokeStyle='rgba(140,185,225,0.60)'; ctx.lineWidth=5; ctx.stroke();
-  // Neutral
-  ctx.beginPath(); ctx.arc(tcx,tcy,tr,tS+tSpan*.22,tS+tSpan*.76);
-  ctx.strokeStyle='rgba(200,200,198,0.42)'; ctx.lineWidth=5; ctx.stroke();
-  // Hot zone (red)
-  ctx.beginPath(); ctx.arc(tcx,tcy,tr,tS+tSpan*.76,tE);
-  ctx.strokeStyle='rgba(205,58,48,0.60)'; ctx.lineWidth=5; ctx.stroke();
-
-  // Tick marks
-  for(let i=0;i<=12;i++){
-    const a=tS+i/12*tSpan, maj=(i%3===0);
-    ctx.strokeStyle=maj?'rgba(255,255,255,0.55)':'rgba(255,255,255,0.22)';
-    ctx.lineWidth=maj?1.1:0.7;
+  // Tick-mark helper (E/F style): 2-layer stacked ticks from outer edge inward
+  // Layer 1 (all): tl1. Layer 2 (quarter+major): tl2. Returns inner tip radius.
+  const tl1=r*.036, tl2Qtr=r*.026, tl2Maj=r*.044;
+  function drawTick(ox,oy,radius,angle,isMaj,isQtr,col,lw1){
+    const c=Math.cos(angle), s=Math.sin(angle);
+    const d1=(isMaj||isQtr)?tl1:tl1*1.35;
+    ctx.strokeStyle=col; ctx.lineWidth=lw1;
     ctx.beginPath();
-    ctx.moveTo(tcx+(tr+2)*Math.cos(a),tcy+(tr+2)*Math.sin(a));
-    ctx.lineTo(tcx+(tr-(maj?8:4))*Math.cos(a),tcy+(tr-(maj?8:4))*Math.sin(a)); ctx.stroke();
+    ctx.moveTo(ox+radius*c, oy+radius*s);
+    ctx.lineTo(ox+(radius-d1)*c, oy+(radius-d1)*s);
+    ctx.stroke();
+    if(isMaj||isQtr){
+      const r2=radius-tl1, tl2=isMaj?tl2Maj:tl2Qtr;
+      ctx.lineWidth=isMaj?2.0:1.2;
+      ctx.beginPath();
+      ctx.moveTo(ox+r2*c, oy+r2*s);
+      ctx.lineTo(ox+(r2-tl2)*c, oy+(r2-tl2)*s);
+      ctx.stroke();
+    }
   }
-  // Indicator bar (~28% = cool temp)
-  const tCurr=tS+0.28*tSpan;
-  ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=2.2; ctx.lineCap='round';
+
+  // ── TOP: Power Potential arc (∩, 210°→330° clockwise through 270°/top) ──
+  // Inverted from previous ∪ — now arches upward, making room to be 33% larger.
+  const bcx=cx, bcy=cy+battArc.power.yOff*r, br=battArc.power.rad*r;
+  const bS=210*deg, bSpan=120*deg;
+  const bA=(t)=>bS+t*bSpan;  // t=0 → 210° (left/0%), t=1 → 330° (right/100%)
+  const bN=60;
+  function bCol(frac){
+    if(frac<.33) return '#E07020';
+    if(frac<.66) return '#FFD700';
+    if(frac<.84) return '#FFE55C';
+    return 'rgba(200,200,200,0.38)';
+  }
+  for(let i=0;i<=bN;i++){
+    const frac=i/bN, a=bA(frac);
+    const isEnd=(i===0||i===bN), isHalf=(i===bN/2);
+    const isQtr=(i===Math.round(bN*.25)||i===Math.round(bN*.75));
+    const isMaj=isEnd||isHalf;
+    drawTick(bcx,bcy,br,a,isMaj,isQtr,bCol(frac),isMaj?1.6:isQtr?1.1:0.85);
+  }
+  // Power indicator at ~50% (TOUR zone, 270°)
+  const pwrA=bA(.50);
+  const bInner=br-tl1-tl2Maj-r*.02;
+  ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=2.4; ctx.lineCap='round';
   ctx.beginPath();
-  ctx.moveTo(tcx+(tr+3)*Math.cos(tCurr),tcy+(tr+3)*Math.sin(tCurr));
-  ctx.lineTo(tcx+(tr-11)*Math.cos(tCurr),tcy+(tr-11)*Math.sin(tCurr)); ctx.stroke();
-  ctx.lineCap='butt';
+  ctx.moveTo(bcx+(br+r*.025)*Math.cos(pwrA), bcy+(br+r*.025)*Math.sin(pwrA));
+  ctx.lineTo(bcx+bInner*Math.cos(pwrA),       bcy+bInner*Math.sin(pwrA));
+  ctx.stroke(); ctx.lineCap='butt';
+
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  // Zone labels inside ∩ (toward arc center)
+  ctx.font=`700 ${Math.round(r*.148)}px Barlow Condensed,sans-serif`;
+  const bLR=br*.73;
+  [[.165,'RANGE','rgba(238,108,30,0.95)'],[.495,'TOUR','rgba(255,215,0,0.95)'],[.755,'PERFO','rgba(255,228,70,0.90)']].forEach(([t,lbl,col])=>{
+    const a=bA(t); ctx.fillStyle=col;
+    ctx.fillText(lbl, bcx+bLR*Math.cos(a), bcy+bLR*Math.sin(a));
+  });
+  // 0% / 100 outside arc endpoints
+  ctx.font=`400 ${Math.round(r*.156)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,0.50)';
+  ctx.fillText('0%',  bcx+(br+r*.06)*Math.cos(bS),          bcy+(br+r*.06)*Math.sin(bS));
+  ctx.fillText('100', bcx+(br+r*.06)*Math.cos(bS+bSpan),    bcy+(br+r*.06)*Math.sin(bS+bSpan));
+  // "POWER / POTENTIAL" below the ∩ endpoints (in gap between arcs)
+  ctx.font=`600 ${Math.round(r*.164)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(230,230,222,0.80)';
+  const ppBase=bcy-br*.5+r*.14;
+  ctx.fillText('POWER',     bcx, ppBase);
+  ctx.fillText('POTENTIAL', bcx, ppBase+r*.19);
+
+  // Power arc selection highlight
+  if(battArc.sel==='power'||selectedBinnIds.has('binn-dd-pwr-pot')){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,242,0,0.75)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.arc(bcx,bcy,br+r*.03,bS,bS+bSpan); ctx.stroke();
+    ctx.setLineDash([]);
+    const apexA=270*pi/180;
+    ctx.fillStyle='rgba(255,242,0,0.92)';
+    ctx.beginPath(); ctx.arc(bcx+br*Math.cos(apexA),bcy+br*Math.sin(apexA),5,0,pi*2); ctx.fill();
+    ctx.strokeStyle='rgba(255,242,0,0.5)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.arc(bcx,bcy,4,0,pi*2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // ── BOTTOM: Battery Temperature arc (∪, 30°→150° clockwise through 90°/bottom) ──
+  // Inverted from previous ∩ — now curves downward, making room to be 33% larger.
+  const tcx=cx, tcy=cy+battArc.temp.yOff*r, tr=battArc.temp.rad*r;
+  const tS=30*deg, tSpan=120*deg;
+  const tA=(t)=>tS+t*tSpan;  // t=0 → 30° (right/H), t=1 → 150° (left/C)
+  const tN=60;
+  function tCol(frac){
+    if(frac<.24) return 'rgba(208,55,45,0.85)';    // hot (H end)
+    if(frac<.78) return 'rgba(200,200,198,0.65)';  // neutral
+    return 'rgba(130,182,230,0.85)';                // cold (C end)
+  }
+  for(let i=0;i<=tN;i++){
+    const frac=i/tN, a=tA(frac);
+    const isEnd=(i===0||i===tN), isHalf=(i===tN/2);
+    const isQtr=(i===Math.round(tN*.25)||i===Math.round(tN*.75));
+    const isMaj=isEnd||isHalf;
+    drawTick(tcx,tcy,tr,a,isMaj,isQtr,tCol(frac),isMaj?1.6:isQtr?1.1:0.85);
+  }
+  // Temp indicator at ~28% (just into neutral zone)
+  const tCurr=tA(.28);
+  const tInner=tr-tl1-tl2Maj-r*.02;
+  ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=2.4; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(tcx+(tr+r*.025)*Math.cos(tCurr), tcy+(tr+r*.025)*Math.sin(tCurr));
+  ctx.lineTo(tcx+tInner*Math.cos(tCurr),       tcy+tInner*Math.sin(tCurr));
+  ctx.stroke(); ctx.lineCap='butt';
 
   // C / H endpoint dots
-  ctx.beginPath(); ctx.arc(tcx+tr*Math.cos(tS),tcy+tr*Math.sin(tS),2.8,0,pi*2);
-  ctx.fillStyle='rgba(130,178,228,0.90)'; ctx.fill();
-  ctx.beginPath(); ctx.arc(tcx+tr*Math.cos(tE),tcy+tr*Math.sin(tE),2.8,0,pi*2);
-  ctx.fillStyle='rgba(212,60,50,0.90)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(tcx+tr*Math.cos(tS+tSpan),tcy+tr*Math.sin(tS+tSpan),3.8,0,pi*2);
+  ctx.fillStyle='rgba(128,180,232,0.92)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(tcx+tr*Math.cos(tS),tcy+tr*Math.sin(tS),3.8,0,pi*2);
+  ctx.fillStyle='rgba(214,56,44,0.92)'; ctx.fill();
 
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  // "BATTERY TEMP" label inside the ∩ arch (between endpoints and peak)
-  ctx.font=`600 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.82)';
-  ctx.fillText('BATTERY TEMP',tcx,tcy-tr*.62);
-  // C / H labels at endpoints
-  ctx.font=`500 ${Math.round(r*.090)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(130,178,228,0.82)';
-  ctx.fillText('C',tcx+(tr+r*.11)*Math.cos(tS),tcy+(tr+r*.11)*Math.sin(tS));
-  ctx.fillStyle='rgba(212,68,52,0.82)';
-  ctx.fillText('H',tcx+(tr+r*.11)*Math.cos(tE),tcy+(tr+r*.11)*Math.sin(tE));
+  // C / H labels just outside arc endpoints
+  ctx.font=`500 ${Math.round(r*.184)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(128,180,230,0.88)';
+  ctx.fillText('C', tcx+(tr+r*.055)*Math.cos(tS+tSpan), tcy+(tr+r*.055)*Math.sin(tS+tSpan));
+  ctx.fillStyle='rgba(214,62,48,0.88)';
+  ctx.fillText('H', tcx+(tr+r*.055)*Math.cos(tS),       tcy+(tr+r*.055)*Math.sin(tS));
+  // "BATTERY / TEMP" inside ∪ (above arc bottom, below endpoint level)
+  ctx.font=`600 ${Math.round(r*.164)}px Barlow Condensed,sans-serif`;
+  ctx.fillStyle='rgba(230,230,222,0.85)';
+  ctx.fillText('BATTERY', tcx, tcy+tr*.60-r*.07);
+  ctx.fillText('TEMP',    tcx, tcy+tr*.60+r*.12);
 
-  // ── BOTTOM: Power Potential arc (∪ shape in lower half) ──
-  // Arc anticlockwise from 150° to 30° through 90° (bottom), centered below dial center
-  const bcx=cx, bcy=cy+r*.22, br=r*.32;
-  // 0% at 150° (lower-left), 100 at 30° (lower-right), through 90° (bottom)
-  const bStart=150*deg, bEnd=30*deg, bSpan=120*deg;
-  // Angle at fraction t (anticlockwise): bStart - t*bSpan
-  const bA=(t)=>bStart-t*bSpan;
-
-  // Zone segments
-  const zones=[
-    [0,   .32, '#E87722'],
-    [.32, .68, '#FFD700'],
-    [.68, .88, '#FFE55C'],
-    [.88, 1.0, 'rgba(200,200,200,0.18)'],
-  ];
-  zones.forEach(([t0,t1,col])=>{
-    ctx.beginPath(); ctx.arc(bcx,bcy,br,bA(t0),bA(t1),true);
-    ctx.strokeStyle=col; ctx.lineWidth=5; ctx.lineCap='butt'; ctx.stroke();
-  });
-
-  // Tick marks
-  for(let i=0;i<=12;i++){
-    const a=bA(i/12), maj=(i%3===0);
-    ctx.strokeStyle=maj?'rgba(255,255,255,0.50)':'rgba(255,255,255,0.20)';
-    ctx.lineWidth=maj?1.1:0.7;
-    ctx.beginPath();
-    ctx.moveTo(bcx+(br+2)*Math.cos(a),bcy+(br+2)*Math.sin(a));
-    ctx.lineTo(bcx+(br-(maj?8:4))*Math.cos(a),bcy+(br-(maj?8:4))*Math.sin(a)); ctx.stroke();
+  // Temp arc selection highlight
+  if(battArc.sel==='temp'||selectedBinnIds.has('binn-dd-batt-temp')){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,242,0,0.75)'; ctx.lineWidth=1.5; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.arc(tcx,tcy,tr+r*.03,tS,tS+tSpan); ctx.stroke();
+    ctx.setLineDash([]);
+    const apexA=90*pi/180;
+    ctx.fillStyle='rgba(255,242,0,0.92)';
+    ctx.beginPath(); ctx.arc(tcx+tr*Math.cos(apexA),tcy+tr*Math.sin(apexA),5,0,pi*2); ctx.fill();
+    ctx.strokeStyle='rgba(255,242,0,0.5)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.arc(tcx,tcy,4,0,pi*2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
   }
-  // Power indicator (~50% = TOUR zone)
-  const pwrA=bA(0.50);
-  ctx.strokeStyle='rgba(255,255,255,0.92)'; ctx.lineWidth=2.2; ctx.lineCap='round';
-  ctx.beginPath();
-  ctx.moveTo(bcx+(br+3)*Math.cos(pwrA),bcy+(br+3)*Math.sin(pwrA));
-  ctx.lineTo(bcx+(br-11)*Math.cos(pwrA),bcy+(br-11)*Math.sin(pwrA)); ctx.stroke();
-  ctx.lineCap='butt';
-
-  // Zone labels inside arc
-  ctx.font=`600 ${Math.round(r*.076)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(255,215,0,0.82)'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  [[.16,'RANGE'],[.50,'TOUR'],[.78,'PERFO']].forEach(([t,lbl])=>{
-    const a=bA(t);
-    ctx.fillText(lbl,bcx+(br-r*.115)*Math.cos(a),bcy+(br-r*.115)*Math.sin(a));
-  });
-
-  // 0% / 100 end labels
-  ctx.font=`400 ${Math.round(r*.080)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(255,255,255,0.45)';
-  ctx.fillText('0%', bcx+(br+r*.115)*Math.cos(bStart),bcy+(br+r*.115)*Math.sin(bStart));
-  ctx.fillText('100',bcx+(br+r*.115)*Math.cos(bEnd),  bcy+(br+r*.115)*Math.sin(bEnd));
-
-  // POWER POTENTIAL label (below arc, inside ∪ curve)
-  ctx.font=`600 ${Math.round(r*.088)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.78)'; ctx.textAlign='center';
-  ctx.fillText('POWER',    bcx,bcy+br*.58);
-  ctx.fillText('POTENTIAL',bcx,bcy+br*.58+r*.118);
 }
 function ddTrip(ctx,cx,cy,r){
-  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const GREEN  = 'rgba(88,178,105,0.88)';
+  const YELLOW = 'rgba(198,162,46,0.90)';
+  const VAL    = 'rgba(232,232,224,0.95)';
+  const UNIT   = 'rgba(210,210,204,0.80)';
 
-  // ── Large distance at top ──
-  const distY=cy-r*.56;
-  ctx.font=`700 ${Math.round(r*.46)}px Rajdhani,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.95)';
-  const distNum='106';
-  const distW=ctx.measureText(distNum).width;
-  ctx.fillText(distNum,cx-r*.06,distY);
-  ctx.font=`400 ${Math.round(r*.13)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(200,200,196,0.65)'; ctx.textAlign='left';
-  ctx.fillText('km',cx-r*.06+distW*.5+r*.03,distY+r*.09);
-  ctx.textAlign='center';
+  function hline(y){
+    ctx.strokeStyle='rgba(255,255,255,0.10)'; ctx.lineWidth=0.6;
+    ctx.beginPath(); ctx.moveTo(cx-r*.62,y); ctx.lineTo(cx+r*.62,y); ctx.stroke();
+  }
 
-  // ── 2x2 stats grid ──
-  const row1y=cy-r*.17, row2y=cy+r*.20;
-  const lx=cx-r*.28, rx=cx+r*.28;
+  // Draw a number + inline unit centered at (x,y)
+  // numFont/unitFont are font strings; unitDy offsets unit baseline below mid
+  function inlineVal(num,unit,x,y,numFont,unitFont,unitDy){
+    ctx.font=numFont;
+    const nw=ctx.measureText(num).width;
+    ctx.font=unitFont;
+    const uw=ctx.measureText(unit).width;
+    const gap=r*.022;
+    const startX=x-(nw+gap+uw)/2;
+    ctx.font=numFont; ctx.fillStyle=VAL; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(num,startX,y);
+    ctx.font=unitFont; ctx.fillStyle=UNIT; ctx.textBaseline='alphabetic';
+    ctx.fillText(unit,startX+nw+gap,y+unitDy);
+    ctx.textBaseline='middle';
+  }
 
-  // Row 1 labels
-  ctx.font=`600 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='#4ade80';
-  ctx.fillText('MAX. SPEED',lx,row1y-r*.17);
-  ctx.fillText('AVG. SPEED',rx,row1y-r*.17);
-  // Row 1 values
-  ctx.font=`700 ${Math.round(r*.28)}px Rajdhani,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.92)';
-  ctx.fillText('205',lx,row1y+r*.03);
-  ctx.fillText('109',rx,row1y+r*.03);
-  ctx.font=`400 ${Math.round(r*.076)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(200,200,196,0.52)';
-  ctx.fillText('km/h',lx,row1y+r*.21); ctx.fillText('km/h',rx,row1y+r*.21);
+  const lx=cx-r*.30, rx=cx+r*.30;
+  const lbFs=Math.round(r*.082);
+  const lblFont=`600 ${lbFs}px Barlow Condensed,sans-serif`;
+  const valFs=Math.round(r*.27);
+  const valFont=`700 ${valFs}px Rajdhani,sans-serif`;
+  const unitFont=`400 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
 
-  // Divider line
-  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=0.5;
-  ctx.beginPath(); ctx.moveTo(cx-r*.60,cy+r*.025); ctx.lineTo(cx+r*.60,cy+r*.025); ctx.stroke();
+  // ── Distance ──
+  const distY=cy-r*.50;
+  const distFs=Math.round(r*.42);
+  inlineVal('106','km',cx,distY,
+    `700 ${distFs}px Rajdhani,sans-serif`,
+    `400 ${Math.round(r*.135)}px Barlow Condensed,sans-serif`,
+    distFs*0.22);
 
-  // Row 2 labels
-  ctx.font=`600 ${Math.round(r*.082)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='#FFD700'; ctx.fillText('ENERGY kWh',lx,row2y-r*.17);
-  ctx.fillStyle='rgba(200,200,196,0.58)'; ctx.fillText('Wh/km',rx,row2y-r*.17);
-  // Row 2 values
-  ctx.font=`700 ${Math.round(r*.28)}px Rajdhani,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.92)';
-  ctx.fillText('35',lx,row2y+r*.03);
-  ctx.fillText('268',rx,row2y+r*.03);
+  // Line 1
+  hline(cy-r*.295);
 
-  // ── Time at bottom ──
-  const ty=cy+r*.64;
-  ctx.font=`700 ${Math.round(r*.220)}px Rajdhani,sans-serif`;
-  ctx.fillStyle='rgba(232,232,224,0.85)';
-  ctx.fillText('55',cx-r*.24,ty); ctx.fillText('38',cx+r*.22,ty);
-  ctx.font=`500 ${Math.round(r*.092)}px Barlow Condensed,sans-serif`;
-  ctx.fillStyle='rgba(200,200,196,0.52)';
-  ctx.fillText('m',cx-r*.07,ty); ctx.fillText('s',cx+r*.39,ty);
+  // ── Row 1: MAX / AVG SPEED ──
+  ctx.font=lblFont; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle=GREEN;
+  ctx.fillText('MAX. SPEED',lx,cy-r*.185);
+  ctx.fillText('AVG. SPEED',rx,cy-r*.185);
+  inlineVal('205','km/h',lx,cy-r*.035,valFont,unitFont,valFs*0.17);
+  inlineVal('109','km/h',rx,cy-r*.035,valFont,unitFont,valFs*0.17);
+
+  // Line 2
+  hline(cy+r*.115);
+
+  // ── Row 2: ENERGY / Wh/km ──
+  ctx.font=lblFont; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle=YELLOW;
+  ctx.fillText('ENERGY kWh',lx,cy+r*.215);
+  ctx.fillStyle=UNIT;
+  ctx.fillText('Wh/km',rx,cy+r*.215);
+  ctx.font=valFont; ctx.fillStyle=VAL; ctx.textAlign='center';
+  ctx.fillText('35',lx,cy+r*.370);
+  ctx.fillText('268',rx,cy+r*.370);
+
+  // Line 3
+  hline(cy+r*.505);
+
+  // ── Time: "55m 38s" centered ──
+  const ty=cy+r*.660;
+  const tFs=Math.round(r*.195);
+  const tFont=`700 ${tFs}px Rajdhani,sans-serif`;
+  const tsFont=`500 ${Math.round(r*.092)}px Barlow Condensed,sans-serif`;
+  ctx.font=tFont;
+  const w55=ctx.measureText('55').width;
+  const w38=ctx.measureText('38').width;
+  ctx.font=tsFont;
+  const wm=ctx.measureText('m').width;
+  const ws=ctx.measureText('s').width;
+  const sp=r*.055;
+  const totalTW=w55+wm+sp+w38+ws;
+  const tx0=cx-totalTW/2;
+  ctx.font=tFont; ctx.fillStyle=VAL; ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText('55',tx0,ty);
+  ctx.font=tsFont; ctx.fillStyle=UNIT; ctx.textBaseline='alphabetic';
+  ctx.fillText('m',tx0+w55,ty+tFs*0.19);
+  ctx.font=tFont; ctx.fillStyle=VAL; ctx.textBaseline='middle';
+  ctx.fillText('38',tx0+w55+wm+sp,ty);
+  ctx.font=tsFont; ctx.fillStyle=UNIT; ctx.textBaseline='alphabetic';
+  ctx.fillText('s',tx0+w55+wm+sp+w38,ty+tFs*0.19);
+  ctx.textBaseline='middle';
 }
 
 function ddDynamics(ctx,cx,cy,r){
@@ -4047,8 +4455,43 @@ document.getElementById('pdLabel').addEventListener('click',()=>{
   s.eIdx=(s.eIdx+1)%E_MANET.length; applyBadgesClean();
   if(selectedBinnIds.has('binn-power-dial')||selectedBinnIds.has('binn-pd-label')) renderBinnHint();
 });
-document.getElementById('ddCanvas').addEventListener('click',()=>{
+document.getElementById('ddCanvas').addEventListener('click',(e)=>{
+  if(DRIVER_MODES[driverModeIdx]==='BATTERY'){
+    const cv=document.getElementById('ddCanvas');
+    const rect=cv.getBoundingClientRect();
+    const scaleX=cv.width/rect.width, scaleY=cv.height/rect.height;
+    const mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+    const cx=cv.width/2, cy=cv.height/2, r=cv.width/2*0.94;
+    const deg=Math.PI/180;
+    // Hit-test power arc (∩): center bcy=cy+yOff*r, 210°–330°
+    const bcx=cx, bcy=cy+battArc.power.yOff*r, br=battArc.power.rad*r;
+    const bS=210*deg, bE=330*deg;
+    const distP=Math.hypot(mx-bcx,my-bcy);
+    let hitPower=false;
+    if(Math.abs(distP-br)<14){
+      let a=Math.atan2(my-bcy,mx-bcx); if(a<0) a+=2*Math.PI;
+      hitPower=(a>=bS&&a<=bE);
+    }
+    // Hit-test temp arc (∪): center tcy=cy+yOff*r, 30°–150°
+    const tcx=cx, tcy=cy+battArc.temp.yOff*r, tr=battArc.temp.rad*r;
+    const tS=30*deg, tE=150*deg;
+    const distT=Math.hypot(mx-tcx,my-tcy);
+    let hitTemp=false;
+    if(Math.abs(distT-tr)<14){
+      let a=Math.atan2(my-tcy,mx-tcx); if(a<0) a+=2*Math.PI;
+      hitTemp=(a>=tS&&a<=tE);
+    }
+    if(hitPower||hitTemp){
+      const which=hitPower?'power':'temp';
+      battArc.sel=(battArc.sel===which)?null:which;
+      if(battArc.sel&&!selectedBinnIds.has('binn-driver-dial')) selectBinnElem('binn-driver-dial');
+      if(selectedBinnIds.has('binn-driver-dial')) showBinnConfig('binn-driver-dial');
+      drawDriverDial(); return;
+    }
+    battArc.sel=null;
+  }
   driverModeIdx=(driverModeIdx+1)%DRIVER_MODES.length;
+  battArc.sel=null;
   if(selectedBinnIds.has('binn-driver-dial')) renderBinnHint();
 });
 document.getElementById('ddLabel').addEventListener('click',()=>{
@@ -4104,6 +4547,26 @@ function renderElemPanel() {
       lbl.textContent = label;
       item.appendChild(cb);
       item.appendChild(lbl);
+      list.appendChild(item);
+    });
+    return;
+  }
+  if (activeTab() === 'sw') {
+    Object.entries(SW_ELEMENTS).forEach(([id, label]) => {
+      const item = document.createElement('label');
+      item.className = 'ep-item' + (selectedSwIds.has(id) ? ' ep-sel' : '');
+      item.dataset.epId = id;
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = selectedSwIds.has(id);
+      cb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        if (cb.checked) selectSwElem(id); else deselectSwElem(id);
+      });
+      const lbl = document.createElement('span');
+      lbl.className = 'ep-lbl';
+      lbl.textContent = label;
+      item.appendChild(cb); item.appendChild(lbl);
       list.appendChild(item);
     });
     return;
@@ -4201,6 +4664,152 @@ function updateTabIndicator(instant) {
   if (instant) requestAnimationFrame(() => { ind.style.transition = ''; });
 }
 
+
+// ══════════════════════════════════════════════════════
+// STEERING WHEEL — element selection
+// ══════════════════════════════════════════════════════
+const selectedSwIds = new Set();
+
+function getSwEl(id) { return document.querySelector('[data-sw-id="' + id + '"]'); }
+
+function selectSwElem(id) {
+  const el = getSwEl(id);
+  if (!el) return;
+  selectedSwIds.add(id);
+  el.classList.add('sw-sel');
+  if (id === 'sw-rim') {
+    const h = document.getElementById('swBezHandles');
+    if (h) h.setAttribute('display', '');
+  }
+  syncSwPanel(); updatePosHint(); updateResizeOverlay();
+}
+
+function deselectSwElem(id) {
+  if (id === undefined) {
+    selectedSwIds.forEach(bid => {
+      const el = getSwEl(bid);
+      if (el) el.classList.remove('sw-sel');
+    });
+    if (selectedSwIds.has('sw-rim')) {
+      const h = document.getElementById('swBezHandles');
+      if (h) h.setAttribute('display', 'none');
+    }
+    selectedSwIds.clear();
+  } else {
+    const el = getSwEl(id);
+    if (el) el.classList.remove('sw-sel');
+    if (id === 'sw-rim') {
+      const h = document.getElementById('swBezHandles');
+      if (h) h.setAttribute('display', 'none');
+    }
+    selectedSwIds.delete(id);
+  }
+  syncSwPanel(); updatePosHint(); updateResizeOverlay();
+}
+
+function clearSwSelection() { deselectSwElem(); }
+
+function syncSwPanel() {
+  if (!elemPanelOpen) return;
+  document.querySelectorAll('#epList .ep-item').forEach(item => {
+    const id = item.dataset.epId;
+    const cb = item.querySelector('input[type="checkbox"]');
+    const sel = selectedSwIds.has(id);
+    if (cb) cb.checked = sel;
+    item.classList.toggle('ep-sel', sel);
+  });
+}
+
+// Bezier rim editing
+const swRimBez = { fy: 440, b0: [205, 450], b1: [355, 450], b2: [250, 445], b3: [310, 445] };
+
+function updateSwRimPath() {
+  const { fy, b0, b1, b2, b3 } = swRimBez;
+  const cy = 255, rO = 228, rI = 192, rOa = 232, rIa = 188;
+  const dy = fy - cy;
+  const xOL = Math.round(280 - Math.sqrt(rO*rO - dy*dy));
+  const xOR = Math.round(280 + Math.sqrt(rO*rO - dy*dy));
+  const xIL = Math.round(280 - Math.sqrt(rI*rI - dy*dy));
+  const xIR = Math.round(280 + Math.sqrt(rI*rI - dy*dy));
+  const xOaL = Math.round(280 - Math.sqrt(rOa*rOa - dy*dy));
+  const xOaR = Math.round(280 + Math.sqrt(rOa*rOa - dy*dy));
+  const xIaL = Math.round(280 - Math.sqrt(Math.max(0, rIa*rIa - dy*dy)));
+  const xIaR = Math.round(280 + Math.sqrt(Math.max(0, rIa*rIa - dy*dy)));
+
+  // Update clip rect height
+  const cr = document.getElementById('swRimClipRect');
+  if (cr) cr.setAttribute('height', String(fy + 20));
+
+  // Main body bar
+  const bar = document.getElementById('swRimBar');
+  if (bar) bar.setAttribute('d', `M ${xOL},${fy} C ${b0[0]},${b0[1]} ${b1[0]},${b1[1]} ${xOR},${fy} L ${xIR},${fy} C ${b3[0]},${b3[1]} ${b2[0]},${b2[1]} ${xIL},${fy} Z`);
+
+  // Ambient bar
+  const amb = document.getElementById('swRimBarAmbient');
+  if (amb) amb.setAttribute('d', `M ${xOaL},${fy} C ${b0[0]-8},${b0[1]+2} ${b1[0]+8},${b1[1]+2} ${xOaR},${fy} L ${xIaR},${fy} C ${b3[0]+5},${b3[1]+2} ${b2[0]-5},${b2[1]+2} ${xIaL},${fy} Z`);
+
+  // Shadow bar (inner ring strip)
+  const shad = document.getElementById('swRimBarShadow');
+  if (shad) shad.setAttribute('d', `M ${xIL-2},${fy} C ${b2[0]-3},${b2[1]+3} ${b3[0]+3},${b3[1]+3} ${xIR+2},${fy} L ${xIR},${fy} C ${b3[0]},${b3[1]} ${b2[0]},${b2[1]} ${xIL},${fy} Z`);
+
+  // Bezier handles + guides
+  [['swBezH0',b0],['swBezH1',b1],['swBezH2',b2],['swBezH3',b3]].forEach(([hid,pt]) => {
+    const h = document.getElementById(hid);
+    if (h) { h.setAttribute('cx', pt[0]); h.setAttribute('cy', pt[1]); }
+  });
+  const guides = [[xOL,fy,b0],[xOR,fy,b1],[xIL,fy,b2],[xIR,fy,b3]];
+  guides.forEach(([ax,ay,cp], i) => {
+    const g = document.getElementById('swBezGuide' + i);
+    if (g) { g.setAttribute('x1',ax); g.setAttribute('y1',ay); g.setAttribute('x2',cp[0]); g.setAttribute('y2',cp[1]); }
+  });
+}
+
+// SW drag-to-move
+let _swDrag = null;
+document.addEventListener('mousedown', (e) => {
+  if (activeTab() !== 'sw') return;
+  if (!e.ctrlKey && !e.metaKey) return;
+  const swEl = e.target.closest('[data-sw-id]');
+  if (!swEl) return;
+  const id = swEl.getAttribute('data-sw-id');
+  if (!selectedSwIds.has(id) || id === 'sw-rim') return;
+  e.preventDefault();
+  const svg = getSwSvg();
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const sp = pt.matrixTransform(svg.getScreenCTM().inverse());
+  _swDrag = { el: swEl, id, ox: sp.x - (swTx[id]||0), oy: sp.y - (swTy[id]||0) };
+}, true);
+document.addEventListener('mousemove', (e) => {
+  if (!_swDrag) return;
+  const svg = getSwSvg();
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const sp = pt.matrixTransform(svg.getScreenCTM().inverse());
+  swTx[_swDrag.id] = sp.x - _swDrag.ox;
+  swTy[_swDrag.id] = sp.y - _swDrag.oy;
+  applySwTransform(_swDrag.id);
+  updateResizeOverlay();
+});
+document.addEventListener('mouseup', () => { _swDrag = null; });
+
+// Bezier handle drag
+let _bezDrag = null;
+document.addEventListener('mousedown', (e) => {
+  const ids = ['swBezH0','swBezH1','swBezH2','swBezH3'];
+  const hid = e.target.id;
+  if (!ids.includes(hid)) return;
+  e.preventDefault(); e.stopPropagation();
+  _bezDrag = { idx: ids.indexOf(hid) };
+}, true);
+document.addEventListener('mousemove', (e) => {
+  if (!_bezDrag) return;
+  const svg = document.querySelector('.sw-svg');
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const sp = pt.matrixTransform(svg.getScreenCTM().inverse());
+  const keys = ['b0','b1','b2','b3'];
+  swRimBez[keys[_bezDrag.idx]] = [Math.round(sp.x), Math.round(sp.y)];
+  updateSwRimPath();
+});
+document.addEventListener('mouseup', () => { _bezDrag = null; });
 
 // ══════════════════════════════════════════════════════
 // STEERING WHEEL
