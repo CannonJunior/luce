@@ -845,6 +845,7 @@ body.ctrl-held #cpShell.pos-selected .cp-shell-tab { color: #FFF200; border-colo
 [data-binn-id].binn-sel::before { content: attr(data-binn-label); position: absolute; top: -22px; left: 0; font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 400; letter-spacing: 0.5px; color: #FFF200; background: rgba(0,0,0,0.85); padding: 2px 5px; border-radius: 3px; white-space: nowrap; pointer-events: none; z-index: 100; }
 body.ctrl-held [data-binn-id] { cursor: crosshair !important; }
 body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !important; outline-offset: 4px; }
+#ddDots.binn-sel { position: absolute !important; }
 #binnConfig { display: none; align-items: center; gap: 8px; }
 #binnHint {
   position: fixed; bottom: 0; left: 0; right: 0; background: rgba(6,6,8,0.96);
@@ -1582,7 +1583,7 @@ body.ctrl-held [data-binn-id]:hover { outline: 1px dashed rgba(255,242,0,0.38) !
             </div>
           </div>
           <!-- Mode dots — positioned outside the dial at top-right -->
-          <div class="dd-mode-dots" id="ddDots">
+          <div class="dd-mode-dots" id="ddDots" data-binn-id="binn-dd-dots" data-binn-label="Mode Dots">
             <span class="dd-dot active" style="left:70.6px;top:-109.1px"></span>
             <span class="dd-dot"        style="left:79.6px;top:-102.8px"></span>
             <span class="dd-dot"        style="left:88.0px;top:-95.7px"></span>
@@ -2145,6 +2146,7 @@ const BINN_ELEMENTS = {
   'binn-dd-batt-temp':   'Battery Temp Arc',
   'binn-dd-pwr-pot':     'Power Potential Arc',
   'binn-susp':           'Suspension',
+  'binn-dd-dots':        'Mode Dots',
 };
 
 const SW_ELEMENTS = {
