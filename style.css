@@ -248,6 +248,13 @@ html, body {
   margin: 0 auto;
 }
 .hidden { opacity: 0; pointer-events: none; }
+.cockpit-ref-overlay {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 100%; max-height: 100%; pointer-events: none; z-index: 2;
+  opacity: 0.5; object-fit: contain; transition: opacity 0.3s;
+}
+.cockpit-ref-overlay:not(.binn-hidden) { pointer-events: auto; }
+.cockpit-ref-overlay.binn-hidden { opacity: 0; pointer-events: none; }
 .cockpit.visible {
   opacity: 1;
   pointer-events: all;
@@ -1385,6 +1392,7 @@ html, body {
   position: relative !important;
   z-index: 30 !important;
 }
+.cockpit-ref-overlay.binn-sel { position: absolute !important; }
 
 /* ── ELEMENT VISIBILITY ───────────────────────────────────── */
 [data-binn-id].binn-hidden {

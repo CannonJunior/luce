@@ -1023,11 +1023,15 @@ const BINN_ELEMS = [
     { id: 'warnings',   label: 'Warning Strip',    sel: '.warning-strip',        canHide: true  },
     { id: 'keyhints',   label: 'Key Hints',        sel: '.key-hints',            canHide: true  },
   ]},
+  { group: 'OVERLAY', items: [
+    { id: 'overlay-img', label: 'Overlay Image',   sel: '.cockpit-ref-overlay',  canHide: true  },
+  ]},
 ];
 
 const binnVis = {};
 BINN_ELEMS.forEach(g => g.items.forEach(it => { binnVis[it.id] = true; }));
-binnVis['torque-meter'] = false; // overlay hidden by default
+binnVis['torque-meter'] = false;
+binnVis['overlay-img'] = false;
 
 let selectedBinnId = null;
 let binnElemPanelOpen = false;
@@ -1207,6 +1211,16 @@ function renderBinnConfigStrip(id) {
       html = `<span class="cfg-status">${Math.round(state.torquePct * 8.45)} Nm</span>
               <span class="cfg-status">${TM_N} SEGS · 136° ARC</span>`;
       break;
+    case 'overlay-img': {
+      const ov = document.getElementById('cockpitOverlay');
+      const cur = Math.round(parseFloat(ov.style.opacity || 0.5) * 100);
+      html = `<span class="cfg-status">OPACITY</span>
+              <button class="cfg-btn" data-act="ov-opa" data-v="0.25">25%</button>
+              <button class="cfg-btn${cur===50?' cfg-active':''}" data-act="ov-opa" data-v="0.5">50%</button>
+              <button class="cfg-btn${cur===75?' cfg-active':''}" data-act="ov-opa" data-v="0.75">75%</button>
+              <button class="cfg-btn${cur===100?' cfg-active':''}" data-act="ov-opa" data-v="1">100%</button>`;
+      break;
+    }
     default:
       html = `<span class="cfg-status">${getBinnElemLabel(id)}</span>`;
   }
@@ -1270,6 +1284,12 @@ function handleBinnCfgAction(act, data) {
       toggleBinnElemVis('keyhints');
       renderBinnConfigStrip('keyhints');
       break;
+    case 'ov-opa': {
+      const ov = document.getElementById('cockpitOverlay');
+      ov.style.opacity = data.v;
+      renderBinnConfigStrip('overlay-img');
+      break;
+    }
   }
 }
 
